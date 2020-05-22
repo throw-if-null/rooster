@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Rooster
 {
@@ -14,28 +12,12 @@ namespace Rooster
     {
         public DockerLogReference Extract(string line)
         {
-            var portIndex = line.IndexOf("-p");
-            var portsLine = line.Substring(portIndex + 2);
-            portsLine = portsLine.Remove(portsLine.IndexOf(" -"));
-            var ports = portsLine.Split(":").Select(x => x.Trim()).ToArray();
-
-            var imageIndex = line.IndexOf("DOCKER_CUSTOM_IMAGE_NAME");
-            var imageLine = line.Substring(imageIndex + 25);
-            var image = imageLine.Remove(imageLine.IndexOf(" -e"));
-
-            var websiteIndex = line.IndexOf("WEBSITE_SITE_NAME");
-            var website = line.Substring(websiteIndex + 18);
-            website = website.Remove(website.IndexOf(" -e"));
-
-            var hostIndex = line.IndexOf("WEBSITE_HOSTNAME");
-            var host = line.Substring(hostIndex + 17);
-            host = host.Remove(host.IndexOf(" -e"));
-
+            var (inbound, outbound) = ExtractPorts(line);
+            var image = ExtractImageName(line);
+            var website = ExtractWebsiteName(line);
+            var host = ExtractHostName(line);
             var date = line.Remove(line.IndexOf("INFO") - 1);
-
-            var nameIndex = line.IndexOf("--name");
-            var name = line.Substring(nameIndex + 7);
-            name = name.Remove(name.IndexOf(" -e"));
+            var name = ExtractContainerName(line);
 
             return new DockerLogReference
             {
@@ -43,10 +25,46 @@ namespace Rooster
                 ContainerName = name,
                 HostName = host,
                 ImageName = image,
-                InboundPort = ports[0],
-                OutbouondPort = ports[1],
+                InboundPort = inbound,
+                OutbouondPort = outbound,
                 Date = DateTimeOffset.Parse(date)
             };
         }
+
+        private static (string inbound, string outbound) ExtractPorts(string line)
+        {
+            var portsValue = ExtractValue(line, "-p", "-");
+            var ports = portsValue.Split(":");
+
+            return (ports[0], ports[1]);
+        }
+
+        private static string ExtractImageName(string line)
+        {
+            return ExtractValue(line, "DOCKER_CUSTOM_IMAGE_NAME", "-e");
+        }
+
+        private static string ExtractWebsiteName(string line)
+        {
+            return ExtractValue(line, "WEBSITE_SITE_NAME", "-e");
+        }
+
+        private static string ExtractHostName(string line)
+        {
+            return ExtractValue(line, "WEBSITE_HOSTNAME", "-e");
+        }
+
+        private static string ExtractContainerName(string line)
+        {
+            return ExtractValue(line, "--name", "-e");
+        }
+
+        private static readonly Func<string, string, string, string> ExtractValue = delegate (string input, string key, string splitter)
+        {
+            var index = input.IndexOf(key);
+            var value = input.Substring(index + key.Length + 1);
+            value = value.Remove(value.IndexOf(splitter));
+            return value;
+        };
     }
 }
