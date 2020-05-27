@@ -1,10 +1,16 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace Rooster
+namespace Rooster.DataAccess.Logbooks.Entities
 {
-    public class LogReference
+    public class Logbook
     {
+        [JsonIgnore]
+        public int Id { get; set; }
+
+        [JsonIgnore]
+        public DateTimeOffset Created { get; set; }
+
         [JsonProperty("machineName")]
         public string MachineName { get; set; }
 

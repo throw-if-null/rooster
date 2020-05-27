@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
+using Rooster.DataAccess.Logbooks.Entities;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -39,16 +39,19 @@ namespace Rooster
 
                 var content = await reader.ReadToEndAsync();
 
-                var logs = JsonConvert.DeserializeObject<List<LogReference>>(content);
+                var logs = JsonConvert.DeserializeObject<List<Logbook>>(content);
 
                 foreach (var log in logs)
                 {
+                    // TODO: Check the latest read log in database
+
                     stream = await client.GetStreamAsync(log.Href);
 
                     using var logReader = new StreamReader(stream);
                     stream = null;
 
                     var line = "init";
+
                     while (line != null)
                     {
                         line = await logReader.ReadLineAsync();
@@ -59,6 +62,8 @@ namespace Rooster
                         if (line.Contains("docker", StringComparison.InvariantCultureIgnoreCase))
                         {
                             var dockerLog = extractor.Extract(line);
+                            // TODO: insert log entry
+
                             Console.WriteLine(dockerLog);
                         }
                     }
@@ -71,7 +76,6 @@ namespace Rooster
             }
 
             Console.ReadKey();
-
         }
     }
 }

@@ -1,16 +1,16 @@
-﻿using System;
-using System.Linq;
+﻿using Rooster.DataAccess.LogEntries.Entities;
+using System;
 
 namespace Rooster
 {
     public interface ILogExtractor
     {
-        DockerLogReference Extract(string line);
+        LogEntry Extract(string line);
     }
 
     public class LogExtractor : ILogExtractor
     {
-        public DockerLogReference Extract(string line)
+        public LogEntry Extract(string line)
         {
             var (inbound, outbound) = ExtractPorts(line);
             var image = ExtractImageName(line);
@@ -19,7 +19,7 @@ namespace Rooster
             var date = line.Remove(line.IndexOf("INFO") - 1);
             var name = ExtractContainerName(line);
 
-            return new DockerLogReference
+            return new LogEntry
             {
                 AppServiceName = website,
                 ContainerName = name,

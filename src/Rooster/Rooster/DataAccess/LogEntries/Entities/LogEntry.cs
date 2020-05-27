@@ -1,12 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
-using System.Xml.Schema;
 
-namespace Rooster
+namespace Rooster.DataAccess.LogEntries.Entities
 {
-    public class DockerLogReference
+    public class LogEntry
     {
+        public int Id { get; set; }
+
+        public DateTimeOffset Created { get; set; }
+
         public string AppServiceName { get; set; }
 
         public string HostName { get; set; }
