@@ -16,8 +16,28 @@ namespace Rooster.DataAccess.Logbooks
 
     public class LogbookRepository : ILogbookRepository
     {
-        public const string InsertLogbook = "INSERT INTO Logbook (MachineName, LastUpdated) VALUES(@MachineName, @LastUpdated)";
-        public const string GetLatestLogbook = "SELECT TOP 1 Id, MachineName, LastUpdated FROM Logbook WITH(nolock) ORDER BY Created DESC";
+        private static readonly Func<string, string> BuildList = delegate (string prefix)
+        {
+            return $"{prefix}{nameof(Logbook.MachineName)}, {prefix}{nameof(Logbook.LastUpdated)}";
+        };
+
+        private static readonly Func<string> BuildInsertPropertyList = delegate ()
+        {
+            return BuildList(string.Empty);
+        };
+
+        private static readonly Func<string> BuildInsertValuesList = delegate ()
+        {
+            return BuildList("@");
+        };
+
+        private static Func<string> BuildGetLatestList = delegate ()
+        {
+            return $"{nameof(Logbook.Id)}, {BuildInsertPropertyList}";
+        };
+
+        public static readonly string InsertLogbook = $"INSERT INTO {nameof(Logbook)} ({BuildInsertPropertyList}) VALUES({BuildInsertValuesList})";
+        public static readonly string GetLatestLogbook = $"SELECT TOP 1 {BuildGetLatestList} FROM {nameof(Logbook)} WITH(nolock) ORDER BY {nameof(Logbook.Created)} DESC";
 
         private readonly ISqlConnectionFactory _connectionFactory;
 

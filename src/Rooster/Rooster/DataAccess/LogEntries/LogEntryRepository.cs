@@ -2,6 +2,7 @@
 using Rooster.Connectors.Sql;
 using Rooster.DataAccess.LogEntries.Entities;
 using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,7 +15,33 @@ namespace Rooster.DataAccess.LogEntries
 
     public class LogEntryRepository : ILogEntryRepository
     {
-        private const string InsertLogEntryQuery = "INSERT INTO LogEntry () VALUES () WITH(NOLOCK)";
+        private static readonly Func<string, string> BuildList = delegate (string prefix)
+        {
+            var builder = new StringBuilder();
+
+            builder
+                .Append($"{prefix}{nameof(LogEntry.AppServiceName)}, ")
+                .Append($"{prefix}{nameof(LogEntry.ContainerName)}, ")
+                .Append($"{prefix}{nameof(LogEntry.Date)}, ")
+                .Append($"{prefix}{nameof(LogEntry.HostName)}, ")
+                .Append($"{prefix}{nameof(LogEntry.ImageName)}, ")
+                .Append($"{prefix}{nameof(LogEntry.InboundPort)}")
+                .Append($"{prefix}{nameof(LogEntry.OutbouondPort)}");
+
+            return builder.ToString();
+        };
+
+        private static readonly Func<string> BuildPropertiesList = delegate
+        {
+            return BuildList(string.Empty);
+        };
+
+        private static readonly Func<string> BuildValuesList = delegate
+        {
+            return BuildList("@");
+        };
+
+        private static readonly string InsertLogEntryQuery = $"INSERT INTO {nameof(LogEntry)} ({BuildPropertiesList()}) VALUES ({BuildValuesList()})";
 
         private readonly ISqlConnectionFactory _connectionFactory;
 
@@ -27,7 +54,17 @@ namespace Rooster.DataAccess.LogEntries
         {
             using var connection = _connectionFactory.CreateConnection();
 
-            await connection.ExecuteAsync(InsertLogEntryQuery, new { });
+            await connection.ExecuteAsync(
+                InsertLogEntryQuery, new
+                {
+                    entry.AppServiceName,
+                    entry.ContainerName,
+                    entry.Date,
+                    entry.HostName,
+                    entry.ImageName,
+                    entry.InboundPort,
+                    entry.OutbouondPort
+                });
         }
     }
 }
