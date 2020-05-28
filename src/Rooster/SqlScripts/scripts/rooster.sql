@@ -7,7 +7,7 @@ GO
 IF EXISTS (SELECT [name] FROM sys.databases WHERE [name] = N'Rooster')
 BEGIN
 	ALTER DATABASE Rooster SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-    DROP DATABASE Rooster
+	DROP DATABASE Rooster
 END
 
 CREATE DATABASE Rooster
@@ -19,26 +19,26 @@ USE Rooster
 CREATE TABLE [dbo].[Logbook]
 (
 	[Id] INT NOT NULL IDENTITY(1, 1),
-	[Created] DATETIMEOFFSET NOT NULL DEFAULT(NOW()),
+	[Created] DATETIMEOFFSET NOT NULL DEFAULT(GETDATE()),
 	[MachineName] NVARCHAR(500) NOT NULL,
 	[LastUpdated] DATETIMEOFFSET NOT NULL
 
-	CONSTRAINT [PK_Configuration_Id] PRIMARY KEY ([Id] ASC)
+	CONSTRAINT [PK_Logbook_Id] PRIMARY KEY ([Id] ASC)
 );
 
 GO
 
-CREATE NONCLUSTERED INDEX [UX_Logbook_Key] ON [dbo].[Logbook] ([Key]);
-GO
+--CREATE NONCLUSTERED INDEX [UX_Logbook_Key] ON [dbo].[Logbook] (Id);
+--GO
 
-CREATE CLUSTERED INDEX [IX_Logbook_LastUpdated] on [dbo].[Logbook] ([LastUpdated]);
+CREATE NONCLUSTERED INDEX [IX_Logbook_LastUpdated] on [dbo].[Logbook] ([LastUpdated]);
 GO
 
 -- Create table LogEntry
 CREATE TABLE [dbo].[LogEntry]
 (
 	[Id] INT NOT NULL IDENTITY(1, 1),
-	[Created] DATETIMEOFFSET NOT NULL DEFAULT(NOW()),
+	[Created] DATETIMEOFFSET NOT NULL DEFAULT(GETDATE()),
 	[AppServiceName] NVARCHAR(500) NOT NULL,
 	[HostName] NVARCHAR(500) NOT NULL,
 	[ImageName] NVARCHAR(500) NOT NULL,
@@ -52,8 +52,8 @@ CREATE TABLE [dbo].[LogEntry]
 
 GO
 
-CREATE NONCLUSTERED INDEX [UX_LogEntry_Id] ON [dbo].[Logbook] ([Key]);
-GO
+--CREATE NONCLUSTERED INDEX [UX_LogEntry_Id] ON [dbo].[LogEntry] ([Id]);
+--GO
 
-CREATE CLUSTERED INDEX [IX_LogEntry_AppServiceName] ON [dbo].[Logbook] ([AppServiceName]);
+CREATE NONCLUSTERED INDEX [IX_LogEntry_AppServiceName] ON [dbo].[LogEntry] ([AppServiceName]);
 GO
