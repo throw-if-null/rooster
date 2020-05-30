@@ -20,7 +20,7 @@ namespace Rooster.DataAccess.LogEntries
             var builder = new StringBuilder();
 
             builder
-                .Append($"{prefix}{nameof(LogEntry.AppServiceName)}, ")
+                .Append($"{prefix}AppServiceId, ")
                 .Append($"{prefix}{nameof(LogEntry.ContainerName)}, ")
                 .Append($"{prefix}{nameof(LogEntry.Date)}, ")
                 .Append($"{prefix}{nameof(LogEntry.HostName)}, ")
@@ -55,9 +55,10 @@ namespace Rooster.DataAccess.LogEntries
             using var connection = _connectionFactory.CreateConnection();
 
             await connection.ExecuteAsync(
-                InsertLogEntryQuery, new
+                InsertLogEntryQuery,
+                new
                 {
-                    entry.AppServiceName,
+                    entry.AppService.Id,
                     entry.ContainerName,
                     entry.Date,
                     entry.HostName,

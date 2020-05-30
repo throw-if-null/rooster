@@ -28,10 +28,20 @@ CREATE TABLE [dbo].[Logbook]
 
 GO
 
---CREATE NONCLUSTERED INDEX [UX_Logbook_Key] ON [dbo].[Logbook] (Id);
---GO
-
 CREATE NONCLUSTERED INDEX [IX_Logbook_LastUpdated] on [dbo].[Logbook] ([LastUpdated]);
+GO
+
+-- Create table AppService7
+CREATE TABLE [dbo].[AppService]
+(
+	[Id] INT NOT NULL IDENTITY(1, 1),
+	[Name] NVARCHAR(500) NOT NULL,
+	[Created] DATETIMEOFFSET NOT NULL DEFAULT(GETDATE()),
+
+	CONSTRAINT [PK_AppService_Id] PRIMARY KEY ([Id] ASC)
+);
+
+CREATE NONCLUSTERED INDEX [IX_AppService_Name] on [dbo].[Logbook] ([Name]);
 GO
 
 -- Create table LogEntry
@@ -39,21 +49,19 @@ CREATE TABLE [dbo].[LogEntry]
 (
 	[Id] INT NOT NULL IDENTITY(1, 1),
 	[Created] DATETIMEOFFSET NOT NULL DEFAULT(GETDATE()),
-	[AppServiceName] NVARCHAR(500) NOT NULL,
 	[HostName] NVARCHAR(500) NOT NULL,
 	[ImageName] NVARCHAR(500) NOT NULL,
 	[ContainerName] NVARCHAR(500) NOT NULL,
 	[Date] DATETIMEOFFSET NOT NULL,
 	[InboundPort] INT NOT NULL,
-	[OutboundPort] INT NOT NULL
+	[OutboundPort] INT NOT NULL,
+	[AppServiceId] INT NOT NULL,
 
-	CONSTRAINT [PK_LogEntry_Id] PRIMARY KEY ([Id] ASC)
+	CONSTRAINT [PK_LogEntry_Id] PRIMARY KEY ([Id] ASC),
+	CONSTRAINT [FK_LogEntry_AppService_Id] FOREIGN KEY ([AppServiceId]) REFERENCES [dbo].[AppService] ([Id])
 );
 
 GO
 
---CREATE NONCLUSTERED INDEX [UX_LogEntry_Id] ON [dbo].[LogEntry] ([Id]);
---GO
-
-CREATE NONCLUSTERED INDEX [IX_LogEntry_AppServiceName] ON [dbo].[LogEntry] ([AppServiceName]);
+CREATE NONCLUSTERED INDEX [IX_LogEntry_AppServiceId] ON [dbo].[LogEntry] ([AppServiceId]);
 GO

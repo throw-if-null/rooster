@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rooster.DataAccess.AppServices.Entities;
+using System;
 using System.Text;
 
 namespace Rooster.DataAccess.LogEntries.Entities
@@ -9,7 +10,7 @@ namespace Rooster.DataAccess.LogEntries.Entities
 
         public DateTimeOffset Created { get; set; }
 
-        public string AppServiceName { get; set; }
+        public AppService AppService { get; set; }
 
         public string HostName { get; set; }
 
@@ -28,7 +29,7 @@ namespace Rooster.DataAccess.LogEntries.Entities
             var builder = new StringBuilder();
 
             builder
-                .Append($"{nameof(AppServiceName)}: {AppServiceName}, ")
+                .Append($"{nameof(AppService.Name)}: {AppService.Name}, ")
                 .Append($"{nameof(HostName)}:{HostName}, ")
                 .Append($"{nameof(ImageName)}:{ImageName}, ")
                 .Append($"{nameof(ContainerName)}:{ContainerName}, ")

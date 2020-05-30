@@ -1,4 +1,5 @@
-﻿using Rooster.DataAccess.LogEntries.Entities;
+﻿using Rooster.DataAccess.AppServices.Entities;
+using Rooster.DataAccess.LogEntries.Entities;
 using System;
 
 namespace Rooster
@@ -21,7 +22,7 @@ namespace Rooster
 
             return new LogEntry
             {
-                AppServiceName = website,
+                AppService = new AppService { Name = website},
                 ContainerName = name,
                 HostName = host,
                 ImageName = image,
@@ -64,6 +65,7 @@ namespace Rooster
             var index = input.IndexOf(key);
             var value = input.Substring(index + key.Length + 1);
             value = value.Remove(value.IndexOf(splitter));
+
             return value;
         };
     }
