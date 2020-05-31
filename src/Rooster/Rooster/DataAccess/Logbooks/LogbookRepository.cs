@@ -33,11 +33,22 @@ namespace Rooster.DataAccess.Logbooks
 
         private static Func<string> BuildGetLatestList = delegate ()
         {
-            return $"{nameof(Logbook.Id)}, {BuildInsertPropertyList}";
+            return $"{nameof(Logbook.Id)}, {BuildInsertPropertyList()}";
         };
 
-        public static readonly string InsertLogbook = $"INSERT INTO {nameof(Logbook)} ({BuildInsertPropertyList}) VALUES({BuildInsertValuesList})";
-        public static readonly string GetLatestLogbook = $"SELECT TOP 1 {BuildGetLatestList} FROM {nameof(Logbook)} WITH(nolock) ORDER BY {nameof(Logbook.Created)} DESC";
+        public static readonly Func<string> InsertLogbook =
+            delegate
+            {
+                return
+                    $"INSERT INTO {nameof(Logbook)} ({BuildInsertPropertyList()}) VALUES({BuildInsertValuesList()})";
+            };
+
+        public static readonly Func<string> GetLatestLogbook =
+            delegate
+            {
+                return
+                    $"SELECT TOP 1 {BuildGetLatestList()} FROM {nameof(Logbook)} WITH(nolock) ORDER BY {nameof(Logbook.Created)} DESC";
+            };
 
         private readonly ISqlConnectionFactory _connectionFactory;
 
@@ -50,14 +61,14 @@ namespace Rooster.DataAccess.Logbooks
         {
             using var connection = _connectionFactory.CreateConnection();
 
-            await connection.ExecuteAsync(InsertLogbook, new { logbook.MachineName, logbook.LastUpdated });
+            await connection.ExecuteAsync(InsertLogbook(), new { logbook.MachineName, logbook.LastUpdated });
         }
 
         public async Task<Logbook> GetLast(CancellationToken cancellation)
         {
             using var connection = _connectionFactory.CreateConnection();
 
-            var logbook = await connection.QueryFirstOrDefaultAsync<Logbook>(GetLatestLogbook);
+            var logbook = await connection.QueryFirstOrDefaultAsync<Logbook>(GetLatestLogbook());
 
             return logbook;
         }

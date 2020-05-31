@@ -3,14 +3,14 @@ using Rooster.Connectors.Sql;
 using Rooster.DataAccess.LogEntries.Entities;
 using System;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rooster.DataAccess.LogEntries
 {
     public interface ILogEntryRepository
     {
-        Task Create(LogEntry entry, CancellationToken cancellation);
+        Task Create(LogEntry entry);
+        Task<DateTimeOffset> GetLatest();
     }
 
     public class LogEntryRepository : ILogEntryRepository
@@ -25,8 +25,8 @@ namespace Rooster.DataAccess.LogEntries
                 .Append($"{prefix}{nameof(LogEntry.Date)}, ")
                 .Append($"{prefix}{nameof(LogEntry.HostName)}, ")
                 .Append($"{prefix}{nameof(LogEntry.ImageName)}, ")
-                .Append($"{prefix}{nameof(LogEntry.InboundPort)}")
-                .Append($"{prefix}{nameof(LogEntry.OutbouondPort)}");
+                .Append($"{prefix}{nameof(LogEntry.InboundPort)}, ")
+                .Append($"{prefix}{nameof(LogEntry.OutboundPort)}");
 
             return builder.ToString();
         };
@@ -41,7 +41,17 @@ namespace Rooster.DataAccess.LogEntries
             return BuildList("@");
         };
 
-        private static readonly string InsertLogEntryQuery = $"INSERT INTO {nameof(LogEntry)} ({BuildPropertiesList()}) VALUES ({BuildValuesList()})";
+        private static readonly Func<string> InsertLogEntryQuery = delegate
+        {
+            return $"INSERT INTO {nameof(LogEntry)} ({BuildPropertiesList()}) VALUES ({BuildValuesList()})";
+        };
+
+        private static readonly Func<string> GetLastLogEntryDate =
+            delegate
+            {
+                return
+                $"SELECT TOP 1 {nameof(LogEntry.Date)} FROM {nameof(LogEntry)} ORDER BY {nameof(LogEntry.Created)} DESC";
+            };
 
         private readonly ISqlConnectionFactory _connectionFactory;
 
@@ -50,22 +60,31 @@ namespace Rooster.DataAccess.LogEntries
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        public async Task Create(LogEntry entry, CancellationToken cancellation)
+        public async Task Create(LogEntry entry)
         {
             using var connection = _connectionFactory.CreateConnection();
 
             await connection.ExecuteAsync(
-                InsertLogEntryQuery,
+                InsertLogEntryQuery(),
                 new
                 {
-                    entry.AppService.Id,
+                    AppServiceId = entry.AppService.Id,
                     entry.ContainerName,
                     entry.Date,
                     entry.HostName,
                     entry.ImageName,
                     entry.InboundPort,
-                    entry.OutbouondPort
+                    entry.OutboundPort
                 });
+        }
+
+        public async Task<DateTimeOffset> GetLatest()
+        {
+            using var connection = _connectionFactory.CreateConnection();
+
+            var lastDate = await connection.QueryFirstOrDefaultAsync<DateTimeOffset>(GetLastLogEntryDate());
+
+            return lastDate;
         }
     }
 }

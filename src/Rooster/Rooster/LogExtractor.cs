@@ -27,7 +27,7 @@ namespace Rooster
                 HostName = host,
                 ImageName = image,
                 InboundPort = inbound,
-                OutbouondPort = outbound,
+                OutboundPort = outbound,
                 Date = DateTimeOffset.Parse(date)
             };
         }

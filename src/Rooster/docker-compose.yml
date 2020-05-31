@@ -10,7 +10,7 @@ services:
 
   portainer:
     <<: *base-service-template
-    image: portainer/portainer:latest
+    image: portainer/portainer:1.24.0
     container_name: portainer.ctn
     command: -p :80
     ports:
@@ -21,7 +21,7 @@ services:
 
   sqlserver:
     <<: *base-service-template
-    image: microsoft/mssql-server-linux:latest
+    image: mcr.microsoft.com/mssql/server:2017-latest
     container_name: sqlserver.ctn
     environment:
       - ACCEPT_EULA=Y

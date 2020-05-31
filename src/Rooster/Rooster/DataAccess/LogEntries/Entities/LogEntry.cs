@@ -20,7 +20,7 @@ namespace Rooster.DataAccess.LogEntries.Entities
 
         public string InboundPort { get; set; }
 
-        public string OutbouondPort { get; set; }
+        public string OutboundPort { get; set; }
 
         public DateTimeOffset Date { get; set; }
 
@@ -34,7 +34,7 @@ namespace Rooster.DataAccess.LogEntries.Entities
                 .Append($"{nameof(ImageName)}:{ImageName}, ")
                 .Append($"{nameof(ContainerName)}:{ContainerName}, ")
                 .Append($"{nameof(InboundPort)}:{InboundPort}, ")
-                .Append($"{nameof(OutbouondPort)}:{OutbouondPort}, ")
+                .Append($"{nameof(OutboundPort)}:{OutboundPort}, ")
                 .Append($"{nameof(Date)}:{Date}");
 
             return builder.ToString();

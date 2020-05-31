@@ -16,9 +16,9 @@ namespace Rooster.Connectors.Sql
             return new SqlConnection(connectionString);
         };
 
-        private readonly SqlConnectionFactoryOptions _options;
+        private readonly SqlServerConnectionFactoryOptions _options;
 
-        public SqlConnectionFactory(IOptionsMonitor<SqlConnectionFactoryOptions> options)
+        public SqlConnectionFactory(IOptionsMonitor<SqlServerConnectionFactoryOptions> options)
         {
             _options = options?.CurrentValue ?? throw new ArgumentNullException(nameof(options));
         }

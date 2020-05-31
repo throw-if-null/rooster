@@ -41,7 +41,7 @@ CREATE TABLE [dbo].[AppService]
 	CONSTRAINT [PK_AppService_Id] PRIMARY KEY ([Id] ASC)
 );
 
-CREATE NONCLUSTERED INDEX [IX_AppService_Name] on [dbo].[Logbook] ([Name]);
+CREATE NONCLUSTERED INDEX [IX_AppService_Name] on [dbo].[AppService] ([Name]);
 GO
 
 -- Create table LogEntry
