@@ -5,7 +5,6 @@ using Rooster.DataAccess.AppServices;
 using Rooster.DataAccess.Logbooks;
 using Rooster.DataAccess.LogEntries;
 using System;
-using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,6 +12,7 @@ namespace Rooster
 {
     internal class AppHost : IHostedService
     {
+        private readonly AppHostOptions _options;
         private readonly IKuduApiAdapter _kudu;
         private readonly ILogExtractor _extractor;
         private readonly ILogbookRepository _logbookRepository;
@@ -20,12 +20,14 @@ namespace Rooster
         private readonly IAppServiceRepository _appServiceRepository;
 
         public AppHost(
+            IOptionsMonitor<AppHostOptions> options,
             IKuduApiAdapter kudu,
             ILogExtractor extractor,
             ILogbookRepository logbookRepository,
             ILogEntryRepository logEntryRepository,
             IAppServiceRepository appServiceRepository)
         {
+            _options = options.CurrentValue ?? throw new ArgumentNullException(nameof(options));
             _kudu = kudu ?? throw new ArgumentNullException(nameof(kudu));
             _extractor = extractor ?? throw new ArgumentNullException(nameof(extractor));
             _logbookRepository = logbookRepository ?? throw new ArgumentNullException(nameof(logbookRepository));
@@ -35,41 +37,46 @@ namespace Rooster
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            var logbooks = await _kudu.GetLogs(cancellationToken);
-
-            foreach(var logbook in logbooks)
+            while (true)
             {
-                var latestLogbook = await _logbookRepository.GetLast(cancellationToken);
+                var logbooks = await _kudu.GetLogs(cancellationToken);
 
-                if (latestLogbook == null)
+                foreach (var logbook in logbooks)
                 {
-                    await _logbookRepository.Create(logbook, cancellationToken);
-                    latestLogbook = logbook;
+                    var latestLogbook = await _logbookRepository.GetLast(cancellationToken);
+
+                    if (latestLogbook == null)
+                    {
+                        await _logbookRepository.Create(logbook, cancellationToken);
+                        latestLogbook = logbook;
+                    }
+
+                    if (logbook.LastUpdated < latestLogbook.LastUpdated)
+                        continue;
+
+                    await _kudu.ExtractLogsFromStream(logbook.Href, ExtractAndPersistDockerLogLine, cancellationToken);
                 }
 
-                if (logbook.LastUpdated < latestLogbook.LastUpdated)
-                    continue;
-
-                await
-                    _kudu.ExtractLogsFromStream(
-                        logbook.Href,
-                        async (line) =>
-                        {
-                            var logEntry = _extractor.Extract(line);
-                            var latestLogEntry = await _logEntryRepository.GetLatest();
-
-                            if (logEntry.Date <= latestLogEntry)
-                                return;
-
-                            logEntry.AppService.Id = await _appServiceRepository.GetIdByName(logEntry.AppService.Name);
-
-                            if (logEntry.AppService.Id == default)
-                                logEntry.AppService.Id = await _appServiceRepository.Create(logEntry.AppService.Name);
-
-                            await _logEntryRepository.Create(logEntry);
-                        },
-                        cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(_options.PoolingIntervalInSeconds));
             }
+        }
+
+        private async Task ExtractAndPersistDockerLogLine(string line)
+        {
+            var logEntry = _extractor.Extract(line);
+            var latestLogEntry = await _logEntryRepository.GetLatest();
+
+            if (logEntry.Date <= latestLogEntry)
+                return;
+
+            logEntry.AppService.Id = await _appServiceRepository.GetIdByName(logEntry.AppService.Name);
+
+            if (logEntry.AppService.Id == default)
+                logEntry.AppService.Id = await _appServiceRepository.Create(logEntry.AppService.Name);
+
+            await _logEntryRepository.Create(logEntry);
+
+            // TODO: Add Slack integration.
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
