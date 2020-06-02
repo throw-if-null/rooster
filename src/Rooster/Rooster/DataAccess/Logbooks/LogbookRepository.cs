@@ -47,7 +47,7 @@ namespace Rooster.DataAccess.Logbooks
             delegate
             {
                 return
-                    $"SELECT TOP 1 {BuildGetLatestList()} FROM {nameof(Logbook)} WITH(nolock) ORDER BY {nameof(Logbook.Created)} DESC";
+                    $"SELECT TOP 1 {BuildGetLatestList()} FROM {nameof(Logbook)} ORDER BY {nameof(Logbook.Created)} DESC";
             };
 
         private readonly ISqlConnectionFactory _connectionFactory;

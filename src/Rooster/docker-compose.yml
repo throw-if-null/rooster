@@ -35,6 +35,20 @@ services:
       retries: 3
       start_period: 3s
 
+  mongo:
+    <<: *base-service-template
+    image: mongo:latest
+    container_name: mongo
+    command: >
+      sh -c "mongod --bind_ip 0.0.0.0 --port 80"
+    ports:
+      - "27017:80"
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo mongo:80 --quiet
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
   shower:
     <<: *base-service-template
     image: mirzamerdovic/shower:latest
@@ -55,6 +69,27 @@ services:
       timeout: 2s
       retries: 3
       start_period: 3s
+
+  unicorn:
+    <<: *base-service-template
+    image: mirzamerdovic/unicorn:1.1.0
+    container_name: unicorn.ctn
+    environment:
+      - MONGO_ADDRESS=mongo:80
+      - RECREATE_COLLECTIONS=true
+    depends_on:
+      - mongo
+    volumes:
+      - type: bind
+        source: ./MongoScripts
+        target: /imports
+        read_only: true
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo mongo --quiet
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 1s
 
 networks:
   local:

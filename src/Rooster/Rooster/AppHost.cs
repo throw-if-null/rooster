@@ -47,6 +47,8 @@ namespace Rooster
 
                     if (latestLogbook == null)
                     {
+                        // TODO: Implement KuduInstanceRepository and GetOrAdd KuduIntanceId
+
                         await _logbookRepository.Create(logbook, cancellationToken);
                         latestLogbook = logbook;
                     }
@@ -64,15 +66,16 @@ namespace Rooster
         private async Task ExtractAndPersistDockerLogLine(string line)
         {
             var logEntry = _extractor.Extract(line);
-            var latestLogEntry = await _logEntryRepository.GetLatest();
-
-            if (logEntry.Date <= latestLogEntry)
-                return;
 
             logEntry.AppService.Id = await _appServiceRepository.GetIdByName(logEntry.AppService.Name);
 
             if (logEntry.AppService.Id == default)
                 logEntry.AppService.Id = await _appServiceRepository.Create(logEntry.AppService.Name);
+
+            var latestLogEntry = await _logEntryRepository.GetLatestForAppService(logEntry.AppService.Id);
+
+            if (logEntry.Date <= latestLogEntry)
+                return;
 
             await _logEntryRepository.Create(logEntry);
 

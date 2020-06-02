@@ -15,20 +15,35 @@ GO
 
 USE Rooster
 
+-- Create table KuduInstance
+CREATE TABLE [dbo].[KuduInstance]
+(
+	[Id] INT NOT NULL IDENTITY(1, 1),
+	[Name] NVARCHAR(500) NOT NULL,
+	[Created] DATETIMEOFFSET NOT NULL DEFAULT(GETDATE()),
+
+	CONSTRAINT [PK_KuduInstance_Id] PRIMARY KEY ([Id] ASC)
+);
+
+CREATE NONCLUSTERED INDEX [IX_KuduInstance_Name] on [dbo].[KuduInstance] ([Name]);
+GO
+
 -- Create table Logbook
 CREATE TABLE [dbo].[Logbook]
 (
 	[Id] INT NOT NULL IDENTITY(1, 1),
 	[Created] DATETIMEOFFSET NOT NULL DEFAULT(GETDATE()),
 	[MachineName] NVARCHAR(500) NOT NULL,
-	[LastUpdated] DATETIMEOFFSET NOT NULL
+	[LastUpdated] DATETIMEOFFSET NOT NULL,
+	[KuduInstanceId] INT NOT NULL,
 
-	CONSTRAINT [PK_Logbook_Id] PRIMARY KEY ([Id] ASC)
+	CONSTRAINT [PK_Logbook_Id] PRIMARY KEY ([Id] ASC),
+	CONSTRAINT [FK_Logbook_KuduInstance_Id] FOREIGN KEY ([KuduInstanceId]) REFERENCES [dbo].[KuduInstance] ([Id])
 );
 
 GO
 
-CREATE NONCLUSTERED INDEX [IX_Logbook_LastUpdated] on [dbo].[Logbook] ([LastUpdated]);
+CREATE NONCLUSTERED INDEX [IX_Logbook_LastUpdated] on [dbo].[Logbook] ([KuduInstanceId], [LastUpdated]);
 GO
 
 -- Create table AppService7
@@ -63,5 +78,5 @@ CREATE TABLE [dbo].[LogEntry]
 
 GO
 
-CREATE NONCLUSTERED INDEX [IX_LogEntry_AppServiceId] ON [dbo].[LogEntry] ([AppServiceId]);
+CREATE NONCLUSTERED INDEX [IX_LogEntry_AppServiceId] ON [dbo].[LogEntry] ([AppServiceId], [Created] DESC);
 GO

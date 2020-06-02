@@ -10,7 +10,7 @@ namespace Rooster.DataAccess.LogEntries
     public interface ILogEntryRepository
     {
         Task Create(LogEntry entry);
-        Task<DateTimeOffset> GetLatest();
+        Task<DateTimeOffset> GetLatestForAppService(int appServiceId);
     }
 
     public class LogEntryRepository : ILogEntryRepository
@@ -50,7 +50,7 @@ namespace Rooster.DataAccess.LogEntries
             delegate
             {
                 return
-                $"SELECT TOP 1 {nameof(LogEntry.Date)} FROM {nameof(LogEntry)} ORDER BY {nameof(LogEntry.Created)} DESC";
+                $"SELECT TOP 1 {nameof(LogEntry.Date)} FROM {nameof(LogEntry)} WHERE AppServiceId = @AppServiceId ORDER BY {nameof(LogEntry.Created)} DESC";
             };
 
         private readonly ISqlConnectionFactory _connectionFactory;
@@ -78,11 +78,13 @@ namespace Rooster.DataAccess.LogEntries
                 });
         }
 
-        public async Task<DateTimeOffset> GetLatest()
+        public async Task<DateTimeOffset> GetLatestForAppService(int appServiceId)
         {
             using var connection = _connectionFactory.CreateConnection();
 
-            var lastDate = await connection.QueryFirstOrDefaultAsync<DateTimeOffset>(GetLastLogEntryDate());
+            var lastDate = await connection.QueryFirstOrDefaultAsync<DateTimeOffset>(
+                GetLastLogEntryDate(),
+                new { AppServiceId = appServiceId });
 
             return lastDate;
         }

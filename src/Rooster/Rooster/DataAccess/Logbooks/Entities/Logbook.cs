@@ -25,5 +25,7 @@ namespace Rooster.DataAccess.Logbooks.Entities
 
         [JsonProperty("path")]
         public string Path { get; set; }
+
+        public string Host { get; set; }
     }
 }
