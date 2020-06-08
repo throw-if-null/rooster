@@ -62,7 +62,7 @@ namespace Rooster.DataAccess.LogEntries
 
         public async Task Create(LogEntry entry)
         {
-            using var connection = _connectionFactory.CreateConnection();
+            await using var connection = _connectionFactory.CreateConnection();
 
             await connection.ExecuteAsync(
                 InsertLogEntryQuery(),
@@ -80,7 +80,7 @@ namespace Rooster.DataAccess.LogEntries
 
         public async Task<DateTimeOffset> GetLatestForAppService(int appServiceId)
         {
-            using var connection = _connectionFactory.CreateConnection();
+            await using var connection = _connectionFactory.CreateConnection();
 
             var lastDate = await connection.QueryFirstOrDefaultAsync<DateTimeOffset>(
                 GetLastLogEntryDate(),

@@ -16,7 +16,7 @@ namespace Rooster.Adapters.Kudu
     {
         Task<IEnumerable<Logbook>> GetLogs(CancellationToken cancellation);
 
-        Task ExtractLogsFromStream(string logUrl, Func<string, Task> persistLogLine, CancellationToken cancellation);
+        Task ExtractLogsFromStream(Uri logUri, Func<string, Task> persistLogLine);
     }
 
     public class KuduApiAdapter : IKuduApiAdapter
@@ -34,11 +34,9 @@ namespace Rooster.Adapters.Kudu
                     new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{user}:{password}")));
             };
 
-        private static readonly Func<IHttpClientFactory, KuduAdapterOptions, HttpClient> BuildHttpClient =
-            delegate (IHttpClientFactory factory, KuduAdapterOptions options)
+        private static readonly Func<HttpClient, KuduAdapterOptions, HttpClient> BuildHttpClient =
+            delegate (HttpClient client, KuduAdapterOptions options)
             {
-                var client = factory.CreateClient("kudu");
-
                 client.DefaultRequestHeaders.Authorization = BuildBasicAuthHeader(options.User, options.Password);
                 client.BaseAddress = options.BaseUri;
 
@@ -47,12 +45,12 @@ namespace Rooster.Adapters.Kudu
 
         private readonly HttpClient _client;
 
-        public KuduApiAdapter(IOptionsMonitor<KuduAdapterOptions> options, IHttpClientFactory httpClientFactory)
+        public KuduApiAdapter(IOptionsMonitor<KuduAdapterOptions> options, HttpClient client)
         {
-            _ = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            _ = client ?? throw new ArgumentNullException(nameof(client));
             _ = options?.CurrentValue ?? throw new ArgumentNullException(nameof(options));
 
-            _client = BuildHttpClient(httpClientFactory, options?.CurrentValue);
+            _client = BuildHttpClient(client, options?.CurrentValue);
         }
 
         public async Task<IEnumerable<Logbook>> GetLogs(CancellationToken cancellation)
@@ -67,11 +65,9 @@ namespace Rooster.Adapters.Kudu
             return logs;
         }
 
-        public async Task ExtractLogsFromStream(string logUrl, Func<string, Task> persistLogLine,  CancellationToken cancellation)
+        public async Task ExtractLogsFromStream(Uri logUrl, Func<string, Task> persistLogLine)
         {
-            if (string.IsNullOrWhiteSpace(logUrl))
-                throw new ArgumentNullException(nameof(logUrl));
-
+            _ = logUrl ?? throw new ArgumentNullException(nameof(logUrl));
             _ = persistLogLine ?? throw new ArgumentNullException(nameof(persistLogLine));
 
             Stream stream = null;

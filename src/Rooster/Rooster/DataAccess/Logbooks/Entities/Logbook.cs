@@ -21,11 +21,11 @@ namespace Rooster.DataAccess.Logbooks.Entities
         public int Size { get; set; }
 
         [JsonProperty("href")]
-        public string Href { get; set; }
+        public Uri Href { get; set; }
 
         [JsonProperty("path")]
         public string Path { get; set; }
 
-        public string Host { get; set; }
+        public int KuduInstanceId { get; set; }
     }
 }

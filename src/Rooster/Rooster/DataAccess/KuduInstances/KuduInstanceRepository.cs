@@ -1,24 +1,26 @@
 ﻿using Dapper;
 using Rooster.Connectors.Sql;
-using Rooster.DataAccess.AppServices.Entities;
+using Rooster.DataAccess.KuduInstances.Entities;
 using System;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.AppServices
+namespace Rooster.DataAccess.KuduInstances
 {
-    public interface IAppServiceRepository
+    public interface IKuduInstaceRepository
     {
         Task<int> Create(string name);
+
         Task<int> GetIdByName(string name);
+
         Task<string> GetNameById(int id);
     }
 
-    public class AppServiceRepository : IAppServiceRepository
+    public class KuduInstanceRepository : IKuduInstaceRepository
     {
         private static readonly Func<string> BuildFrom = delegate
         {
-            return $"FROM [dbo].[{nameof(AppService)}]";
+            return $"FROM [dbo].[{nameof(KuduInstance)}]";
         };
 
         private static readonly Func<string, string> BuildWhere = delegate (string propertyName)
@@ -28,19 +30,19 @@ namespace Rooster.DataAccess.AppServices
 
         private static readonly Func<string> BuildGetIdByName = delegate
         {
-            return $"SELECT {nameof(AppService.Id)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(AppService.Name))}";
+            return $"SELECT {nameof(KuduInstance.Id)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(KuduInstance.Name))}";
         };
 
         private static readonly Func<string> BuildGetNameById = delegate
         {
-            return $"SELECT {nameof(AppService.Name)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(AppService.Id))}";
+            return $"SELECT {nameof(KuduInstance.Name)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(KuduInstance.Id))}";
         };
 
         private readonly Func<string> BuildInsert = delegate
         {
             var query =
                 new StringBuilder()
-                .AppendLine($"INSERT INTO {nameof(AppService)} ({nameof(AppService.Name)}) VALUES (@{nameof(AppService.Name)})")
+                .AppendLine($"INSERT INTO {nameof(KuduInstance)} ({nameof(KuduInstance.Name)}) VALUES (@{nameof(KuduInstance.Name)})")
                 .AppendLine("SELECT SCOPE_IDENTITY()")
                 .ToString();
 
@@ -49,7 +51,7 @@ namespace Rooster.DataAccess.AppServices
 
         private readonly ISqlConnectionFactory _connectionFactory;
 
-        public AppServiceRepository(ISqlConnectionFactory connectionFactory)
+        public KuduInstanceRepository(ISqlConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }

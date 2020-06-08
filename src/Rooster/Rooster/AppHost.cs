@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Rooster.Adapters.Kudu;
 using Rooster.DataAccess.AppServices;
+using Rooster.DataAccess.KuduInstances;
 using Rooster.DataAccess.Logbooks;
 using Rooster.DataAccess.LogEntries;
 using System;
@@ -18,6 +20,8 @@ namespace Rooster
         private readonly ILogbookRepository _logbookRepository;
         private readonly ILogEntryRepository _logEntryRepository;
         private readonly IAppServiceRepository _appServiceRepository;
+        private readonly IKuduInstaceRepository _kuduInstaceRepository;
+        private readonly ILogger _logger;
 
         public AppHost(
             IOptionsMonitor<AppHostOptions> options,
@@ -25,7 +29,9 @@ namespace Rooster
             ILogExtractor extractor,
             ILogbookRepository logbookRepository,
             ILogEntryRepository logEntryRepository,
-            IAppServiceRepository appServiceRepository)
+            IAppServiceRepository appServiceRepository,
+            IKuduInstaceRepository kuduInstaceRepository,
+            ILogger<AppHost> logger)
         {
             _options = options.CurrentValue ?? throw new ArgumentNullException(nameof(options));
             _kudu = kudu ?? throw new ArgumentNullException(nameof(kudu));
@@ -33,10 +39,13 @@ namespace Rooster
             _logbookRepository = logbookRepository ?? throw new ArgumentNullException(nameof(logbookRepository));
             _logEntryRepository = logEntryRepository ?? throw new ArgumentNullException(nameof(logEntryRepository));
             _appServiceRepository = appServiceRepository ?? throw new ArgumentNullException(nameof(appServiceRepository));
+            _kuduInstaceRepository = kuduInstaceRepository ?? throw new ArgumentNullException(nameof(kuduInstaceRepository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+
             while (true)
             {
                 var logbooks = await _kudu.GetLogs(cancellationToken);
@@ -47,7 +56,10 @@ namespace Rooster
 
                     if (latestLogbook == null)
                     {
-                        // TODO: Implement KuduInstanceRepository and GetOrAdd KuduIntanceId
+                        logbook.KuduInstanceId = await _kuduInstaceRepository.GetIdByName(logbook.Href.Host);
+
+                        if (logbook.KuduInstanceId == default)
+                            logbook.KuduInstanceId = await _kuduInstaceRepository.Create(logbook.Href.Host);
 
                         await _logbookRepository.Create(logbook, cancellationToken);
                         latestLogbook = logbook;
@@ -56,7 +68,7 @@ namespace Rooster
                     if (logbook.LastUpdated < latestLogbook.LastUpdated)
                         continue;
 
-                    await _kudu.ExtractLogsFromStream(logbook.Href, ExtractAndPersistDockerLogLine, cancellationToken);
+                    await _kudu.ExtractLogsFromStream(logbook.Href, ExtractAndPersistDockerLogLine);
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(_options.PoolingIntervalInSeconds));

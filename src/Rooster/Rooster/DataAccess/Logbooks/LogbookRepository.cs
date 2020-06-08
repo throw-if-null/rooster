@@ -18,7 +18,7 @@ namespace Rooster.DataAccess.Logbooks
     {
         private static readonly Func<string, string> BuildList = delegate (string prefix)
         {
-            return $"{prefix}{nameof(Logbook.MachineName)}, {prefix}{nameof(Logbook.LastUpdated)}";
+            return $"{prefix}{nameof(Logbook.MachineName)}, {prefix}{nameof(Logbook.LastUpdated)}, {prefix}{nameof(Logbook.KuduInstanceId)}";
         };
 
         private static readonly Func<string> BuildInsertPropertyList = delegate ()
@@ -59,14 +59,14 @@ namespace Rooster.DataAccess.Logbooks
 
         public async Task Create(Logbook logbook, CancellationToken cancellation)
         {
-            using var connection = _connectionFactory.CreateConnection();
+            await using var connection = _connectionFactory.CreateConnection();
 
-            await connection.ExecuteAsync(InsertLogbook(), new { logbook.MachineName, logbook.LastUpdated });
+            await connection.ExecuteAsync(InsertLogbook(), new { logbook.MachineName, logbook.LastUpdated, logbook.KuduInstanceId });
         }
 
         public async Task<Logbook> GetLast(CancellationToken cancellation)
         {
-            using var connection = _connectionFactory.CreateConnection();
+            await using var connection = _connectionFactory.CreateConnection();
 
             var logbook = await connection.QueryFirstOrDefaultAsync<Logbook>(GetLatestLogbook());
 
