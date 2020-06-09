@@ -1,6 +1,6 @@
 ﻿namespace Rooster.Connectors.Sql
 {
-    public class SqlServerConnectionFactoryOptions
+    public class ConnectionFactoryOptions
     {
         public string ConnectionString { get; set; }
     }

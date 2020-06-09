@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Rooster.Adapters.Kudu;
+using Rooster.Connectors.MongoDb.Colections;
+using Rooster.Connectors.MongoDb.Databases;
 using Rooster.Connectors.Sql;
 using Rooster.DataAccess.AppServices;
 using Rooster.DataAccess.KuduInstances;
@@ -17,6 +19,9 @@ namespace Rooster
 {
     internal class Program
     {
+        private const string SqlConfigPath = "Connectors:Sql";
+        private const string MongoConfigPath = "Connectors:MongoDb";
+
         private static readonly Func<CancellationToken> BuildCancellationTokne = delegate ()
         {
             CancellationTokenSource source = new CancellationTokenSource();
@@ -45,9 +50,16 @@ namespace Rooster
                 {
                     services.AddLogging(x => x.SetMinimumLevel(LogLevel.Trace));
 
-                    services.Configure<SqlServerConnectionFactoryOptions>(context.Configuration.GetSection(nameof(SqlServerConnectionFactoryOptions)));
-                    services.Configure<KuduAdapterOptions>(context.Configuration.GetSection(nameof(KuduAdapterOptions)));
-                    services.Configure<AppHostOptions>(context.Configuration.GetSection(nameof(AppHostOptions)));
+                    services.Configure<ConnectionFactoryOptions>(context.Configuration.GetSection($"{SqlConfigPath}:{nameof(ConnectionFactoryOptions)}"));
+                    services.Configure<ConnectionFactoryOptions>(context.Configuration.GetSection($"{MongoConfigPath}:{nameof(ConnectionFactoryOptions)}"));
+                    services.Configure<DatabaseFactoryOptions>(context.Configuration.GetSection($"{MongoConfigPath}:{nameof(DatabaseFactoryOptions)}"));
+                    services.Configure<AppServiceCollectionFactoryOptions>(context.Configuration.GetSection(BuildMongoCollectionFactoryConfigPath<AppServiceCollectionFactoryOptions>()));
+                    services.Configure<KuduInstanceCollectionFactoryOptions>(context.Configuration.GetSection(BuildMongoCollectionFactoryConfigPath<KuduInstanceCollectionFactoryOptions>()));
+                    services.Configure<LogbookCollectionFactoryOptions>(context.Configuration.GetSection(BuildMongoCollectionFactoryConfigPath<LogbookCollectionFactoryOptions>()));
+                    services.Configure<LogEntryCollectionFactoryOptions>(context.Configuration.GetSection(BuildMongoCollectionFactoryConfigPath<LogEntryCollectionFactoryOptions>()));
+
+                    services.Configure<KuduAdapterOptions>(context.Configuration.GetSection($"Adapters:{nameof(KuduAdapterOptions)}"));
+                    services.Configure<AppHostOptions>(context.Configuration.GetSection($"Hosts:{nameof(AppHostOptions)}"));
 
                     services
                         .AddHttpClient<IKuduApiAdapter, KuduApiAdapter>(x => x.Timeout = TimeSpan.FromSeconds(10))
@@ -55,7 +67,7 @@ namespace Rooster
 
                     services.AddMemoryCache();
 
-                    services.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
+                    services.AddSingleton<IConnectionFactory, ConnectionFactory>();
 
                     services.AddTransient<ILogExtractor, LogExtractor>();
                     services.AddTransient<ILogEntryRepository, LogEntryRepository>();
@@ -65,5 +77,10 @@ namespace Rooster
 
                     services.AddHostedService<AppHost>();
                 });
+
+        private static string BuildMongoCollectionFactoryConfigPath<T>()
+        {
+            return $"{MongoConfigPath}:{nameof(CollectionFactoryOptions)}:{nameof(T)}";
+        }
     }
 }

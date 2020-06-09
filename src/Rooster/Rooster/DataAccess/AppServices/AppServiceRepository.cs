@@ -47,9 +47,9 @@ namespace Rooster.DataAccess.AppServices
             return query;
         };
 
-        private readonly ISqlConnectionFactory _connectionFactory;
+        private readonly IConnectionFactory _connectionFactory;
 
-        public AppServiceRepository(ISqlConnectionFactory connectionFactory)
+        public AppServiceRepository(IConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }

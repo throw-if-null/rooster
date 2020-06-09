@@ -53,9 +53,9 @@ namespace Rooster.DataAccess.LogEntries
                 $"SELECT TOP 1 {nameof(LogEntry.Date)} FROM {nameof(LogEntry)} WHERE AppServiceId = @AppServiceId ORDER BY {nameof(LogEntry.Created)} DESC";
             };
 
-        private readonly ISqlConnectionFactory _connectionFactory;
+        private readonly IConnectionFactory _connectionFactory;
 
-        public LogEntryRepository(ISqlConnectionFactory connectionFactory)
+        public LogEntryRepository(IConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }

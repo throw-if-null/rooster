@@ -49,9 +49,9 @@ namespace Rooster.DataAccess.KuduInstances
             return query;
         };
 
-        private readonly ISqlConnectionFactory _connectionFactory;
+        private readonly IConnectionFactory _connectionFactory;
 
-        public KuduInstanceRepository(ISqlConnectionFactory connectionFactory)
+        public KuduInstanceRepository(IConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }

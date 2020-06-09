@@ -4,21 +4,21 @@ using System;
 
 namespace Rooster.Connectors.Sql
 {
-    public interface ISqlConnectionFactory
+    public interface IConnectionFactory
     {
         SqlConnection CreateConnection();
     }
 
-    public class SqlConnectionFactory : ISqlConnectionFactory
+    public class ConnectionFactory : IConnectionFactory
     {
         private static readonly Func<string, SqlConnection> Create = delegate (string connectionString)
         {
             return new SqlConnection(connectionString);
         };
 
-        private readonly SqlServerConnectionFactoryOptions _options;
+        private readonly ConnectionFactoryOptions _options;
 
-        public SqlConnectionFactory(IOptionsMonitor<SqlServerConnectionFactoryOptions> options)
+        public ConnectionFactory(IOptionsMonitor<ConnectionFactoryOptions> options)
         {
             _options = options?.CurrentValue ?? throw new ArgumentNullException(nameof(options));
         }

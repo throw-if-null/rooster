@@ -50,9 +50,9 @@ namespace Rooster.DataAccess.Logbooks
                     $"SELECT TOP 1 {BuildGetLatestList()} FROM {nameof(Logbook)} ORDER BY {nameof(Logbook.Created)} DESC";
             };
 
-        private readonly ISqlConnectionFactory _connectionFactory;
+        private readonly IConnectionFactory _connectionFactory;
 
-        public LogbookRepository(ISqlConnectionFactory connectionFactory)
+        public LogbookRepository(IConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
