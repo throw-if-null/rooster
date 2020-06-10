@@ -6,7 +6,7 @@ using Rooster.Adapters.Kudu;
 using Rooster.Connectors.MongoDb.Colections;
 using Rooster.Connectors.MongoDb.Databases;
 using Rooster.Connectors.Sql;
-using Rooster.DataAccess.AppServices;
+using Rooster.DataAccess.AppServices.Implementations.Sql;
 using Rooster.DataAccess.KuduInstances;
 using Rooster.DataAccess.Logbooks;
 using Rooster.DataAccess.LogEntries;
@@ -72,10 +72,11 @@ namespace Rooster
                     services.AddTransient<ILogExtractor, LogExtractor>();
                     services.AddTransient<ILogEntryRepository, LogEntryRepository>();
                     services.AddTransient<ILogbookRepository, LogbookRepository>();
-                    services.AddTransient<IAppServiceRepository, AppServiceRepository>();
+                    services.AddTransient<ISqlAppServiceRepository, SqlAppServiceRepository>();
                     services.AddTransient<IKuduInstaceRepository, KuduInstanceRepository>();
 
-                    services.AddHostedService<AppHost>();
+
+                    services.AddHostedService<SqlAppHost>();
                 });
 
         private static string BuildMongoCollectionFactoryConfigPath<T>()

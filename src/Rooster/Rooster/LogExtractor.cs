@@ -22,7 +22,7 @@ namespace Rooster
 
             return new LogEntry
             {
-                AppService = new AppService { Name = website},
+                AppService = new SqlAppService { Name = website},
                 ContainerName = name,
                 HostName = host,
                 ImageName = image,

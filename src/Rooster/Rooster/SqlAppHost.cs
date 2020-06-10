@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Rooster.Adapters.Kudu;
-using Rooster.DataAccess.AppServices;
+using Rooster.DataAccess.AppServices.Implementations.Sql;
 using Rooster.DataAccess.KuduInstances;
 using Rooster.DataAccess.Logbooks;
 using Rooster.DataAccess.LogEntries;
@@ -12,26 +12,26 @@ using System.Threading.Tasks;
 
 namespace Rooster
 {
-    internal class AppHost : IHostedService
+    internal class SqlAppHost : IHostedService
     {
         private readonly AppHostOptions _options;
         private readonly IKuduApiAdapter _kudu;
         private readonly ILogExtractor _extractor;
         private readonly ILogbookRepository _logbookRepository;
         private readonly ILogEntryRepository _logEntryRepository;
-        private readonly IAppServiceRepository _appServiceRepository;
+        private readonly ISqlAppServiceRepository _appServiceRepository;
         private readonly IKuduInstaceRepository _kuduInstaceRepository;
         private readonly ILogger _logger;
 
-        public AppHost(
+        public SqlAppHost(
             IOptionsMonitor<AppHostOptions> options,
             IKuduApiAdapter kudu,
             ILogExtractor extractor,
             ILogbookRepository logbookRepository,
             ILogEntryRepository logEntryRepository,
-            IAppServiceRepository appServiceRepository,
+            ISqlAppServiceRepository appServiceRepository,
             IKuduInstaceRepository kuduInstaceRepository,
-            ILogger<AppHost> logger)
+            ILogger<SqlAppHost> logger)
         {
             _options = options.CurrentValue ?? throw new ArgumentNullException(nameof(options));
             _kudu = kudu ?? throw new ArgumentNullException(nameof(kudu));
@@ -68,21 +68,21 @@ namespace Rooster
                     if (logbook.LastUpdated < latestLogbook.LastUpdated)
                         continue;
 
-                    await _kudu.ExtractLogsFromStream(logbook.Href, ExtractAndPersistDockerLogLine);
+                    await _kudu.ExtractLogsFromStream(logbook.Href, cancellationToken, ExtractAndPersistDockerLogLine);
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(_options.PoolingIntervalInSeconds));
             }
         }
 
-        private async Task ExtractAndPersistDockerLogLine(string line)
+        private async Task ExtractAndPersistDockerLogLine(string line, CancellationToken cancellation)
         {
             var logEntry = _extractor.Extract(line);
 
-            logEntry.AppService.Id = await _appServiceRepository.GetIdByName(logEntry.AppService.Name);
+            logEntry.AppService = await _appServiceRepository.GetIdByName(logEntry.AppService.Name, cancellation);
 
             if (logEntry.AppService.Id == default)
-                logEntry.AppService.Id = await _appServiceRepository.Create(logEntry.AppService.Name);
+                logEntry.AppService = await _appServiceRepository.Create(logEntry.AppService, cancellation);
 
             var latestLogEntry = await _logEntryRepository.GetLatestForAppService(logEntry.AppService.Id);
 

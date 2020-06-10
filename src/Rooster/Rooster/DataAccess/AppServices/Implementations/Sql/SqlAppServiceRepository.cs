@@ -3,22 +3,16 @@ using Rooster.Connectors.Sql;
 using Rooster.DataAccess.AppServices.Entities;
 using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.AppServices
+namespace Rooster.DataAccess.AppServices.Implementations.Sql
 {
-    public interface IAppServiceRepository
-    {
-        Task<int> Create(string name);
-        Task<int> GetIdByName(string name);
-        Task<string> GetNameById(int id);
-    }
-
-    public class AppServiceRepository : IAppServiceRepository
+    public class SqlAppServiceRepository : ISqlAppServiceRepository
     {
         private static readonly Func<string> BuildFrom = delegate
         {
-            return $"FROM [dbo].[{nameof(AppService)}]";
+            return $"FROM [dbo].[AppService]";
         };
 
         private static readonly Func<string, string> BuildWhere = delegate (string propertyName)
@@ -28,19 +22,19 @@ namespace Rooster.DataAccess.AppServices
 
         private static readonly Func<string> BuildGetIdByName = delegate
         {
-            return $"SELECT {nameof(AppService.Id)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(AppService.Name))}";
+            return $"SELECT {nameof(SqlAppService.Id)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(SqlAppService.Name))}";
         };
 
         private static readonly Func<string> BuildGetNameById = delegate
         {
-            return $"SELECT {nameof(AppService.Name)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(AppService.Id))}";
+            return $"SELECT {nameof(SqlAppService.Name)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(SqlAppService.Id))}";
         };
 
         private readonly Func<string> BuildInsert = delegate
         {
             var query =
                 new StringBuilder()
-                .AppendLine($"INSERT INTO {nameof(AppService)} ({nameof(AppService.Name)}) VALUES (@{nameof(AppService.Name)})")
+                .AppendLine($"INSERT INTO AppService ({nameof(SqlAppService.Name)}) VALUES (@{nameof(SqlAppService.Name)})")
                 .AppendLine("SELECT SCOPE_IDENTITY()")
                 .ToString();
 
@@ -49,35 +43,43 @@ namespace Rooster.DataAccess.AppServices
 
         private readonly IConnectionFactory _connectionFactory;
 
-        public AppServiceRepository(IConnectionFactory connectionFactory)
+        public SqlAppServiceRepository(IConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        public async Task<int> Create(string name)
+        public async Task<SqlAppService> Create(SqlAppService appService, CancellationToken cancellation)
         {
+            _ = appService ?? throw new ArgumentNullException(nameof(appService));
+
             await using var connection = _connectionFactory.CreateConnection();
 
-            var id =
+            appService.Id =
                 await
                     connection.ExecuteAsync(
                         BuildInsert(),
-                        new { Name = name });
+                        new { appService.Name });
 
-            return id;
+            return appService;
         }
 
-        public async Task<int> GetIdByName(string name)
+        public async Task<SqlAppService> GetIdByName(string name, CancellationToken cancellation)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                return default;
+
             await using var connection = _connectionFactory.CreateConnection();
 
             var id = await connection.QueryFirstOrDefaultAsync<int>(BuildGetIdByName(), new { Name = name });
 
-            return id;
+            return new SqlAppService { Id = id, Name = name };
         }
 
-        public async Task<string> GetNameById(int id)
+        public async Task<string> GetNameById(int id, CancellationToken cancellation)
         {
+            if (id == default)
+                return default;
+
             await using var connection = _connectionFactory.CreateConnection();
 
             var name = await connection.QueryFirstOrDefaultAsync<string>(BuildGetNameById(), new { Id = id });

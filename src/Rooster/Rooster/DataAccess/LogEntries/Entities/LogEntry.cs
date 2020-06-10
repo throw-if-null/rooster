@@ -10,7 +10,7 @@ namespace Rooster.DataAccess.LogEntries.Entities
 
         public DateTimeOffset Created { get; set; }
 
-        public AppService AppService { get; set; }
+        public SqlAppService AppService { get; set; }
 
         public string HostName { get; set; }
 

@@ -16,7 +16,7 @@ namespace Rooster.Adapters.Kudu
     {
         Task<IEnumerable<Logbook>> GetLogs(CancellationToken cancellation);
 
-        Task ExtractLogsFromStream(Uri logUri, Func<string, Task> persistLogLine);
+        Task ExtractLogsFromStream(Uri logUri, CancellationToken cancellation, Func<string, CancellationToken, Task> persistLogLine);
     }
 
     public class KuduApiAdapter : IKuduApiAdapter
@@ -65,7 +65,7 @@ namespace Rooster.Adapters.Kudu
             return logs;
         }
 
-        public async Task ExtractLogsFromStream(Uri logUrl, Func<string, Task> persistLogLine)
+        public async Task ExtractLogsFromStream(Uri logUrl, CancellationToken cancellation, Func<string, CancellationToken, Task> persistLogLine)
         {
             _ = logUrl ?? throw new ArgumentNullException(nameof(logUrl));
             _ = persistLogLine ?? throw new ArgumentNullException(nameof(persistLogLine));
@@ -91,7 +91,7 @@ namespace Rooster.Adapters.Kudu
                     if (!line.Contains("docker", StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
-                    await persistLogLine(line);
+                    await persistLogLine(line, cancellation);
                 }
             }
             finally
