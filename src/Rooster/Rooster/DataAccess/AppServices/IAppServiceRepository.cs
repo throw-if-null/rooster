@@ -10,6 +10,6 @@ namespace Rooster.DataAccess.AppServices
 
         Task<T> GetIdByName(string name, CancellationToken cancellation);
 
-        Task<string> GetNameById(int id, CancellationToken cancellation);
+        Task<string> GetNameById(string id, CancellationToken cancellation);
     }
 }

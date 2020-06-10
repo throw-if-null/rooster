@@ -75,14 +75,14 @@ namespace Rooster.DataAccess.AppServices.Implementations.Sql
             return new SqlAppService { Id = id, Name = name };
         }
 
-        public async Task<string> GetNameById(int id, CancellationToken cancellation)
+        public async Task<string> GetNameById(string id, CancellationToken cancellation)
         {
-            if (id == default)
+            if (int.TryParse(id, out var typedId))
                 return default;
 
             await using var connection = _connectionFactory.CreateConnection();
 
-            var name = await connection.QueryFirstOrDefaultAsync<string>(BuildGetNameById(), new { Id = id });
+            var name = await connection.QueryFirstOrDefaultAsync<string>(BuildGetNameById(), new { Id = typedId });
 
             return name;
         }

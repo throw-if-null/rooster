@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using Rooster.Connectors.MongoDb.Colections;
 using Rooster.DataAccess.AppServices.Entities;
 using System;
@@ -25,21 +26,39 @@ namespace Rooster.DataAccess.AppServices.Implementations.MongoDb
         {
             _ = appService ?? throw new ArgumentNullException(nameof(appService));
 
-            var collection = await _collectionFactory.Get<IAppService>(cancellation);
+            var collection = await _collectionFactory.Get<MongoDbAppService>(cancellation);
 
             await collection.InsertOneAsync(appService, GetInsertOneOptions(), cancellation);
 
             return appService;
         }
 
-        public Task<MongoDbAppService> GetIdByName(string name, CancellationToken cancellation)
+        public async Task<MongoDbAppService> GetIdByName(string name, CancellationToken cancellation)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(name))
+                return default;
+
+            var collection = await _collectionFactory.Get<MongoDbAppService>(cancellation);
+
+            var cursor = await collection.FindAsync(x => x.Name == name.Trim(), null, cancellation);
+
+            var appService = await cursor.FirstOrDefaultAsync();
+
+            return appService;
         }
 
-        public Task<string> GetNameById(int id, CancellationToken cancellation)
+        public async Task<string> GetNameById(string id, CancellationToken cancellation)
         {
-            throw new NotImplementedException();
+            if (ObjectId.TryParse(id, out var objectId))
+                return default;
+
+            var collection = await _collectionFactory.Get<MongoDbAppService>(cancellation);
+
+            var cursor = await collection.FindAsync(x => x.Id == objectId, null, cancellation);
+
+            var appService = await cursor.FirstOrDefaultAsync();
+
+            return appService.Name;
         }
     }
 }
