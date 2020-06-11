@@ -1,12 +1,19 @@
-﻿using Newtonsoft.Json;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
+using Rooster.DataAccess.KuduInstances.Entities;
 using System;
 
 namespace Rooster.DataAccess.Logbooks.Entities
 {
-    public class Logbook
+    public interface ILogbook
     {
-        [JsonIgnore]
-        public int Id { get; set; }
+    }
+
+    public class Logbook<T, U> : ILogbook
+        where U : IKuduInstance
+    {
+        [JsonIgnore] [BsonId]
+        public T Id { get; set; }
 
         [JsonIgnore]
         public DateTimeOffset Created { get; set; }
@@ -26,6 +33,6 @@ namespace Rooster.DataAccess.Logbooks.Entities
         [JsonProperty("path")]
         public string Path { get; set; }
 
-        public int KuduInstanceId { get; set; }
+        public U KuduInstance { get; set; }
     }
 }

@@ -6,9 +6,12 @@ using Rooster.Adapters.Kudu;
 using Rooster.Connectors.MongoDb.Colections;
 using Rooster.Connectors.MongoDb.Databases;
 using Rooster.Connectors.Sql;
+using Rooster.DataAccess.AppServices.Implementations.MongoDb;
 using Rooster.DataAccess.AppServices.Implementations.Sql;
-using Rooster.DataAccess.KuduInstances;
-using Rooster.DataAccess.Logbooks;
+using Rooster.DataAccess.KuduInstances.Implementations.MongoDb;
+using Rooster.DataAccess.KuduInstances.Implementations.Sql;
+using Rooster.DataAccess.Logbooks.Implementations.MongoDb;
+using Rooster.DataAccess.Logbooks.Implementations.Sql;
 using Rooster.DataAccess.LogEntries;
 using System;
 using System.IO;
@@ -71,10 +74,13 @@ namespace Rooster
 
                     services.AddTransient<ILogExtractor, LogExtractor>();
                     services.AddTransient<ILogEntryRepository, LogEntryRepository>();
-                    services.AddTransient<ILogbookRepository, LogbookRepository>();
+                    services.AddTransient<ISqlLogbookRepository, SqlLogbookRepository>();
                     services.AddTransient<ISqlAppServiceRepository, SqlAppServiceRepository>();
-                    services.AddTransient<IKuduInstaceRepository, KuduInstanceRepository>();
+                    services.AddTransient<ISqlKuduInstanceRepository, SqlKuduInstanceRepository>();
 
+                    services.AddTransient<IMongoDbAppServiceRepository, MongoDbAppServiceRepository>();
+                    services.AddTransient<IMongoDbKuduInstanceRepository, MongoDbKuduInstanceRepository>();
+                    services.AddTransient<IMongoDbLogbookRepository, MongoDbLogbookRepository>();
 
                     services.AddHostedService<SqlAppHost>();
                 });

@@ -1,8 +1,15 @@
-﻿namespace Rooster.DataAccess.KuduInstances.Entities
+﻿using MongoDB.Bson.Serialization.Attributes;
+
+namespace Rooster.DataAccess.KuduInstances.Entities
 {
-    public class KuduInstance
+    public interface IKuduInstance
     {
-        public int Id { get; set; }
+    }
+
+    public class KuduInstance<T> : IKuduInstance
+    {
+        [BsonId]
+        public T Id { get; set; }
 
         public string Name { get; set; }
     }

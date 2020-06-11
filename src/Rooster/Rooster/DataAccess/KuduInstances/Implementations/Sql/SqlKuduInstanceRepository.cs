@@ -3,24 +3,16 @@ using Rooster.Connectors.Sql;
 using Rooster.DataAccess.KuduInstances.Entities;
 using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.KuduInstances
+namespace Rooster.DataAccess.KuduInstances.Implementations.Sql
 {
-    public interface IKuduInstaceRepository
-    {
-        Task<int> Create(string name);
-
-        Task<int> GetIdByName(string name);
-
-        Task<string> GetNameById(int id);
-    }
-
-    public class KuduInstanceRepository : IKuduInstaceRepository
+    public class SqlKuduInstanceRepository : ISqlKuduInstanceRepository
     {
         private static readonly Func<string> BuildFrom = delegate
         {
-            return $"FROM [dbo].[{nameof(KuduInstance)}]";
+            return $"FROM [dbo].[KuduInstance]";
         };
 
         private static readonly Func<string, string> BuildWhere = delegate (string propertyName)
@@ -30,19 +22,19 @@ namespace Rooster.DataAccess.KuduInstances
 
         private static readonly Func<string> BuildGetIdByName = delegate
         {
-            return $"SELECT {nameof(KuduInstance.Id)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(KuduInstance.Name))}";
+            return $"SELECT {nameof(SqlKuduInstance.Id)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(SqlKuduInstance.Name))}";
         };
 
         private static readonly Func<string> BuildGetNameById = delegate
         {
-            return $"SELECT {nameof(KuduInstance.Name)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(KuduInstance.Id))}";
+            return $"SELECT {nameof(SqlKuduInstance.Name)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(SqlKuduInstance.Id))}";
         };
 
         private readonly Func<string> BuildInsert = delegate
         {
             var query =
                 new StringBuilder()
-                .AppendLine($"INSERT INTO {nameof(KuduInstance)} ({nameof(KuduInstance.Name)}) VALUES (@{nameof(KuduInstance.Name)})")
+                .AppendLine($"INSERT INTO KuduInstance ({nameof(SqlKuduInstance.Name)}) VALUES (@{nameof(SqlKuduInstance.Name)})")
                 .AppendLine("SELECT SCOPE_IDENTITY()")
                 .ToString();
 
@@ -51,35 +43,43 @@ namespace Rooster.DataAccess.KuduInstances
 
         private readonly IConnectionFactory _connectionFactory;
 
-        public KuduInstanceRepository(IConnectionFactory connectionFactory)
+        public SqlKuduInstanceRepository(IConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        public async Task<int> Create(string name)
+        public async Task<SqlKuduInstance> Create(SqlKuduInstance kuduInstance, CancellationToken cancellation)
         {
+            _ = kuduInstance ?? throw new ArgumentNullException(nameof(kuduInstance));
+
             await using var connection = _connectionFactory.CreateConnection();
 
             var id =
                 await
                     connection.ExecuteAsync(
                         BuildInsert(),
-                        new { Name = name });
+                        new { kuduInstance.Name });
 
-            return id;
+            return kuduInstance;
         }
 
-        public async Task<int> GetIdByName(string name)
+        public async Task<SqlKuduInstance> GetIdByName(string name, CancellationToken cancellation)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                return default;
+
             await using var connection = _connectionFactory.CreateConnection();
 
             var id = await connection.QueryFirstOrDefaultAsync<int>(BuildGetIdByName(), new { Name = name });
 
-            return id;
+            return new SqlKuduInstance { Id = id, Name = name };
         }
 
-        public async Task<string> GetNameById(int id)
+        public async Task<string> GetNameById(string id, CancellationToken cancellation)
         {
+            if (int.TryParse(id, out var typedId))
+                return default;
+
             await using var connection = _connectionFactory.CreateConnection();
 
             var name = await connection.QueryFirstOrDefaultAsync<string>(BuildGetNameById(), new { Id = id });

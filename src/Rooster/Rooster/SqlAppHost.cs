@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Rooster.Adapters.Kudu;
 using Rooster.DataAccess.AppServices.Implementations.Sql;
-using Rooster.DataAccess.KuduInstances;
-using Rooster.DataAccess.Logbooks;
+using Rooster.DataAccess.KuduInstances.Implementations.Sql;
+using Rooster.DataAccess.Logbooks.Implementations.Sql;
 using Rooster.DataAccess.LogEntries;
 using System;
 using System.Threading;
@@ -17,20 +17,20 @@ namespace Rooster
         private readonly AppHostOptions _options;
         private readonly IKuduApiAdapter _kudu;
         private readonly ILogExtractor _extractor;
-        private readonly ILogbookRepository _logbookRepository;
+        private readonly ISqlLogbookRepository _logbookRepository;
         private readonly ILogEntryRepository _logEntryRepository;
         private readonly ISqlAppServiceRepository _appServiceRepository;
-        private readonly IKuduInstaceRepository _kuduInstaceRepository;
+        private readonly ISqlKuduInstanceRepository _kuduInstanceRepository;
         private readonly ILogger _logger;
 
         public SqlAppHost(
             IOptionsMonitor<AppHostOptions> options,
             IKuduApiAdapter kudu,
             ILogExtractor extractor,
-            ILogbookRepository logbookRepository,
+            ISqlLogbookRepository logbookRepository,
             ILogEntryRepository logEntryRepository,
             ISqlAppServiceRepository appServiceRepository,
-            IKuduInstaceRepository kuduInstaceRepository,
+            ISqlKuduInstanceRepository kuduInstanceRepository,
             ILogger<SqlAppHost> logger)
         {
             _options = options.CurrentValue ?? throw new ArgumentNullException(nameof(options));
@@ -39,7 +39,7 @@ namespace Rooster
             _logbookRepository = logbookRepository ?? throw new ArgumentNullException(nameof(logbookRepository));
             _logEntryRepository = logEntryRepository ?? throw new ArgumentNullException(nameof(logEntryRepository));
             _appServiceRepository = appServiceRepository ?? throw new ArgumentNullException(nameof(appServiceRepository));
-            _kuduInstaceRepository = kuduInstaceRepository ?? throw new ArgumentNullException(nameof(kuduInstaceRepository));
+            _kuduInstanceRepository = kuduInstanceRepository ?? throw new ArgumentNullException(nameof(kuduInstanceRepository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -56,10 +56,10 @@ namespace Rooster
 
                     if (latestLogbook == null)
                     {
-                        logbook.KuduInstanceId = await _kuduInstaceRepository.GetIdByName(logbook.Href.Host);
+                        logbook.KuduInstance = await _kuduInstanceRepository.GetIdByName(logbook.Href.Host, cancellationToken);
 
-                        if (logbook.KuduInstanceId == default)
-                            logbook.KuduInstanceId = await _kuduInstaceRepository.Create(logbook.Href.Host);
+                        if (logbook.KuduInstance == default)
+                            logbook.KuduInstance = await _kuduInstanceRepository.Create(logbook.KuduInstance, cancellationToken);
 
                         await _logbookRepository.Create(logbook, cancellationToken);
                         latestLogbook = logbook;
