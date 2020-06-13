@@ -2,33 +2,38 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Rooster.Adapters.Kudu;
+using Rooster.CrossCutting;
+using Rooster.DataAccess.AppServices.Entities;
 using Rooster.DataAccess.AppServices.Implementations.Sql;
+using Rooster.DataAccess.KuduInstances.Entities;
 using Rooster.DataAccess.KuduInstances.Implementations.Sql;
+using Rooster.DataAccess.Logbooks.Entities;
 using Rooster.DataAccess.Logbooks.Implementations.Sql;
-using Rooster.DataAccess.LogEntries;
+using Rooster.DataAccess.LogEntries.Entities;
+using Rooster.DataAccess.LogEntries.Implementations.Sql;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster
+namespace Rooster.AppHosts
 {
     internal class SqlAppHost : IHostedService
     {
         private readonly AppHostOptions _options;
-        private readonly IKuduApiAdapter _kudu;
+        private readonly IKuduApiAdapter<int> _kudu;
         private readonly ILogExtractor _extractor;
         private readonly ISqlLogbookRepository _logbookRepository;
-        private readonly ILogEntryRepository _logEntryRepository;
+        private readonly ISqlLogEntryRepository _logEntryRepository;
         private readonly ISqlAppServiceRepository _appServiceRepository;
         private readonly ISqlKuduInstanceRepository _kuduInstanceRepository;
         private readonly ILogger _logger;
 
         public SqlAppHost(
             IOptionsMonitor<AppHostOptions> options,
-            IKuduApiAdapter kudu,
+            IKuduApiAdapter<int> kudu,
             ILogExtractor extractor,
             ISqlLogbookRepository logbookRepository,
-            ILogEntryRepository logEntryRepository,
+            ISqlLogEntryRepository logEntryRepository,
             ISqlAppServiceRepository appServiceRepository,
             ISqlKuduInstanceRepository kuduInstanceRepository,
             ILogger<SqlAppHost> logger)
@@ -45,21 +50,25 @@ namespace Rooster
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-
             while (true)
             {
                 var logbooks = await _kudu.GetLogs(cancellationToken);
 
-                foreach (var logbook in logbooks)
+                foreach (SqlLogbook logbook in logbooks)
                 {
                     var latestLogbook = await _logbookRepository.GetLast(cancellationToken);
 
                     if (latestLogbook == null)
                     {
-                        logbook.KuduInstance = await _kuduInstanceRepository.GetIdByName(logbook.Href.Host, cancellationToken);
+                        var kuduInstance = await _kuduInstanceRepository.GetIdByName(logbook.Href.Host, cancellationToken);
 
-                        if (logbook.KuduInstance == default)
-                            logbook.KuduInstance = await _kuduInstanceRepository.Create(logbook.KuduInstance, cancellationToken);
+                        if (kuduInstance == null)
+                        {
+                            kuduInstance = new SqlKuduInstance { Name = logbook.Href.Host };
+                            kuduInstance = await _kuduInstanceRepository.Create(kuduInstance, cancellationToken);
+                        }
+
+                        logbook.KuduInstanceId = kuduInstance.Id;
 
                         await _logbookRepository.Create(logbook, cancellationToken);
                         latestLogbook = logbook;
@@ -77,19 +86,30 @@ namespace Rooster
 
         private async Task ExtractAndPersistDockerLogLine(string line, CancellationToken cancellation)
         {
-            var logEntry = _extractor.Extract(line);
+            var (inboundPort, outboundPort) = _extractor.ExtractPorts(line);
 
-            logEntry.AppService = await _appServiceRepository.GetIdByName(logEntry.AppService.Name, cancellation);
+            var websiteName = _extractor.ExtractWebsiteName(line);
 
-            if (logEntry.AppService.Id == default)
-                logEntry.AppService = await _appServiceRepository.Create(logEntry.AppService, cancellation);
+            var appService = await _appServiceRepository.GetIdByName(websiteName, cancellation);
 
-            var latestLogEntry = await _logEntryRepository.GetLatestForAppService(logEntry.AppService.Id);
+            if (appService == null)
+                appService = await _appServiceRepository.Create(new SqlAppService { Name = websiteName}, cancellation);
+
+            var logEntry = new SqlLogEntry(
+                appService.Id,
+                _extractor.ExtractHostName(line),
+                _extractor.ExtractImageName(line),
+                _extractor.ExtractContainerName(line),
+                inboundPort,
+                outboundPort,
+                _extractor.ExtractDate(line));
+
+            var latestLogEntry = await _logEntryRepository.GetLatestForAppService(logEntry.AppServiceId.ToString(), cancellation);
 
             if (logEntry.Date <= latestLogEntry)
                 return;
 
-            await _logEntryRepository.Create(logEntry);
+            await _logEntryRepository.Create(logEntry, cancellation);
 
             // TODO: Add Slack integration.
         }

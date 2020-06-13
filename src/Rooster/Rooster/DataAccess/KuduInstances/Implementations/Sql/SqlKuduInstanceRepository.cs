@@ -54,11 +54,8 @@ namespace Rooster.DataAccess.KuduInstances.Implementations.Sql
 
             await using var connection = _connectionFactory.CreateConnection();
 
-            var id =
-                await
-                    connection.ExecuteAsync(
-                        BuildInsert(),
-                        new { kuduInstance.Name });
+            var command = new CommandDefinition(BuildInsert(), new { kuduInstance.Name }, cancellationToken: cancellation);
+            kuduInstance.Id = await connection.ExecuteAsync(command);
 
             return kuduInstance;
         }
@@ -70,9 +67,10 @@ namespace Rooster.DataAccess.KuduInstances.Implementations.Sql
 
             await using var connection = _connectionFactory.CreateConnection();
 
-            var id = await connection.QueryFirstOrDefaultAsync<int>(BuildGetIdByName(), new { Name = name });
+            var command = new CommandDefinition(BuildGetIdByName(), new { Name = name }, cancellationToken: cancellation);
+            var id = await connection.QueryFirstOrDefaultAsync<int>(command);
 
-            return new SqlKuduInstance { Id = id, Name = name };
+            return id == default ? null : new SqlKuduInstance { Id = id, Name = name };
         }
 
         public async Task<string> GetNameById(string id, CancellationToken cancellation)
@@ -82,7 +80,8 @@ namespace Rooster.DataAccess.KuduInstances.Implementations.Sql
 
             await using var connection = _connectionFactory.CreateConnection();
 
-            var name = await connection.QueryFirstOrDefaultAsync<string>(BuildGetNameById(), new { Id = id });
+            var command = new CommandDefinition(BuildGetNameById(), new { Id = id }, cancellationToken: cancellation);
+            var name = await connection.QueryFirstOrDefaultAsync<string>(command);
 
             return name;
         }

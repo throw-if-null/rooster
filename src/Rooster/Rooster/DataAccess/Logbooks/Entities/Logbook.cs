@@ -1,6 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
-using Rooster.DataAccess.KuduInstances.Entities;
 using System;
 
 namespace Rooster.DataAccess.Logbooks.Entities
@@ -9,8 +8,7 @@ namespace Rooster.DataAccess.Logbooks.Entities
     {
     }
 
-    public class Logbook<T, U> : ILogbook
-        where U : IKuduInstance
+    public abstract class Logbook<T> : ILogbook
     {
         [JsonIgnore] [BsonId]
         public T Id { get; set; }
@@ -33,6 +31,6 @@ namespace Rooster.DataAccess.Logbooks.Entities
         [JsonProperty("path")]
         public string Path { get; set; }
 
-        public U KuduInstance { get; set; }
+        public T KuduInstanceId { get; set; }
     }
 }

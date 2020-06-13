@@ -6,7 +6,7 @@ namespace Rooster.DataAccess.KuduInstances.Entities
     {
     }
 
-    public class KuduInstance<T> : IKuduInstance
+    public abstract class KuduInstance<T> : IKuduInstance
     {
         [BsonId]
         public T Id { get; set; }

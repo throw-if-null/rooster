@@ -11,7 +11,7 @@ namespace Rooster.DataAccess.Logbooks.Implementations.Sql
     {
         private static readonly Func<string, string> BuildList = delegate (string prefix)
         {
-            return $"{prefix}{nameof(SqlLogbook.MachineName)}, {prefix}{nameof(SqlLogbook.LastUpdated)}, {prefix}{nameof(SqlLogbook.KuduInstance)}";
+            return $"{prefix}{nameof(SqlLogbook.MachineName)}, {prefix}{nameof(SqlLogbook.LastUpdated)}, {prefix}{nameof(SqlLogbook.KuduInstanceId)}";
         };
 
         private static readonly Func<string> BuildInsertPropertyList = delegate ()
@@ -54,14 +54,20 @@ namespace Rooster.DataAccess.Logbooks.Implementations.Sql
         {
             await using var connection = _connectionFactory.CreateConnection();
 
-            await connection.ExecuteAsync(InsertLogbook(), new { logbook.MachineName, logbook.LastUpdated, logbook.KuduInstance });
+            var command = new CommandDefinition(
+                InsertLogbook(),
+                new { logbook.MachineName, logbook.LastUpdated, logbook.KuduInstanceId },
+                cancellationToken: cancellation);
+
+            await connection.ExecuteAsync(command);
         }
 
         public async Task<SqlLogbook> GetLast(CancellationToken cancellation)
         {
             await using var connection = _connectionFactory.CreateConnection();
 
-            var logbook = await connection.QueryFirstOrDefaultAsync<SqlLogbook>(GetLatestLogbook());
+            var command = new CommandDefinition(GetLatestLogbook(), cancellationToken: cancellation);
+            var logbook = await connection.QueryFirstOrDefaultAsync<SqlLogbook>(command);
 
             return logbook;
         }

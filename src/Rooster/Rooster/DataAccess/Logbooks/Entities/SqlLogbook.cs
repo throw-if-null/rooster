@@ -2,7 +2,7 @@
 
 namespace Rooster.DataAccess.Logbooks.Entities
 {
-    public class SqlLogbook : Logbook<int, SqlKuduInstance>
+    public class SqlLogbook : Logbook<int>
     {
     }
 }

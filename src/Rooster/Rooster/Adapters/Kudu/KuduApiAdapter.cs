@@ -12,14 +12,14 @@ using System.Threading.Tasks;
 
 namespace Rooster.Adapters.Kudu
 {
-    public interface IKuduApiAdapter
+    public interface IKuduApiAdapter<T>
     {
-        Task<IEnumerable<SqlLogbook>> GetLogs(CancellationToken cancellation);
+        Task<IEnumerable<Logbook<T>>> GetLogs(CancellationToken cancellation);
 
         Task ExtractLogsFromStream(Uri logUri, CancellationToken cancellation, Func<string, CancellationToken, Task> persistLogLine);
     }
 
-    public class KuduApiAdapter : IKuduApiAdapter
+    public class KuduApiAdapter<T> : IKuduApiAdapter<T>
     {
         private static readonly Func<string, string, AuthenticationHeaderValue> BuildBasicAuthHeader =
             delegate (string user, string password)
@@ -53,14 +53,14 @@ namespace Rooster.Adapters.Kudu
             _client = BuildHttpClient(client, options?.CurrentValue);
         }
 
-        public async Task<IEnumerable<SqlLogbook>> GetLogs(CancellationToken cancellation)
+        public async Task<IEnumerable<T>> GetLogs(CancellationToken cancellation)
         {
             using var response = await _client.GetAsync("api/logs/docker", cancellation);
 
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
-            var logs = JsonConvert.DeserializeObject<IEnumerable<SqlLogbook>>(content);
+            var logs = JsonConvert.DeserializeObject<IEnumerable<T>>(content);
 
             return logs;
         }
@@ -98,6 +98,11 @@ namespace Rooster.Adapters.Kudu
             {
                 stream?.Dispose();
             }
+        }
+
+        Task<IEnumerable<Logbook<T>>> IKuduApiAdapter<T>.GetLogs(CancellationToken cancellation)
+        {
+            throw new NotImplementedException();
         }
     }
 }
