@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 
 namespace Rooster.DataAccess.Logbooks
 {
-    public interface ILogbookRepository<T> where T : ILogbook
+    public interface ILogbookRepository<T>
     {
-        Task Create(T logbook, CancellationToken cancellation);
+        Task Create(Logbook<T> logbook, CancellationToken cancellation);
 
-        Task<T> GetLast(CancellationToken cancellation);
+        Task<Logbook<T>> GetLast(CancellationToken cancellation);
     }
 }

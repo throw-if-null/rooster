@@ -1,13 +1,14 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using Rooster.Connectors.MongoDb.Colections;
 using Rooster.DataAccess.Logbooks.Entities;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.Logbooks.Implementations.MongoDb
+namespace Rooster.DataAccess.Logbooks.Implementations
 {
-    public class MongoDbLogbookRepository : IMongoDbLogbookRepository
+    public class MongoDbLogbookRepository : ILogbookRepository<ObjectId>
     {
         private static readonly Func<InsertOneOptions> GetInsertOneOptions = delegate
         {
@@ -21,23 +22,23 @@ namespace Rooster.DataAccess.Logbooks.Implementations.MongoDb
             _collectionFactory = collectionFactory ?? throw new ArgumentNullException(nameof(collectionFactory));
         }
 
-        public async Task Create(MongoDbLogbook logbook, CancellationToken cancellation)
+        public async Task Create(Logbook<ObjectId> logbook, CancellationToken cancellation)
         {
             _ = logbook ?? throw new ArgumentNullException(nameof(logbook));
 
-            var collection = await _collectionFactory.Get<MongoDbLogbook>(cancellation);
+            var collection = await _collectionFactory.Get<Logbook<ObjectId>>(cancellation);
 
             await collection.InsertOneAsync(logbook, GetInsertOneOptions(), cancellation);
         }
 
-        public async Task<MongoDbLogbook> GetLast(CancellationToken cancellation)
+        public async Task<Logbook<ObjectId>> GetLast(CancellationToken cancellation)
         {
-            var collection = await _collectionFactory.Get<MongoDbLogbook>(cancellation);
+            var collection = await _collectionFactory.Get<Logbook<ObjectId>>(cancellation);
 
-            var filter = Builders<MongoDbLogbook>.Filter.Empty;
-            var sort = Builders<MongoDbLogbook>.Sort.Descending(x => x.Created);
+            var filter = Builders<Logbook<ObjectId>>.Filter.Empty;
+            var sort = Builders<Logbook<ObjectId>>.Sort.Descending(x => x.Created);
 
-            var cursor = await collection.FindAsync(filter, new FindOptions<MongoDbLogbook, MongoDbLogbook>
+            var cursor = await collection.FindAsync(filter, new FindOptions<Logbook<ObjectId>, Logbook<ObjectId>>
             {
                 Sort = sort,
                 Limit = 1

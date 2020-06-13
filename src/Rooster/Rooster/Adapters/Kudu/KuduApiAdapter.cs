@@ -53,14 +53,14 @@ namespace Rooster.Adapters.Kudu
             _client = BuildHttpClient(client, options?.CurrentValue);
         }
 
-        public async Task<IEnumerable<T>> GetLogs(CancellationToken cancellation)
+        public async Task<IEnumerable<Logbook<T>>> GetLogs(CancellationToken cancellation)
         {
             using var response = await _client.GetAsync("api/logs/docker", cancellation);
 
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
-            var logs = JsonConvert.DeserializeObject<IEnumerable<T>>(content);
+            var logs = JsonConvert.DeserializeObject<IEnumerable<Logbook<T>>>(content);
 
             return logs;
         }
@@ -98,11 +98,6 @@ namespace Rooster.Adapters.Kudu
             {
                 stream?.Dispose();
             }
-        }
-
-        Task<IEnumerable<Logbook<T>>> IKuduApiAdapter<T>.GetLogs(CancellationToken cancellation)
-        {
-            throw new NotImplementedException();
         }
     }
 }

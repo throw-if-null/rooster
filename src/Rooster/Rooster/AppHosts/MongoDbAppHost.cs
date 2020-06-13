@@ -4,14 +4,13 @@ using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using Rooster.Adapters.Kudu;
 using Rooster.CrossCutting;
+using Rooster.DataAccess.AppServices;
 using Rooster.DataAccess.AppServices.Entities;
-using Rooster.DataAccess.AppServices.Implementations.MongoDb;
+using Rooster.DataAccess.KuduInstances;
 using Rooster.DataAccess.KuduInstances.Entities;
-using Rooster.DataAccess.KuduInstances.Implementations.MongoDb;
-using Rooster.DataAccess.Logbooks.Entities;
-using Rooster.DataAccess.Logbooks.Implementations.MongoDb;
+using Rooster.DataAccess.Logbooks;
+using Rooster.DataAccess.LogEntries;
 using Rooster.DataAccess.LogEntries.Entities;
-using Rooster.DataAccess.LogEntries.Implementations.MongoDb;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,20 +22,20 @@ namespace Rooster.AppHosts
         private readonly AppHostOptions _options;
         private readonly IKuduApiAdapter<ObjectId> _kudu;
         private readonly ILogExtractor _extractor;
-        private readonly IMongoDbLogbookRepository _logbookRepository;
-        private readonly IMongoDbLogEntryRepository _logEntryRepository;
-        private readonly IMongoDbAppServiceRepository _appServiceRepository;
-        private readonly IMongoDbKuduInstanceRepository _kuduInstanceRepository;
+        private readonly ILogbookRepository<ObjectId> _logbookRepository;
+        private readonly ILogEntryRepository<ObjectId> _logEntryRepository;
+        private readonly IAppServiceRepository<ObjectId> _appServiceRepository;
+        private readonly IKuduInstaceRepository<ObjectId> _kuduInstanceRepository;
         private readonly ILogger _logger;
 
         public MongoDbAppHost(
             IOptionsMonitor<AppHostOptions> options,
             IKuduApiAdapter<ObjectId> kudu,
             ILogExtractor extractor,
-            IMongoDbLogbookRepository logbookRepository,
-            IMongoDbLogEntryRepository logEntryRepository,
-            IMongoDbAppServiceRepository appServiceRepository,
-            IMongoDbKuduInstanceRepository kuduInstanceRepository,
+            ILogbookRepository<ObjectId> logbookRepository,
+            ILogEntryRepository<ObjectId> logEntryRepository,
+            IAppServiceRepository<ObjectId> appServiceRepository,
+            IKuduInstaceRepository<ObjectId> kuduInstanceRepository,
             ILogger<MongoDbAppHost> logger)
         {
             _options = options.CurrentValue ?? throw new ArgumentNullException(nameof(options));
@@ -55,21 +54,21 @@ namespace Rooster.AppHosts
             {
                 var logbooks = await _kudu.GetLogs(cancellationToken);
 
-                foreach (MongoDbLogbook logbook in logbooks)
+                foreach (var logbook in logbooks)
                 {
                     var latestLogbook = await _logbookRepository.GetLast(cancellationToken);
 
                     if (latestLogbook == null)
                     {
-                        var kuduInstance = await _kuduInstanceRepository.GetIdByName(logbook.Href.Host, cancellationToken);
+                        var kuduInstanceId = await _kuduInstanceRepository.GetIdByName(logbook.Href.Host, cancellationToken);
 
-                        if (kuduInstance == null)
+                        if (kuduInstanceId == default)
                         {
-                            kuduInstance = new MongoDbKuduInstance { Name = logbook.Href.Host };
-                            kuduInstance = await _kuduInstanceRepository.Create(kuduInstance, cancellationToken);
+                            var newInstance = new KuduInstance<ObjectId> { Name = logbook.Href.Host };
+                            kuduInstanceId = await _kuduInstanceRepository.Create(newInstance, cancellationToken);
                         }
 
-                        logbook.KuduInstanceId = kuduInstance.Id;
+                        logbook.KuduInstanceId = kuduInstanceId;
 
                         await _logbookRepository.Create(logbook, cancellationToken);
                         latestLogbook = logbook;
@@ -91,13 +90,13 @@ namespace Rooster.AppHosts
 
             var websiteName = _extractor.ExtractWebsiteName(line);
 
-            var appService = await _appServiceRepository.GetIdByName(websiteName, cancellation);
+            var appServiceId = await _appServiceRepository.GetIdByName(websiteName, cancellation);
 
-            if (appService == null)
-                appService = await _appServiceRepository.Create(new MongoDbAppService { Name = websiteName }, cancellation);
+            if (appServiceId == default)
+                appServiceId = await _appServiceRepository.Create(new AppService<ObjectId> { Name = websiteName }, cancellation);
 
-            var logEntry = new MongoDbLogEntry(
-                appService.Id,
+            var logEntry = new LogEntry<ObjectId>(
+                appServiceId,
                 _extractor.ExtractHostName(line),
                 _extractor.ExtractImageName(line),
                 _extractor.ExtractContainerName(line),
@@ -105,7 +104,7 @@ namespace Rooster.AppHosts
                 outboundPort,
                 _extractor.ExtractDate(line));
 
-            var latestLogEntry = await _logEntryRepository.GetLatestForAppService(logEntry.AppServiceId.ToString(), cancellation);
+            var latestLogEntry = await _logEntryRepository.GetLatestForAppService(logEntry.AppServiceId, cancellation);
 
             if (logEntry.Date <= latestLogEntry)
                 return;

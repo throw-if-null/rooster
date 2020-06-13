@@ -3,14 +3,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Rooster.Adapters.Kudu;
 using Rooster.CrossCutting;
+using Rooster.DataAccess.AppServices;
 using Rooster.DataAccess.AppServices.Entities;
-using Rooster.DataAccess.AppServices.Implementations.Sql;
+using Rooster.DataAccess.KuduInstances;
 using Rooster.DataAccess.KuduInstances.Entities;
-using Rooster.DataAccess.KuduInstances.Implementations.Sql;
-using Rooster.DataAccess.Logbooks.Entities;
-using Rooster.DataAccess.Logbooks.Implementations.Sql;
+using Rooster.DataAccess.Logbooks;
+using Rooster.DataAccess.LogEntries;
 using Rooster.DataAccess.LogEntries.Entities;
-using Rooster.DataAccess.LogEntries.Implementations.Sql;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,20 +21,20 @@ namespace Rooster.AppHosts
         private readonly AppHostOptions _options;
         private readonly IKuduApiAdapter<int> _kudu;
         private readonly ILogExtractor _extractor;
-        private readonly ISqlLogbookRepository _logbookRepository;
-        private readonly ISqlLogEntryRepository _logEntryRepository;
-        private readonly ISqlAppServiceRepository _appServiceRepository;
-        private readonly ISqlKuduInstanceRepository _kuduInstanceRepository;
+        private readonly ILogbookRepository<int> _logbookRepository;
+        private readonly ILogEntryRepository<int> _logEntryRepository;
+        private readonly IAppServiceRepository<int> _appServiceRepository;
+        private readonly IKuduInstaceRepository<int> _kuduInstanceRepository;
         private readonly ILogger _logger;
 
         public SqlAppHost(
             IOptionsMonitor<AppHostOptions> options,
             IKuduApiAdapter<int> kudu,
             ILogExtractor extractor,
-            ISqlLogbookRepository logbookRepository,
-            ISqlLogEntryRepository logEntryRepository,
-            ISqlAppServiceRepository appServiceRepository,
-            ISqlKuduInstanceRepository kuduInstanceRepository,
+            ILogbookRepository<int> logbookRepository,
+            ILogEntryRepository<int> logEntryRepository,
+            IAppServiceRepository<int> appServiceRepository,
+            IKuduInstaceRepository<int> kuduInstanceRepository,
             ILogger<SqlAppHost> logger)
         {
             _options = options.CurrentValue ?? throw new ArgumentNullException(nameof(options));
@@ -54,21 +53,21 @@ namespace Rooster.AppHosts
             {
                 var logbooks = await _kudu.GetLogs(cancellationToken);
 
-                foreach (SqlLogbook logbook in logbooks)
+                foreach (var logbook in logbooks)
                 {
                     var latestLogbook = await _logbookRepository.GetLast(cancellationToken);
 
                     if (latestLogbook == null)
                     {
-                        var kuduInstance = await _kuduInstanceRepository.GetIdByName(logbook.Href.Host, cancellationToken);
+                        var kuduInstanceId = await _kuduInstanceRepository.GetIdByName(logbook.Href.Host, cancellationToken);
 
-                        if (kuduInstance == null)
+                        if (kuduInstanceId == default)
                         {
-                            kuduInstance = new SqlKuduInstance { Name = logbook.Href.Host };
-                            kuduInstance = await _kuduInstanceRepository.Create(kuduInstance, cancellationToken);
+                            var newInstance = new KuduInstance<int> { Name = logbook.Href.Host };
+                            kuduInstanceId = await _kuduInstanceRepository.Create(newInstance, cancellationToken);
                         }
 
-                        logbook.KuduInstanceId = kuduInstance.Id;
+                        logbook.KuduInstanceId = kuduInstanceId;
 
                         await _logbookRepository.Create(logbook, cancellationToken);
                         latestLogbook = logbook;
@@ -90,13 +89,13 @@ namespace Rooster.AppHosts
 
             var websiteName = _extractor.ExtractWebsiteName(line);
 
-            var appService = await _appServiceRepository.GetIdByName(websiteName, cancellation);
+            var appServiceId = await _appServiceRepository.GetIdByName(websiteName, cancellation);
 
-            if (appService == null)
-                appService = await _appServiceRepository.Create(new SqlAppService { Name = websiteName}, cancellation);
+            if (appServiceId == default)
+                appServiceId = await _appServiceRepository.Create(new AppService<int> { Name = websiteName}, cancellation);
 
-            var logEntry = new SqlLogEntry(
-                appService.Id,
+            var logEntry = new LogEntry<int>(
+                appServiceId,
                 _extractor.ExtractHostName(line),
                 _extractor.ExtractImageName(line),
                 _extractor.ExtractContainerName(line),
@@ -104,7 +103,7 @@ namespace Rooster.AppHosts
                 outboundPort,
                 _extractor.ExtractDate(line));
 
-            var latestLogEntry = await _logEntryRepository.GetLatestForAppService(logEntry.AppServiceId.ToString(), cancellation);
+            var latestLogEntry = await _logEntryRepository.GetLatestForAppService(logEntry.AppServiceId, cancellation);
 
             if (logEntry.Date <= latestLogEntry)
                 return;

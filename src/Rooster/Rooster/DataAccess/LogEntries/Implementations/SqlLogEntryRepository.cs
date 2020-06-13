@@ -6,22 +6,22 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.LogEntries.Implementations.Sql
+namespace Rooster.DataAccess.LogEntries.Implementations
 {
-    public class SqlLogEntryRepository : ISqlLogEntryRepository
+    public class SqlLogEntryRepository : ILogEntryRepository<int>
     {
         private static readonly Func<string, string> BuildList = delegate (string prefix)
         {
             var builder = new StringBuilder();
 
             builder
-                .Append($"{prefix}{nameof(SqlLogEntry.AppServiceId)}, ")
-                .Append($"{prefix}{nameof(SqlLogEntry.ContainerName)}, ")
-                .Append($"{prefix}{nameof(SqlLogEntry.Date)}, ")
-                .Append($"{prefix}{nameof(SqlLogEntry.HostName)}, ")
-                .Append($"{prefix}{nameof(SqlLogEntry.ImageName)}, ")
-                .Append($"{prefix}{nameof(SqlLogEntry.InboundPort)}, ")
-                .Append($"{prefix}{nameof(SqlLogEntry.OutboundPort)}");
+                .Append($"{prefix}{nameof(LogEntry<int>.AppServiceId)}, ")
+                .Append($"{prefix}{nameof(LogEntry<int>.ContainerName)}, ")
+                .Append($"{prefix}{nameof(LogEntry<int>.Date)}, ")
+                .Append($"{prefix}{nameof(LogEntry<int>.HostName)}, ")
+                .Append($"{prefix}{nameof(LogEntry<int>.ImageName)}, ")
+                .Append($"{prefix}{nameof(LogEntry<int>.InboundPort)}, ")
+                .Append($"{prefix}{nameof(LogEntry<int>.OutboundPort)}");
 
             return builder.ToString();
         };
@@ -38,16 +38,16 @@ namespace Rooster.DataAccess.LogEntries.Implementations.Sql
 
         private static readonly Func<string> InsertLogEntryQuery = delegate
         {
-            return $"INSERT INTO LogEntry ({BuildPropertiesList()}) VALUES ({BuildValuesList()})";
+            return $"INSERT INTO {nameof(LogEntry<int>)} ({BuildPropertiesList()}) VALUES ({BuildValuesList()})";
         };
 
         private static readonly Func<string> GetLastLogEntryDate =
             delegate
             {
                 return
-                    $"SELECT TOP 1 {nameof(SqlLogEntry.Date)} FROM LogEntry " +
-                    $"WHERE {nameof(SqlLogEntry.AppServiceId)} = @{nameof(SqlLogEntry.AppServiceId)} " +
-                    $"ORDER BY {nameof(SqlLogEntry.Created)} DESC";
+                    $"SELECT TOP 1 {nameof(LogEntry<int>.Date)} FROM {nameof(LogEntry<int>)} " +
+                    $"WHERE {nameof(LogEntry<int>.AppServiceId)} = @{nameof(LogEntry<int>.AppServiceId)} " +
+                    $"ORDER BY {nameof(LogEntry<int>.Created)} DESC";
             };
 
         private readonly IConnectionFactory _connectionFactory;
@@ -57,7 +57,7 @@ namespace Rooster.DataAccess.LogEntries.Implementations.Sql
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        public async Task Create(SqlLogEntry entry, CancellationToken cancellation)
+        public async Task Create(LogEntry<int> entry, CancellationToken cancellation)
         {
             await using var connection = _connectionFactory.CreateConnection();
 
@@ -78,16 +78,16 @@ namespace Rooster.DataAccess.LogEntries.Implementations.Sql
             await connection.ExecuteAsync(command);
         }
 
-        public async Task<DateTimeOffset> GetLatestForAppService(string appServiceId, CancellationToken cancellation)
+        public async Task<DateTimeOffset> GetLatestForAppService(int appServiceId, CancellationToken cancellation)
         {
-            if (int.TryParse(appServiceId, out var typedAppServiceId))
+            if (appServiceId == default)
                 return default;
 
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(
                 GetLastLogEntryDate(),
-                new { AppServiceId = typedAppServiceId },
+                new { AppServiceId = appServiceId },
                 cancellationToken: cancellation);
 
             var lastDate = await connection.QueryFirstOrDefaultAsync<DateTimeOffset>(command);

@@ -1,18 +1,18 @@
 ﻿using Dapper;
 using Rooster.Connectors.Sql;
-using Rooster.DataAccess.KuduInstances.Entities;
+using Rooster.DataAccess.AppServices.Entities;
 using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.KuduInstances.Implementations.Sql
+namespace Rooster.DataAccess.AppServices.Implementations
 {
-    public class SqlKuduInstanceRepository : ISqlKuduInstanceRepository
+    public class SqlAppServiceRepository : IAppServiceRepository<int>
     {
         private static readonly Func<string> BuildFrom = delegate
         {
-            return $"FROM [dbo].[KuduInstance]";
+            return $"FROM [dbo].[{nameof(AppService<int>)}]";
         };
 
         private static readonly Func<string, string> BuildWhere = delegate (string propertyName)
@@ -22,19 +22,19 @@ namespace Rooster.DataAccess.KuduInstances.Implementations.Sql
 
         private static readonly Func<string> BuildGetIdByName = delegate
         {
-            return $"SELECT {nameof(SqlKuduInstance.Id)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(SqlKuduInstance.Name))}";
+            return $"SELECT {nameof(AppService<int>.Id)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(AppService<int>.Name))}";
         };
 
         private static readonly Func<string> BuildGetNameById = delegate
         {
-            return $"SELECT {nameof(SqlKuduInstance.Name)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(SqlKuduInstance.Id))}";
+            return $"SELECT {nameof(AppService<int>.Name)} {BuildFrom()} WITH(nolock) {BuildWhere(nameof(AppService<int>.Id))}";
         };
 
         private readonly Func<string> BuildInsert = delegate
         {
             var query =
                 new StringBuilder()
-                .AppendLine($"INSERT INTO KuduInstance ({nameof(SqlKuduInstance.Name)}) VALUES (@{nameof(SqlKuduInstance.Name)})")
+                .AppendLine($"INSERT INTO {nameof(AppService<int>)} ({nameof(AppService<int>.Name)}) VALUES (@{nameof(AppService<int>.Name)})")
                 .AppendLine("SELECT SCOPE_IDENTITY()")
                 .ToString();
 
@@ -43,24 +43,27 @@ namespace Rooster.DataAccess.KuduInstances.Implementations.Sql
 
         private readonly IConnectionFactory _connectionFactory;
 
-        public SqlKuduInstanceRepository(IConnectionFactory connectionFactory)
+        public SqlAppServiceRepository(IConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        public async Task<SqlKuduInstance> Create(SqlKuduInstance kuduInstance, CancellationToken cancellation)
+        public async Task<int> Create(AppService<int> appService, CancellationToken cancellation)
         {
-            _ = kuduInstance ?? throw new ArgumentNullException(nameof(kuduInstance));
+            _ = appService ?? throw new ArgumentNullException(nameof(appService));
 
             await using var connection = _connectionFactory.CreateConnection();
 
-            var command = new CommandDefinition(BuildInsert(), new { kuduInstance.Name }, cancellationToken: cancellation);
-            kuduInstance.Id = await connection.ExecuteAsync(command);
+            var id =
+                await
+                    connection.ExecuteAsync(
+                        BuildInsert(),
+                        new { appService.Name });
 
-            return kuduInstance;
+            return id;
         }
 
-        public async Task<SqlKuduInstance> GetIdByName(string name, CancellationToken cancellation)
+        public async Task<int> GetIdByName(string name, CancellationToken cancellation)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return default;
@@ -70,12 +73,12 @@ namespace Rooster.DataAccess.KuduInstances.Implementations.Sql
             var command = new CommandDefinition(BuildGetIdByName(), new { Name = name }, cancellationToken: cancellation);
             var id = await connection.QueryFirstOrDefaultAsync<int>(command);
 
-            return id == default ? null : new SqlKuduInstance { Id = id, Name = name };
+            return id;
         }
 
-        public async Task<string> GetNameById(string id, CancellationToken cancellation)
+        public async Task<string> GetNameById(int id, CancellationToken cancellation)
         {
-            if (int.TryParse(id, out var typedId))
+            if (id == default)
                 return default;
 
             await using var connection = _connectionFactory.CreateConnection();

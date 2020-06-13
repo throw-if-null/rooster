@@ -6,9 +6,9 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.AppServices.Implementations.MongoDb
+namespace Rooster.DataAccess.AppServices.Implementations
 {
-    public class MongoDbAppServiceRepository : IMongoDbAppServiceRepository
+    public class MongoDbAppServiceRepository : IAppServiceRepository<ObjectId>
     {
         private static readonly Func<InsertOneOptions> GetInsertOneOptions = delegate
         {
@@ -22,39 +22,36 @@ namespace Rooster.DataAccess.AppServices.Implementations.MongoDb
             _collectionFactory = collectionFactory ?? throw new ArgumentNullException(nameof(collectionFactory));
         }
 
-        public async Task<MongoDbAppService> Create(MongoDbAppService appService, CancellationToken cancellation)
+        public async Task<ObjectId> Create(AppService<ObjectId> appService, CancellationToken cancellation)
         {
             _ = appService ?? throw new ArgumentNullException(nameof(appService));
 
-            var collection = await _collectionFactory.Get<MongoDbAppService>(cancellation);
+            var collection = await _collectionFactory.Get<AppService<ObjectId>>(cancellation);
 
             await collection.InsertOneAsync(appService, GetInsertOneOptions(), cancellation);
 
-            return appService;
+            return appService.Id;
         }
 
-        public async Task<MongoDbAppService> GetIdByName(string name, CancellationToken cancellation)
+        public async Task<ObjectId> GetIdByName(string name, CancellationToken cancellation)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return default;
 
-            var collection = await _collectionFactory.Get<MongoDbAppService>(cancellation);
+            var collection = await _collectionFactory.Get<AppService<ObjectId>>(cancellation);
 
             var cursor = await collection.FindAsync(x => x.Name == name.Trim(), null, cancellation);
 
             var appService = await cursor.FirstOrDefaultAsync();
 
-            return appService;
+            return appService.Id;
         }
 
-        public async Task<string> GetNameById(string id, CancellationToken cancellation)
+        public async Task<string> GetNameById(ObjectId id, CancellationToken cancellation)
         {
-            if (ObjectId.TryParse(id, out var objectId))
-                return default;
+            var collection = await _collectionFactory.Get<AppService<ObjectId>>(cancellation);
 
-            var collection = await _collectionFactory.Get<MongoDbAppService>(cancellation);
-
-            var cursor = await collection.FindAsync(x => x.Id == objectId, null, cancellation);
+            var cursor = await collection.FindAsync(x => x.Id == id, null, cancellation);
 
             var appService = await cursor.FirstOrDefaultAsync();
 

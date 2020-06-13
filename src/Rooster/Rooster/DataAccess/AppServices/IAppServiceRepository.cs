@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 
 namespace Rooster.DataAccess.AppServices
 {
-    public interface IAppServiceRepository<T> where T : IAppService
+    public interface IAppServiceRepository<T>
     {
-        Task<T> Create(T appService, CancellationToken cancellation);
+        Task<T> Create(AppService<T> appService, CancellationToken cancellation);
 
         Task<T> GetIdByName(string name, CancellationToken cancellation);
 
-        Task<string> GetNameById(string id, CancellationToken cancellation);
+        Task<string> GetNameById(T id, CancellationToken cancellation);
     }
 }

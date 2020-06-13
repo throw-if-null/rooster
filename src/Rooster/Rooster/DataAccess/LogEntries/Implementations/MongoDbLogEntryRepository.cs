@@ -6,9 +6,9 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.LogEntries.Implementations.MongoDb
+namespace Rooster.DataAccess.LogEntries.Implementations
 {
-    public class MongoDbLogEntryRepository : IMongoDbLogEntryRepository
+    public class MongoDbLogEntryRepository : ILogEntryRepository<ObjectId>
     {
         private static readonly Func<InsertOneOptions> GetInsertOneOptions = delegate
         {
@@ -22,26 +22,26 @@ namespace Rooster.DataAccess.LogEntries.Implementations.MongoDb
             _collectionFactory = collectionFactory ?? throw new ArgumentNullException(nameof(collectionFactory));
         }
 
-        public async Task Create(MongoDbLogEntry entry, CancellationToken cancellation)
+        public async Task Create(LogEntry<ObjectId> entry, CancellationToken cancellation)
         {
             _ = entry ?? throw new ArgumentNullException(nameof(entry));
 
-            var collection = await _collectionFactory.Get<MongoDbLogEntry>(cancellation);
+            var collection = await _collectionFactory.Get<LogEntry<ObjectId>>(cancellation);
 
             await collection.InsertOneAsync(entry, GetInsertOneOptions(), cancellation);
         }
 
-        public async Task<DateTimeOffset> GetLatestForAppService(string appServiceId, CancellationToken cancellation)
+        public async Task<DateTimeOffset> GetLatestForAppService(ObjectId appServiceId, CancellationToken cancellation)
         {
-            if (ObjectId.TryParse(appServiceId, out var objectId))
+            if (appServiceId == ObjectId.Empty)
                 return default;
 
-            var collection = await _collectionFactory.Get<MongoDbLogEntry>(cancellation);
+            var collection = await _collectionFactory.Get<LogEntry<ObjectId>>(cancellation);
 
-            var filter = Builders<MongoDbLogEntry>.Filter.Where(x => x.AppServiceId == objectId);
-            var sort = Builders<MongoDbLogEntry>.Sort.Descending(x => x.Created);
+            var filter = Builders<LogEntry<ObjectId>>.Filter.Where(x => x.AppServiceId == appServiceId);
+            var sort = Builders<LogEntry<ObjectId>>.Sort.Descending(x => x.Created);
 
-            var cursor = await collection.FindAsync(filter, new FindOptions<MongoDbLogEntry, MongoDbLogEntry>
+            var cursor = await collection.FindAsync(filter, new FindOptions<LogEntry<ObjectId>, LogEntry<ObjectId>>
             {
                 Sort = sort,
                 Limit = 1

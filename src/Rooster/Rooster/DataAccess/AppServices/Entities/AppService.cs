@@ -6,7 +6,7 @@ namespace Rooster.DataAccess.AppServices.Entities
     {
     }
 
-    public abstract class AppService<T> : IAppService
+    public class AppService<T> : IAppService
     {
         [BsonId]
         public T Id { get; set; }

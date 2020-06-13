@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 
 namespace Rooster.DataAccess.KuduInstances
 {
-    public interface IKuduInstaceRepository<T> where T : IKuduInstance
+    public interface IKuduInstaceRepository<T>
     {
-        Task<T> Create(T kuduInstance, CancellationToken cancellation);
+        Task<T> Create(KuduInstance<T> kuduInstance, CancellationToken cancellation);
 
         Task<T> GetIdByName(string name, CancellationToken cancellation);
 
-        Task<string> GetNameById(string id, CancellationToken cancellation);
+        Task<string> GetNameById(T id, CancellationToken cancellation);
     }
 }

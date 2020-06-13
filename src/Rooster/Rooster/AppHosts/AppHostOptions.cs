@@ -1,4 +1,4 @@
-﻿namespace Rooster
+﻿namespace Rooster.AppHosts
 {
     public class AppHostOptions
     {

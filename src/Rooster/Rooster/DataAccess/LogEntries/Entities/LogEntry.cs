@@ -7,7 +7,7 @@ namespace Rooster.DataAccess.LogEntries.Entities
     {
     }
 
-    public abstract class LogEntry<T> : ILogEntry
+    public class LogEntry<T> : ILogEntry
     {
         public T Id { get; set; }
 
@@ -27,11 +27,8 @@ namespace Rooster.DataAccess.LogEntries.Entities
 
         public DateTimeOffset Date { get; set; }
 
-        protected LogEntry(T appserviceId, string hostName, string imageName, string containerName, string inboundPort, string outboundPort, DateTimeOffset date)
+        public LogEntry(T appServiceId, string hostName, string imageName, string containerName, string inboundPort, string outboundPort, DateTimeOffset date)
         {
-            if (!ValidateT(appserviceId))
-                throw new ArgumentException($"{nameof(AppServiceId)} {appserviceId} must have a valid value.");
-
             if (string.IsNullOrWhiteSpace(hostName))
                 throw new ArgumentNullException(nameof(hostName));
 
@@ -50,7 +47,7 @@ namespace Rooster.DataAccess.LogEntries.Entities
             if (date == default || date == DateTimeOffset.MaxValue)
                 throw new ArgumentException($"{nameof(date)} {date} must have a valid value.");
 
-            AppServiceId = appserviceId;
+            AppServiceId = appServiceId;
             HostName = hostName;
             ImageName = imageName;
             ContainerName = containerName;
@@ -58,8 +55,6 @@ namespace Rooster.DataAccess.LogEntries.Entities
             OutboundPort = outboundPort;
             Date = date;
         }
-
-        protected abstract bool ValidateT(T appServiceId);
 
         public override string ToString()
         {

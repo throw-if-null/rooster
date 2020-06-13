@@ -5,13 +5,13 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.Logbooks.Implementations.Sql
+namespace Rooster.DataAccess.Logbooks.Implementations
 {
-    public class SqlLogbookRepository : ISqlLogbookRepository
+    public class SqlLogbookRepository : ILogbookRepository<int>
     {
         private static readonly Func<string, string> BuildList = delegate (string prefix)
         {
-            return $"{prefix}{nameof(SqlLogbook.MachineName)}, {prefix}{nameof(SqlLogbook.LastUpdated)}, {prefix}{nameof(SqlLogbook.KuduInstanceId)}";
+            return $"{prefix}{nameof(Logbook<int>.MachineName)}, {prefix}{nameof(Logbook<int>.LastUpdated)}, {prefix}{nameof(Logbook<int>.KuduInstanceId)}";
         };
 
         private static readonly Func<string> BuildInsertPropertyList = delegate ()
@@ -26,21 +26,21 @@ namespace Rooster.DataAccess.Logbooks.Implementations.Sql
 
         private static Func<string> BuildGetLatestList = delegate ()
         {
-            return $"{nameof(SqlLogbook.Id)}, {BuildInsertPropertyList()}";
+            return $"{nameof(Logbook<int>.Id)}, {BuildInsertPropertyList()}";
         };
 
         public static readonly Func<string> InsertLogbook =
             delegate
             {
                 return
-                    $"INSERT INTO Logbook ({BuildInsertPropertyList()}) VALUES({BuildInsertValuesList()})";
+                    $"INSERT INTO {nameof(Logbook<int>)} ({BuildInsertPropertyList()}) VALUES({BuildInsertValuesList()})";
             };
 
         public static readonly Func<string> GetLatestLogbook =
             delegate
             {
                 return
-                    $"SELECT TOP 1 {BuildGetLatestList()} FROM Logbook ORDER BY {nameof(SqlLogbook.Created)} DESC";
+                    $"SELECT TOP 1 {BuildGetLatestList()} FROM {nameof(Logbook<int>)} ORDER BY {nameof(Logbook<int>.Created)} DESC";
             };
 
         private readonly IConnectionFactory _connectionFactory;
@@ -50,7 +50,7 @@ namespace Rooster.DataAccess.Logbooks.Implementations.Sql
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        public async Task Create(SqlLogbook logbook, CancellationToken cancellation)
+        public async Task Create(Logbook<int> logbook, CancellationToken cancellation)
         {
             await using var connection = _connectionFactory.CreateConnection();
 
@@ -62,12 +62,12 @@ namespace Rooster.DataAccess.Logbooks.Implementations.Sql
             await connection.ExecuteAsync(command);
         }
 
-        public async Task<SqlLogbook> GetLast(CancellationToken cancellation)
+        public async Task<Logbook<int>> GetLast(CancellationToken cancellation)
         {
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(GetLatestLogbook(), cancellationToken: cancellation);
-            var logbook = await connection.QueryFirstOrDefaultAsync<SqlLogbook>(command);
+            var logbook = await connection.QueryFirstOrDefaultAsync<Logbook<int>>(command);
 
             return logbook;
         }

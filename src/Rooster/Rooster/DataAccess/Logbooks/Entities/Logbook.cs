@@ -8,7 +8,7 @@ namespace Rooster.DataAccess.Logbooks.Entities
     {
     }
 
-    public abstract class Logbook<T> : ILogbook
+    public class Logbook<T> : ILogbook
     {
         [JsonIgnore] [BsonId]
         public T Id { get; set; }
