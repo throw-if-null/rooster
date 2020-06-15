@@ -26,6 +26,11 @@ namespace Rooster.DataAccess.AppServices.Implementations
         {
             _ = appService ?? throw new ArgumentNullException(nameof(appService));
 
+            if (string.IsNullOrWhiteSpace(appService.Name))
+                throw new ArgumentException($"{nameof(appService.Name)} is required.");
+
+            appService.Name = appService.Name.Trim().ToLowerInvariant();
+
             var collection = await _collectionFactory.Get<AppService<ObjectId>>(cancellation);
 
             await collection.InsertOneAsync(appService, GetInsertOneOptions(), cancellation);
@@ -40,22 +45,38 @@ namespace Rooster.DataAccess.AppServices.Implementations
 
             var collection = await _collectionFactory.Get<AppService<ObjectId>>(cancellation);
 
-            var cursor = await collection.FindAsync(x => x.Name == name.Trim(), null, cancellation);
+            var trimmedName = name.Trim();
+            var cursor = await collection.FindAsync(
+                x => x.Name == trimmedName,
+                new FindOptions<AppService<ObjectId>, AppService<ObjectId>>
+                {
+                    Projection = Builders<AppService<ObjectId>>.Projection.Include(x => x.Id)
+                },
+                cancellation);
 
             var appService = await cursor.FirstOrDefaultAsync();
 
-            return appService.Id;
+            return appService == null ? ObjectId.Empty : appService.Id;
         }
 
         public async Task<string> GetNameById(ObjectId id, CancellationToken cancellation)
         {
+            if (id == ObjectId.Empty)
+                return default;
+
             var collection = await _collectionFactory.Get<AppService<ObjectId>>(cancellation);
 
-            var cursor = await collection.FindAsync(x => x.Id == id, null, cancellation);
+            var cursor = await collection.FindAsync(
+                x => x.Id == id,
+                new FindOptions<AppService<ObjectId>, AppService<ObjectId>>
+                {
+                    Projection = Builders<AppService<ObjectId>>.Projection.Include(x => x.Name)
+                },
+                cancellation);
 
             var appService = await cursor.FirstOrDefaultAsync();
 
-            return appService.Name;
+            return appService?.Name;
         }
     }
 }

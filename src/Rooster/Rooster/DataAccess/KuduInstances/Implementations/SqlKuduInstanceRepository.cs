@@ -10,9 +10,11 @@ namespace Rooster.DataAccess.KuduInstances.Implementations
 {
     public class SqlKuduInstanceRepository : IKuduInstaceRepository<int>
     {
+        private static readonly string TableName = nameof(KuduInstance<int>);
+
         private static readonly Func<string> BuildFrom = delegate
         {
-            return $"FROM [dbo].[{nameof(KuduInstance<int>)}]";
+            return $"FROM [dbo].[{TableName}]";
         };
 
         private static readonly Func<string, string> BuildWhere = delegate (string propertyName)
@@ -34,7 +36,7 @@ namespace Rooster.DataAccess.KuduInstances.Implementations
         {
             var query =
                 new StringBuilder()
-                .AppendLine($"INSERT INTO {nameof(KuduInstance<int>)} ({nameof(KuduInstance<int>.Name)}) VALUES (@{nameof(KuduInstance<int>.Name)})")
+                .AppendLine($"INSERT INTO {TableName} ({nameof(KuduInstance<int>.Name)}) VALUES (@{nameof(KuduInstance<int>.Name)})")
                 .AppendLine("SELECT SCOPE_IDENTITY()")
                 .ToString();
 
@@ -52,9 +54,16 @@ namespace Rooster.DataAccess.KuduInstances.Implementations
         {
             _ = kuduInstance ?? throw new ArgumentNullException(nameof(kuduInstance));
 
+            if (string.IsNullOrWhiteSpace(kuduInstance.Name))
+                throw new ArgumentException($"{nameof(kuduInstance.Name)} is required.");
+
             await using var connection = _connectionFactory.CreateConnection();
 
-            var command = new CommandDefinition(BuildInsert(), new { kuduInstance.Name }, cancellationToken: cancellation);
+            var command = new CommandDefinition(
+                BuildInsert(),
+                new { Name = kuduInstance.Name.Trim().ToLowerInvariant() },
+                cancellationToken: cancellation);
+
             kuduInstance.Id = await connection.ExecuteAsync(command);
 
             return kuduInstance.Id;
@@ -67,7 +76,11 @@ namespace Rooster.DataAccess.KuduInstances.Implementations
 
             await using var connection = _connectionFactory.CreateConnection();
 
-            var command = new CommandDefinition(BuildGetIdByName(), new { Name = name }, cancellationToken: cancellation);
+            var command = new CommandDefinition(
+                BuildGetIdByName(),
+                new { Name = name.Trim().ToLowerInvariant() },
+                cancellationToken: cancellation);
+
             var id = await connection.QueryFirstOrDefaultAsync<int>(command);
 
             return id;

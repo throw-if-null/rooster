@@ -11,7 +11,7 @@ namespace Rooster.DataAccess.LogEntries.Entities
     {
         public T Id { get; set; }
 
-        public DateTimeOffset Created { get; set; }
+        public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 
         public T AppServiceId { get; set; }
 
@@ -29,24 +29,6 @@ namespace Rooster.DataAccess.LogEntries.Entities
 
         public LogEntry(T appServiceId, string hostName, string imageName, string containerName, string inboundPort, string outboundPort, DateTimeOffset date)
         {
-            if (string.IsNullOrWhiteSpace(hostName))
-                throw new ArgumentNullException(nameof(hostName));
-
-            if(string.IsNullOrWhiteSpace(imageName))
-                throw new ArgumentNullException(nameof(imageName));
-
-            if(string.IsNullOrWhiteSpace(containerName))
-                throw new ArgumentNullException(nameof(containerName));
-
-            if (!int.TryParse(inboundPort, out var _))
-                throw new ArgumentException($"{nameof(InboundPort)} {inboundPort} must have a valid value.");
-
-            if (!int.TryParse(outboundPort, out var _))
-                throw new ArgumentException($"{nameof(OutboundPort)} {outboundPort} must have a valid value.");
-
-            if (date == default || date == DateTimeOffset.MaxValue)
-                throw new ArgumentException($"{nameof(date)} {date} must have a valid value.");
-
             AppServiceId = appServiceId;
             HostName = hostName;
             ImageName = imageName;

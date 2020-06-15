@@ -15,16 +15,16 @@ namespace Rooster.DataAccess.Logbooks.Implementations
             return new InsertOneOptions();
         };
 
-        private readonly ILogbooCollectionFactory _collectionFactory;
+        private readonly ILogbookCollectionFactory _collectionFactory;
 
-        public MongoDbLogbookRepository(ILogbooCollectionFactory collectionFactory)
+        public MongoDbLogbookRepository(ILogbookCollectionFactory collectionFactory)
         {
             _collectionFactory = collectionFactory ?? throw new ArgumentNullException(nameof(collectionFactory));
         }
 
         public async Task Create(Logbook<ObjectId> logbook, CancellationToken cancellation)
         {
-            _ = logbook ?? throw new ArgumentNullException(nameof(logbook));
+            ValidateLogbook(logbook);
 
             var collection = await _collectionFactory.Get<Logbook<ObjectId>>(cancellation);
 
@@ -48,5 +48,24 @@ namespace Rooster.DataAccess.Logbooks.Implementations
 
             return kuduInstance;
         }
+
+        private static void ValidateLogbook(Logbook<ObjectId> logbook)
+        {
+            _ = logbook ?? throw new ArgumentNullException(nameof(logbook));
+
+            if (logbook.KuduInstanceId == ObjectId.Empty)
+                ThrowArgumentException(nameof(logbook.KuduInstanceId), logbook.KuduInstanceId.ToString());
+
+            if (logbook.LastUpdated == default || logbook.LastUpdated == DateTimeOffset.MaxValue)
+                ThrowArgumentException(nameof(logbook.LastUpdated), logbook.LastUpdated.ToString());
+
+            if (string.IsNullOrWhiteSpace(logbook.MachineName))
+                ThrowArgumentException(nameof(logbook.MachineName), logbook.MachineName == null ? "NULL" : "EMPTY");
+        }
+
+        private static readonly Action<string, string> ThrowArgumentException = delegate (string name, string value)
+        {
+            throw new ArgumentException($"{name} has invalid value: [{value}].");
+        };
     }
 }

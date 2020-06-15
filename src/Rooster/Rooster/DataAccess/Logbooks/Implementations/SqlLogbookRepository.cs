@@ -52,11 +52,18 @@ namespace Rooster.DataAccess.Logbooks.Implementations
 
         public async Task Create(Logbook<int> logbook, CancellationToken cancellation)
         {
+            ValidateLogbook(logbook);
+
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(
                 InsertLogbook(),
-                new { logbook.MachineName, logbook.LastUpdated, logbook.KuduInstanceId },
+                new
+                {
+                    MachineName = logbook.MachineName.Trim().ToLowerInvariant(),
+                    LastUpdated = logbook.LastUpdated,
+                    KuduInstanceId = logbook.KuduInstanceId
+                },
                 cancellationToken: cancellation);
 
             await connection.ExecuteAsync(command);
@@ -71,5 +78,24 @@ namespace Rooster.DataAccess.Logbooks.Implementations
 
             return logbook;
         }
+
+        private static void ValidateLogbook(Logbook<int> logbook)
+        {
+            _ = logbook ?? throw new ArgumentNullException(nameof(logbook));
+
+            if (logbook.KuduInstanceId == default)
+                ThrowArgumentException(nameof(logbook.KuduInstanceId), logbook.KuduInstanceId.ToString());
+
+            if (logbook.LastUpdated == default || logbook.LastUpdated == DateTimeOffset.MaxValue)
+                ThrowArgumentException(nameof(logbook.LastUpdated), logbook.LastUpdated.ToString());
+
+            if (string.IsNullOrWhiteSpace(logbook.MachineName))
+                ThrowArgumentException(nameof(logbook.MachineName), logbook.MachineName == null ? "NULL" : "EMPTY");
+        }
+
+        private static readonly Action<string, string> ThrowArgumentException = delegate (string name, string value)
+        {
+            throw new ArgumentException($"{name} has invalid value: [{value}].");
+        };
     }
 }

@@ -3,13 +3,13 @@ using Rooster.Connectors.MongoDb.Databases;
 
 namespace Rooster.Connectors.MongoDb.Colections
 {
-    public interface ILogbooCollectionFactory : ICollectionFactory
+    public interface ILogbookCollectionFactory : ICollectionFactory
     {
     }
 
     public class LogbookCollectionFactory :
         CollectionFactory<LogbookCollectionFactoryOptions>,
-        ILogbooCollectionFactory
+        ILogbookCollectionFactory
     {
         public LogbookCollectionFactory(IOptions<LogbookCollectionFactoryOptions> options, IDatabaseFactory databaseFactory)
             : base(options, databaseFactory)

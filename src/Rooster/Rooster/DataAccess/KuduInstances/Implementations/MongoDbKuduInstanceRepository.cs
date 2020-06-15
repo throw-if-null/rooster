@@ -26,6 +26,11 @@ namespace Rooster.DataAccess.KuduInstances.Implementations
         {
             _ = kuduInstance ?? throw new ArgumentNullException(nameof(kuduInstance));
 
+            if (string.IsNullOrWhiteSpace(kuduInstance.Name))
+                throw new ArgumentException($"{nameof(kuduInstance.Name)} is required.");
+
+            kuduInstance.Name = kuduInstance.Name.Trim().ToLowerInvariant();
+
             var collection = await _collectionFactory.Get<KuduInstance<ObjectId>>(cancellation);
 
             await collection.InsertOneAsync(kuduInstance, GetInsertOneOptions(), cancellation);
@@ -38,14 +43,20 @@ namespace Rooster.DataAccess.KuduInstances.Implementations
             if (string.IsNullOrWhiteSpace(name))
                 return default;
 
-            var trimmedName = name.Trim();
             var collection = await _collectionFactory.Get<KuduInstance<ObjectId>>(cancellation);
 
-            var cursor = await collection.FindAsync(x => x.Name == trimmedName, null, cancellation);
+            var trimmedName = name.Trim().ToLowerInvariant();
+            var cursor = await collection.FindAsync(
+                x => x.Name == trimmedName,
+                new FindOptions<KuduInstance<ObjectId>, KuduInstance<ObjectId>>
+                {
+                    Projection = Builders<KuduInstance<ObjectId>>.Projection.Include(x => x.Id)
+                },
+                cancellation);
 
             var kuduInstance = await cursor.FirstOrDefaultAsync();
 
-            return kuduInstance.Id;
+            return kuduInstance == null ? ObjectId.Empty : kuduInstance.Id;
         }
 
         public async Task<string> GetNameById(ObjectId id, CancellationToken cancellation)
@@ -55,11 +66,17 @@ namespace Rooster.DataAccess.KuduInstances.Implementations
 
             var collection = await _collectionFactory.Get<KuduInstance<ObjectId>>(cancellation);
 
-            var cursor = await collection.FindAsync(x => x.Id == id, null, cancellation);
+            var cursor = await collection.FindAsync(
+                x => x.Id == id,
+                new FindOptions<KuduInstance<ObjectId>, KuduInstance<ObjectId>>
+                {
+                    Projection = Builders<KuduInstance<ObjectId>>.Projection.Include(x => x.Name)
+                },
+                cancellation); ;
 
             var kuduInstance = await cursor.FirstOrDefaultAsync();
 
-            return kuduInstance.Name;
+            return kuduInstance?.Name;
         }
     }
 }

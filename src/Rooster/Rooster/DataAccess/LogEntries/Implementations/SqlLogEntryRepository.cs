@@ -10,6 +10,8 @@ namespace Rooster.DataAccess.LogEntries.Implementations
 {
     public class SqlLogEntryRepository : ILogEntryRepository<int>
     {
+        private static readonly string TableName = nameof(LogEntry<int>);
+
         private static readonly Func<string, string> BuildList = delegate (string prefix)
         {
             var builder = new StringBuilder();
@@ -38,7 +40,7 @@ namespace Rooster.DataAccess.LogEntries.Implementations
 
         private static readonly Func<string> InsertLogEntryQuery = delegate
         {
-            return $"INSERT INTO {nameof(LogEntry<int>)} ({BuildPropertiesList()}) VALUES ({BuildValuesList()})";
+            return $"INSERT INTO {TableName} ({BuildPropertiesList()}) VALUES ({BuildValuesList()})";
         };
 
         private static readonly Func<string> GetLastLogEntryDate =
@@ -59,19 +61,21 @@ namespace Rooster.DataAccess.LogEntries.Implementations
 
         public async Task Create(LogEntry<int> entry, CancellationToken cancellation)
         {
+            Validate(entry);
+
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(
                 InsertLogEntryQuery(),
                 new
                 {
-                    entry.AppServiceId,
-                    entry.ContainerName,
-                    entry.Date,
-                    entry.HostName,
-                    entry.ImageName,
-                    entry.InboundPort,
-                    entry.OutboundPort
+                    AppServiceId = entry.AppServiceId,
+                    ContainerName = entry.ContainerName.Trim().ToLowerInvariant(),
+                    Date = entry.Date,
+                    HostName = entry.HostName.Trim().ToLowerInvariant(),
+                    ImageName = entry.ImageName.Trim().ToLowerInvariant(),
+                    InboundPort = entry.InboundPort,
+                    OutboundPort = entry.OutboundPort
                 },
                 cancellationToken: cancellation);
 
@@ -94,5 +98,36 @@ namespace Rooster.DataAccess.LogEntries.Implementations
 
             return lastDate;
         }
+
+        private static void Validate(LogEntry<int> logEntry)
+        {
+            _ = logEntry ?? throw new ArgumentNullException(nameof(logEntry));
+
+            if (logEntry.AppServiceId == default)
+                ThrowArgumentException(nameof(logEntry.AppServiceId), logEntry.AppServiceId.ToString());
+
+            if (string.IsNullOrWhiteSpace(logEntry.ContainerName))
+                ThrowArgumentException(nameof(logEntry.ContainerName), logEntry.ContainerName == null ? "NULL" : "EMPTY");
+
+            if (logEntry.Date == default || logEntry.Date == DateTimeOffset.MaxValue)
+                ThrowArgumentException(nameof(logEntry.Date), logEntry.Date.ToString());
+
+            if (string.IsNullOrWhiteSpace(logEntry.HostName))
+                ThrowArgumentException(nameof(logEntry.HostName), logEntry.HostName == null ? "NULL" : "EMPTY");
+
+            if (string.IsNullOrWhiteSpace(logEntry.ImageName))
+                ThrowArgumentException(nameof(logEntry.ImageName), logEntry.ImageName == null ? "NULL" : "EMPTY");
+
+            if (logEntry.InboundPort == default)
+                ThrowArgumentException(nameof(logEntry.InboundPort), logEntry.InboundPort);
+
+            if (logEntry.OutboundPort == default)
+                ThrowArgumentException(nameof(logEntry.OutboundPort), logEntry.InboundPort);
+        }
+
+        private static readonly Action<string, string> ThrowArgumentException = delegate (string name, string value)
+        {
+            throw new ArgumentException($"{name} has invalid value: [{value}].");
+        };
     }
 }

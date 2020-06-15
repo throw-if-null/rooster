@@ -62,7 +62,7 @@ namespace Rooster.AppHosts
                     {
                         var kuduInstanceId = await _kuduInstanceRepository.GetIdByName(logbook.Href.Host, cancellationToken);
 
-                        if (kuduInstanceId == default)
+                        if (kuduInstanceId == ObjectId.Empty)
                         {
                             var newInstance = new KuduInstance<ObjectId> { Name = logbook.Href.Host };
                             kuduInstanceId = await _kuduInstanceRepository.Create(newInstance, cancellationToken);
@@ -92,7 +92,7 @@ namespace Rooster.AppHosts
 
             var appServiceId = await _appServiceRepository.GetIdByName(websiteName, cancellation);
 
-            if (appServiceId == default)
+            if (appServiceId == ObjectId.Empty)
                 appServiceId = await _appServiceRepository.Create(new AppService<ObjectId> { Name = websiteName }, cancellation);
 
             var logEntry = new LogEntry<ObjectId>(

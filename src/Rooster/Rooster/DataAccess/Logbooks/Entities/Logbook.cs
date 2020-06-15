@@ -14,7 +14,7 @@ namespace Rooster.DataAccess.Logbooks.Entities
         public T Id { get; set; }
 
         [JsonIgnore]
-        public DateTimeOffset Created { get; set; }
+        public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 
         [JsonProperty("machineName")]
         public string MachineName { get; set; }
@@ -22,13 +22,13 @@ namespace Rooster.DataAccess.Logbooks.Entities
         [JsonProperty("lastUpdated")]
         public DateTimeOffset LastUpdated { get; set; }
 
-        [JsonProperty("size")]
+        [JsonProperty("size")] [BsonIgnore]
         public int Size { get; set; }
 
-        [JsonProperty("href")]
+        [JsonProperty("href")] [BsonIgnore]
         public Uri Href { get; set; }
 
-        [JsonProperty("path")]
+        [JsonProperty("path")] [BsonIgnore]
         public string Path { get; set; }
 
         public T KuduInstanceId { get; set; }

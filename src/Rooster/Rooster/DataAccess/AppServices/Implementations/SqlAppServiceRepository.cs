@@ -10,9 +10,11 @@ namespace Rooster.DataAccess.AppServices.Implementations
 {
     public class SqlAppServiceRepository : IAppServiceRepository<int>
     {
+        private static readonly string TableName = nameof(AppService<int>);
+
         private static readonly Func<string> BuildFrom = delegate
         {
-            return $"FROM [dbo].[{nameof(AppService<int>)}]";
+            return $"FROM [dbo].[{TableName}]";
         };
 
         private static readonly Func<string, string> BuildWhere = delegate (string propertyName)
@@ -34,7 +36,7 @@ namespace Rooster.DataAccess.AppServices.Implementations
         {
             var query =
                 new StringBuilder()
-                .AppendLine($"INSERT INTO {nameof(AppService<int>)} ({nameof(AppService<int>.Name)}) VALUES (@{nameof(AppService<int>.Name)})")
+                .AppendLine($"INSERT INTO {TableName} ({nameof(AppService<int>.Name)}) VALUES (@{nameof(AppService<int>.Name)})")
                 .AppendLine("SELECT SCOPE_IDENTITY()")
                 .ToString();
 
@@ -52,13 +54,16 @@ namespace Rooster.DataAccess.AppServices.Implementations
         {
             _ = appService ?? throw new ArgumentNullException(nameof(appService));
 
+            if (string.IsNullOrWhiteSpace(appService.Name))
+                throw new ArgumentException($"{nameof(appService.Name)} is required.");
+
             await using var connection = _connectionFactory.CreateConnection();
 
             var id =
                 await
                     connection.ExecuteAsync(
                         BuildInsert(),
-                        new { appService.Name });
+                        new { Name = appService.Name.Trim().ToLowerInvariant() });
 
             return id;
         }
@@ -70,7 +75,11 @@ namespace Rooster.DataAccess.AppServices.Implementations
 
             await using var connection = _connectionFactory.CreateConnection();
 
-            var command = new CommandDefinition(BuildGetIdByName(), new { Name = name }, cancellationToken: cancellation);
+            var command = new CommandDefinition(
+                BuildGetIdByName(),
+                new { Name = name.Trim().ToLowerInvariant() },
+                cancellationToken: cancellation);
+
             var id = await connection.QueryFirstOrDefaultAsync<int>(command);
 
             return id;
