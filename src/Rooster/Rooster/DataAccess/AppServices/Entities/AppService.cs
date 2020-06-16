@@ -2,14 +2,11 @@
 
 namespace Rooster.DataAccess.AppServices.Entities
 {
-    public interface IAppService
-    {
-    }
-
-    public class AppService<T> : IAppService
+    public class AppService<T>
     {
         [BsonId]
         public T Id { get; set; }
+
         public string Name { get; set; }
     }
 }

@@ -3,11 +3,7 @@ using System.Text;
 
 namespace Rooster.DataAccess.LogEntries.Entities
 {
-    public interface ILogEntry
-    {
-    }
-
-    public class LogEntry<T> : ILogEntry
+    public class LogEntry<T>
     {
         public T Id { get; set; }
 

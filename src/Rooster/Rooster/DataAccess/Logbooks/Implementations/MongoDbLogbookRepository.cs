@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.DataAccess.Logbooks.Implementations
 {
-    public class MongoDbLogbookRepository : ILogbookRepository<ObjectId>
+    public class MongoDbLogbookRepository : LogbookRepository<ObjectId>
     {
         private static readonly Func<InsertOneOptions> GetInsertOneOptions = delegate
         {
@@ -22,16 +22,19 @@ namespace Rooster.DataAccess.Logbooks.Implementations
             _collectionFactory = collectionFactory ?? throw new ArgumentNullException(nameof(collectionFactory));
         }
 
-        public async Task Create(Logbook<ObjectId> logbook, CancellationToken cancellation)
+        protected override bool IsDefaultValue(ObjectId value)
         {
-            ValidateLogbook(logbook);
+            return value == ObjectId.Empty;
+        }
 
+        protected override async Task CreateImplementation(Logbook<ObjectId> logbook, CancellationToken cancellation)
+        {
             var collection = await _collectionFactory.Get<Logbook<ObjectId>>(cancellation);
 
             await collection.InsertOneAsync(logbook, GetInsertOneOptions(), cancellation);
         }
 
-        public async Task<Logbook<ObjectId>> GetLast(CancellationToken cancellation)
+        public override async Task<Logbook<ObjectId>> GetLast(CancellationToken cancellation)
         {
             var collection = await _collectionFactory.Get<Logbook<ObjectId>>(cancellation);
 
@@ -48,24 +51,5 @@ namespace Rooster.DataAccess.Logbooks.Implementations
 
             return kuduInstance;
         }
-
-        private static void ValidateLogbook(Logbook<ObjectId> logbook)
-        {
-            _ = logbook ?? throw new ArgumentNullException(nameof(logbook));
-
-            if (logbook.KuduInstanceId == ObjectId.Empty)
-                ThrowArgumentException(nameof(logbook.KuduInstanceId), logbook.KuduInstanceId.ToString());
-
-            if (logbook.LastUpdated == default || logbook.LastUpdated == DateTimeOffset.MaxValue)
-                ThrowArgumentException(nameof(logbook.LastUpdated), logbook.LastUpdated.ToString());
-
-            if (string.IsNullOrWhiteSpace(logbook.MachineName))
-                ThrowArgumentException(nameof(logbook.MachineName), logbook.MachineName == null ? "NULL" : "EMPTY");
-        }
-
-        private static readonly Action<string, string> ThrowArgumentException = delegate (string name, string value)
-        {
-            throw new ArgumentException($"{name} has invalid value: [{value}].");
-        };
     }
 }

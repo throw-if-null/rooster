@@ -110,7 +110,7 @@ namespace Rooster
                 .SetHandlerLifetime(TimeSpan.FromSeconds(5));
 
             services.AddTransient<IAppServiceRepository<ObjectId>, MongoDbAppServiceRepository>();
-            services.AddTransient<IKuduInstaceRepository<ObjectId>, MongoDbKuduInstanceRepository>();
+            services.AddTransient<IKuduInstanceRepository<ObjectId>, MongoDbKuduInstanceRepository>();
             services.AddTransient<ILogbookRepository<ObjectId>, MongoDbLogbookRepository>();
             services.AddTransient<ILogEntryRepository<ObjectId>, MongoDbLogEntryRepository>();
 
@@ -128,7 +128,7 @@ namespace Rooster
             services.AddTransient<ILogEntryRepository<int>, SqlLogEntryRepository>();
             services.AddTransient<ILogbookRepository<int>, SqlLogbookRepository>();
             services.AddTransient<IAppServiceRepository<int>, SqlAppServiceRepository>();
-            services.AddTransient<IKuduInstaceRepository<int>, SqlKuduInstanceRepository>();
+            services.AddTransient<IKuduInstanceRepository<int>, SqlKuduInstanceRepository>();
 
             services
                 .AddHttpClient<IKuduApiAdapter<int>, KuduApiAdapter<int>>(x => x.Timeout = TimeSpan.FromSeconds(10))

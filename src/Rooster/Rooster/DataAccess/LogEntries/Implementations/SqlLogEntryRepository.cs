@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.DataAccess.LogEntries.Implementations
 {
-    public class SqlLogEntryRepository : ILogEntryRepository<int>
+    public class SqlLogEntryRepository : LogEntryRepository<int>
     {
         private static readonly string TableName = nameof(LogEntry<int>);
 
@@ -59,34 +59,34 @@ namespace Rooster.DataAccess.LogEntries.Implementations
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        public async Task Create(LogEntry<int> entry, CancellationToken cancellation)
+        protected override bool IsDefaultValue(int value)
         {
-            Validate(entry);
+            return value == default;
+        }
 
+        protected override async Task CreateImplementation(LogEntry<int> entry, CancellationToken cancellation)
+        {
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(
                 InsertLogEntryQuery(),
                 new
                 {
-                    AppServiceId = entry.AppServiceId,
-                    ContainerName = entry.ContainerName.Trim().ToLowerInvariant(),
-                    Date = entry.Date,
-                    HostName = entry.HostName.Trim().ToLowerInvariant(),
-                    ImageName = entry.ImageName.Trim().ToLowerInvariant(),
-                    InboundPort = entry.InboundPort,
-                    OutboundPort = entry.OutboundPort
+                    entry.AppServiceId,
+                    entry.ContainerName,
+                    entry.Date,
+                    entry.HostName,
+                    entry.ImageName,
+                    entry.InboundPort,
+                    entry.OutboundPort
                 },
                 cancellationToken: cancellation);
 
             await connection.ExecuteAsync(command);
         }
 
-        public async Task<DateTimeOffset> GetLatestForAppService(int appServiceId, CancellationToken cancellation)
+        protected override async Task<DateTimeOffset> GetLatestForAppServiceImplementation(int appServiceId, CancellationToken cancellation)
         {
-            if (appServiceId == default)
-                return default;
-
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(
@@ -98,36 +98,5 @@ namespace Rooster.DataAccess.LogEntries.Implementations
 
             return lastDate;
         }
-
-        private static void Validate(LogEntry<int> logEntry)
-        {
-            _ = logEntry ?? throw new ArgumentNullException(nameof(logEntry));
-
-            if (logEntry.AppServiceId == default)
-                ThrowArgumentException(nameof(logEntry.AppServiceId), logEntry.AppServiceId.ToString());
-
-            if (string.IsNullOrWhiteSpace(logEntry.ContainerName))
-                ThrowArgumentException(nameof(logEntry.ContainerName), logEntry.ContainerName == null ? "NULL" : "EMPTY");
-
-            if (logEntry.Date == default || logEntry.Date == DateTimeOffset.MaxValue)
-                ThrowArgumentException(nameof(logEntry.Date), logEntry.Date.ToString());
-
-            if (string.IsNullOrWhiteSpace(logEntry.HostName))
-                ThrowArgumentException(nameof(logEntry.HostName), logEntry.HostName == null ? "NULL" : "EMPTY");
-
-            if (string.IsNullOrWhiteSpace(logEntry.ImageName))
-                ThrowArgumentException(nameof(logEntry.ImageName), logEntry.ImageName == null ? "NULL" : "EMPTY");
-
-            if (logEntry.InboundPort == default)
-                ThrowArgumentException(nameof(logEntry.InboundPort), logEntry.InboundPort);
-
-            if (logEntry.OutboundPort == default)
-                ThrowArgumentException(nameof(logEntry.OutboundPort), logEntry.InboundPort);
-        }
-
-        private static readonly Action<string, string> ThrowArgumentException = delegate (string name, string value)
-        {
-            throw new ArgumentException($"{name} has invalid value: [{value}].");
-        };
     }
 }

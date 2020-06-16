@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.DataAccess.AppServices.Implementations
 {
-    public class SqlAppServiceRepository : IAppServiceRepository<int>
+    public class SqlAppServiceRepository : AppServiceRepository<int>
     {
         private static readonly string TableName = nameof(AppService<int>);
 
@@ -50,34 +50,28 @@ namespace Rooster.DataAccess.AppServices.Implementations
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        public async Task<int> Create(AppService<int> appService, CancellationToken cancellation)
+        protected override bool IsDefaultValue(int value)
         {
-            _ = appService ?? throw new ArgumentNullException(nameof(appService));
+            return value == default;
+        }
 
-            if (string.IsNullOrWhiteSpace(appService.Name))
-                throw new ArgumentException($"{nameof(appService.Name)} is required.");
-
+        protected override async Task<int> CreateImplementation(AppService<int> appService, CancellationToken cancellation)
+        {
             await using var connection = _connectionFactory.CreateConnection();
 
-            var id =
-                await
-                    connection.ExecuteAsync(
-                        BuildInsert(),
-                        new { Name = appService.Name.Trim().ToLowerInvariant() });
+            var command = new CommandDefinition(BuildInsert(), new { appService.Name }, cancellationToken: cancellation);
+            var id = await connection.ExecuteAsync(command);
 
             return id;
         }
 
-        public async Task<int> GetIdByName(string name, CancellationToken cancellation)
+        protected override async Task<int> GetIdByNameImplementation(string name, CancellationToken cancellation)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                return default;
-
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(
                 BuildGetIdByName(),
-                new { Name = name.Trim().ToLowerInvariant() },
+                new { Name = name },
                 cancellationToken: cancellation);
 
             var id = await connection.QueryFirstOrDefaultAsync<int>(command);
@@ -85,11 +79,8 @@ namespace Rooster.DataAccess.AppServices.Implementations
             return id;
         }
 
-        public async Task<string> GetNameById(int id, CancellationToken cancellation)
+        protected override async Task<string> GetNameByIdImplementation(int id, CancellationToken cancellation)
         {
-            if (id == default)
-                return default;
-
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(BuildGetNameById(), new { Id = id }, cancellationToken: cancellation);

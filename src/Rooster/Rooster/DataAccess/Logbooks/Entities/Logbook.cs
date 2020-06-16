@@ -4,11 +4,7 @@ using System;
 
 namespace Rooster.DataAccess.Logbooks.Entities
 {
-    public interface ILogbook
-    {
-    }
-
-    public class Logbook<T> : ILogbook
+    public class Logbook<T>
     {
         [JsonIgnore] [BsonId]
         public T Id { get; set; }

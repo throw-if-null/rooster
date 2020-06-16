@@ -25,7 +25,7 @@ namespace Rooster.AppHosts
         private readonly ILogbookRepository<ObjectId> _logbookRepository;
         private readonly ILogEntryRepository<ObjectId> _logEntryRepository;
         private readonly IAppServiceRepository<ObjectId> _appServiceRepository;
-        private readonly IKuduInstaceRepository<ObjectId> _kuduInstanceRepository;
+        private readonly IKuduInstanceRepository<ObjectId> _kuduInstanceRepository;
         private readonly ILogger _logger;
 
         public MongoDbAppHost(
@@ -35,7 +35,7 @@ namespace Rooster.AppHosts
             ILogbookRepository<ObjectId> logbookRepository,
             ILogEntryRepository<ObjectId> logEntryRepository,
             IAppServiceRepository<ObjectId> appServiceRepository,
-            IKuduInstaceRepository<ObjectId> kuduInstanceRepository,
+            IKuduInstanceRepository<ObjectId> kuduInstanceRepository,
             ILogger<MongoDbAppHost> logger)
         {
             _options = options.CurrentValue ?? throw new ArgumentNullException(nameof(options));

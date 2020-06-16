@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.DataAccess.Logbooks.Implementations
 {
-    public class SqlLogbookRepository : ILogbookRepository<int>
+    public class SqlLogbookRepository : LogbookRepository<int>
     {
         private static readonly Func<string, string> BuildList = delegate (string prefix)
         {
@@ -50,26 +50,24 @@ namespace Rooster.DataAccess.Logbooks.Implementations
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        public async Task Create(Logbook<int> logbook, CancellationToken cancellation)
+        protected override bool IsDefaultValue(int value)
         {
-            ValidateLogbook(logbook);
+            return value == default;
+        }
 
+        protected override async Task CreateImplementation(Logbook<int> logbook, CancellationToken cancellation)
+        {
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(
                 InsertLogbook(),
-                new
-                {
-                    MachineName = logbook.MachineName.Trim().ToLowerInvariant(),
-                    LastUpdated = logbook.LastUpdated,
-                    KuduInstanceId = logbook.KuduInstanceId
-                },
+                new { logbook.MachineName, logbook.LastUpdated, logbook.KuduInstanceId },
                 cancellationToken: cancellation);
 
             await connection.ExecuteAsync(command);
         }
 
-        public async Task<Logbook<int>> GetLast(CancellationToken cancellation)
+        public override async Task<Logbook<int>> GetLast(CancellationToken cancellation)
         {
             await using var connection = _connectionFactory.CreateConnection();
 
@@ -78,24 +76,5 @@ namespace Rooster.DataAccess.Logbooks.Implementations
 
             return logbook;
         }
-
-        private static void ValidateLogbook(Logbook<int> logbook)
-        {
-            _ = logbook ?? throw new ArgumentNullException(nameof(logbook));
-
-            if (logbook.KuduInstanceId == default)
-                ThrowArgumentException(nameof(logbook.KuduInstanceId), logbook.KuduInstanceId.ToString());
-
-            if (logbook.LastUpdated == default || logbook.LastUpdated == DateTimeOffset.MaxValue)
-                ThrowArgumentException(nameof(logbook.LastUpdated), logbook.LastUpdated.ToString());
-
-            if (string.IsNullOrWhiteSpace(logbook.MachineName))
-                ThrowArgumentException(nameof(logbook.MachineName), logbook.MachineName == null ? "NULL" : "EMPTY");
-        }
-
-        private static readonly Action<string, string> ThrowArgumentException = delegate (string name, string value)
-        {
-            throw new ArgumentException($"{name} has invalid value: [{value}].");
-        };
     }
 }

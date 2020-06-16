@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.DataAccess.KuduInstances.Implementations
 {
-    public class SqlKuduInstanceRepository : IKuduInstaceRepository<int>
+    public class SqlKuduInstanceRepository : KuduInstanceRepository<int>
     {
         private static readonly string TableName = nameof(KuduInstance<int>);
 
@@ -50,18 +50,18 @@ namespace Rooster.DataAccess.KuduInstances.Implementations
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        public async Task<int> Create(KuduInstance<int> kuduInstance, CancellationToken cancellation)
+        protected override bool IsDefaultValue(int value)
         {
-            _ = kuduInstance ?? throw new ArgumentNullException(nameof(kuduInstance));
+            return value == default;
+        }
 
-            if (string.IsNullOrWhiteSpace(kuduInstance.Name))
-                throw new ArgumentException($"{nameof(kuduInstance.Name)} is required.");
-
+        protected override async Task<int> CreateImplementation(KuduInstance<int> kuduInstance, CancellationToken cancellation)
+        {
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(
                 BuildInsert(),
-                new { Name = kuduInstance.Name.Trim().ToLowerInvariant() },
+                new { kuduInstance.Name },
                 cancellationToken: cancellation);
 
             kuduInstance.Id = await connection.ExecuteAsync(command);
@@ -69,16 +69,13 @@ namespace Rooster.DataAccess.KuduInstances.Implementations
             return kuduInstance.Id;
         }
 
-        public async Task<int> GetIdByName(string name, CancellationToken cancellation)
+        protected override async Task<int> GetIdByNameImplementation(string name, CancellationToken cancellation)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                return default;
-
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(
                 BuildGetIdByName(),
-                new { Name = name.Trim().ToLowerInvariant() },
+                new { Name = name },
                 cancellationToken: cancellation);
 
             var id = await connection.QueryFirstOrDefaultAsync<int>(command);
@@ -86,11 +83,8 @@ namespace Rooster.DataAccess.KuduInstances.Implementations
             return id;
         }
 
-        public async Task<string> GetNameById(int id, CancellationToken cancellation)
+        protected override async Task<string> GetNameByIdImplementation(int id, CancellationToken cancellation)
         {
-            if (id == default)
-                return default;
-
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(BuildGetNameById(), new { Id = id }, cancellationToken: cancellation);

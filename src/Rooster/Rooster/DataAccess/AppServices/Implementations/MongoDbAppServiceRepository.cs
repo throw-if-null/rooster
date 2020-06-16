@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.DataAccess.AppServices.Implementations
 {
-    public class MongoDbAppServiceRepository : IAppServiceRepository<ObjectId>
+    public class MongoDbAppServiceRepository : AppServiceRepository<ObjectId>
     {
         private static readonly Func<InsertOneOptions> GetInsertOneOptions = delegate
         {
@@ -22,15 +22,13 @@ namespace Rooster.DataAccess.AppServices.Implementations
             _collectionFactory = collectionFactory ?? throw new ArgumentNullException(nameof(collectionFactory));
         }
 
-        public async Task<ObjectId> Create(AppService<ObjectId> appService, CancellationToken cancellation)
+        protected override bool IsDefaultValue(ObjectId value)
         {
-            _ = appService ?? throw new ArgumentNullException(nameof(appService));
+            return value == ObjectId.Empty;
+        }
 
-            if (string.IsNullOrWhiteSpace(appService.Name))
-                throw new ArgumentException($"{nameof(appService.Name)} is required.");
-
-            appService.Name = appService.Name.Trim().ToLowerInvariant();
-
+        protected override async Task<ObjectId> CreateImplementation(AppService<ObjectId> appService, CancellationToken cancellation)
+        {
             var collection = await _collectionFactory.Get<AppService<ObjectId>>(cancellation);
 
             await collection.InsertOneAsync(appService, GetInsertOneOptions(), cancellation);
@@ -38,16 +36,12 @@ namespace Rooster.DataAccess.AppServices.Implementations
             return appService.Id;
         }
 
-        public async Task<ObjectId> GetIdByName(string name, CancellationToken cancellation)
+        protected override async Task<ObjectId> GetIdByNameImplementation(string name, CancellationToken cancellation)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                return default;
-
             var collection = await _collectionFactory.Get<AppService<ObjectId>>(cancellation);
 
-            var trimmedName = name.Trim();
             var cursor = await collection.FindAsync(
-                x => x.Name == trimmedName,
+                x => x.Name == name,
                 new FindOptions<AppService<ObjectId>, AppService<ObjectId>>
                 {
                     Projection = Builders<AppService<ObjectId>>.Projection.Include(x => x.Id)
@@ -59,11 +53,8 @@ namespace Rooster.DataAccess.AppServices.Implementations
             return appService == null ? ObjectId.Empty : appService.Id;
         }
 
-        public async Task<string> GetNameById(ObjectId id, CancellationToken cancellation)
+        protected override async Task<string> GetNameByIdImplementation(ObjectId id, CancellationToken cancellation)
         {
-            if (id == ObjectId.Empty)
-                return default;
-
             var collection = await _collectionFactory.Get<AppService<ObjectId>>(cancellation);
 
             var cursor = await collection.FindAsync(

@@ -24,7 +24,7 @@ namespace Rooster.AppHosts
         private readonly ILogbookRepository<int> _logbookRepository;
         private readonly ILogEntryRepository<int> _logEntryRepository;
         private readonly IAppServiceRepository<int> _appServiceRepository;
-        private readonly IKuduInstaceRepository<int> _kuduInstanceRepository;
+        private readonly IKuduInstanceRepository<int> _kuduInstanceRepository;
         private readonly ILogger _logger;
 
         public SqlAppHost(
@@ -34,7 +34,7 @@ namespace Rooster.AppHosts
             ILogbookRepository<int> logbookRepository,
             ILogEntryRepository<int> logEntryRepository,
             IAppServiceRepository<int> appServiceRepository,
-            IKuduInstaceRepository<int> kuduInstanceRepository,
+            IKuduInstanceRepository<int> kuduInstanceRepository,
             ILogger<SqlAppHost> logger)
         {
             _options = options.CurrentValue ?? throw new ArgumentNullException(nameof(options));

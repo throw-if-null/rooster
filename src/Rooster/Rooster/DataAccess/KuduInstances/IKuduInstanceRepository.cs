@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.DataAccess.KuduInstances
 {
-    public interface IKuduInstaceRepository<T>
+    public interface IKuduInstanceRepository<T>
     {
         Task<T> Create(KuduInstance<T> kuduInstance, CancellationToken cancellation);
 
