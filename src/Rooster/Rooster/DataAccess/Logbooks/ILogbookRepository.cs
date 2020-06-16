@@ -1,4 +1,5 @@
 ﻿using Rooster.DataAccess.Logbooks.Entities;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,6 +9,6 @@ namespace Rooster.DataAccess.Logbooks
     {
         Task Create(Logbook<T> logbook, CancellationToken cancellation);
 
-        Task<Logbook<T>> GetLast(CancellationToken cancellation);
+        Task<DateTimeOffset> GetLastUpdateDateForKuduInstance(T kuduInstanceId, CancellationToken cancellation);
     }
 }

@@ -9,6 +9,7 @@ namespace Rooster.DataAccess.Logbooks.Implementations
     {
         protected abstract bool IsDefaultValue(T value);
         protected abstract Task CreateImplementation(Logbook<T> logbook, CancellationToken cancellation);
+        protected abstract Task<DateTimeOffset> GetLatestDateForKuduInstanceImplementation(T kuduInstanceId, CancellationToken cancellation);
 
         public Task Create(Logbook<T> logbook, CancellationToken cancellation)
         {
@@ -16,8 +17,6 @@ namespace Rooster.DataAccess.Logbooks.Implementations
 
             return CreateImplementation(logbook, cancellation);
         }
-
-        public abstract Task<Logbook<T>> GetLast(CancellationToken cancellation);
 
         private void ValidateLogbook(Logbook<T> logbook)
         {
@@ -33,6 +32,14 @@ namespace Rooster.DataAccess.Logbooks.Implementations
                 ThrowArgumentException(nameof(logbook.MachineName), logbook.MachineName == null ? "NULL" : "EMPTY");
 
             logbook.MachineName = logbook.MachineName.Trim().ToLowerInvariant();
+        }
+
+        public Task<DateTimeOffset> GetLastUpdateDateForKuduInstance(T kuduInstanceId, CancellationToken cancellation)
+        {
+            if (IsDefaultValue(kuduInstanceId))
+                return default;
+
+            return GetLatestDateForKuduInstanceImplementation(kuduInstanceId, cancellation);
         }
 
         private static readonly Action<string, string> ThrowArgumentException = delegate (string name, string value)

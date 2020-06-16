@@ -10,6 +10,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{3F82D6
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rooster.SqlServer", "Rooster.SqlServer\Rooster.SqlServer.csproj", "{39FCB127-420B-4821-A190-73A774B1D62B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rooster.App", "Rooster.App\Rooster.App.csproj", "{C6E4EF0E-1500-4417-B9CA-017C31DE1284}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rooster.MongoDb", "Rooster.MongoDb\Rooster.MongoDb.csproj", "{53F7DE7A-8652-4DCB-85BF-478426F061CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +26,18 @@ Global
 		{FBDEC9C5-AF7A-4D2B-880D-58A10A735A2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBDEC9C5-AF7A-4D2B-880D-58A10A735A2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBDEC9C5-AF7A-4D2B-880D-58A10A735A2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39FCB127-420B-4821-A190-73A774B1D62B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39FCB127-420B-4821-A190-73A774B1D62B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39FCB127-420B-4821-A190-73A774B1D62B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39FCB127-420B-4821-A190-73A774B1D62B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6E4EF0E-1500-4417-B9CA-017C31DE1284}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6E4EF0E-1500-4417-B9CA-017C31DE1284}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6E4EF0E-1500-4417-B9CA-017C31DE1284}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6E4EF0E-1500-4417-B9CA-017C31DE1284}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53F7DE7A-8652-4DCB-85BF-478426F061CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53F7DE7A-8652-4DCB-85BF-478426F061CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53F7DE7A-8652-4DCB-85BF-478426F061CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53F7DE7A-8652-4DCB-85BF-478426F061CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
