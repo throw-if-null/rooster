@@ -3,11 +3,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.KuduInstances.Implementations
+namespace Rooster.DataAccess.KuduInstances
 {
     public abstract class KuduInstanceRepository<T> : IKuduInstanceRepository<T>
     {
-        protected abstract bool IsDefaultValue(T value);
         protected abstract Task<T> CreateImplementation(KuduInstance<T> kuduInstance, CancellationToken cancellation);
         protected abstract Task<T> GetIdByNameImplementation(string name, CancellationToken cancellation);
         protected abstract Task<string> GetNameByIdImplementation(T id, CancellationToken cancellation);
@@ -21,6 +20,8 @@ namespace Rooster.DataAccess.KuduInstances.Implementations
 
             return CreateImplementation(kuduInstance, cancellation);
         }
+
+        public abstract bool IsDefaultValue(T value);
 
         public Task<T> GetIdByName(string name, CancellationToken cancellation)
         {

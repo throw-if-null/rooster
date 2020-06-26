@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using Rooster.DataAccess.AppServices;
 using Rooster.DataAccess.AppServices.Entities;
-using Rooster.DataAccess.AppServices.Implementations;
 using Rooster.MongoDb.Connectors.Colections;
 using System;
 using System.Threading;
@@ -21,11 +21,6 @@ namespace Rooster.MongoDb.DataAccess.AppServices
         public MongoDbAppServiceRepository(IAppServiceCollectionFactory collectionFactory)
         {
             _collectionFactory = collectionFactory ?? throw new ArgumentNullException(nameof(collectionFactory));
-        }
-
-        protected override bool IsDefaultValue(ObjectId value)
-        {
-            return value == ObjectId.Empty;
         }
 
         protected override async Task<ObjectId> CreateImplementation(AppService<ObjectId> appService, CancellationToken cancellation)
@@ -69,6 +64,11 @@ namespace Rooster.MongoDb.DataAccess.AppServices
             var appService = await cursor.FirstOrDefaultAsync();
 
             return appService?.Name;
+        }
+
+        public override bool IsDefaultValue(ObjectId value)
+        {
+            return value == ObjectId.Empty;
         }
     }
 }

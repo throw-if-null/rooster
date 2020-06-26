@@ -4,16 +4,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using Rooster.Adapters.Kudu;
-using Rooster.AppHosts;
 using Rooster.CrossCutting;
 using Rooster.DataAccess.AppServices;
 using Rooster.DataAccess.KuduInstances;
-using Rooster.DataAccess.KuduInstances.Implementations;
 using Rooster.DataAccess.Logbooks;
-using Rooster.DataAccess.Logbooks.Implementations;
 using Rooster.DataAccess.LogEntries;
-using Rooster.DataAccess.LogEntries.Implementations;
-using Rooster.MongoDb.AppHosts;
+using Rooster.Hosting;
 using Rooster.MongoDb.Connectors.Clients;
 using Rooster.MongoDb.Connectors.Colections;
 using Rooster.MongoDb.Connectors.Databases;
@@ -21,7 +17,6 @@ using Rooster.MongoDb.DataAccess.AppServices;
 using Rooster.MongoDb.DataAccess.KuduInstances;
 using Rooster.MongoDb.DataAccess.Logbooks;
 using Rooster.MongoDb.DataAccess.LogEntries;
-using Rooster.SqlServer.AppHosts;
 using Rooster.SqlServer.Connectors;
 using Rooster.SqlServer.DataAccess.AppServices;
 using System;
@@ -120,7 +115,7 @@ namespace Rooster.App
             services.AddTransient<ILogbookRepository<ObjectId>, MongoDbLogbookRepository>();
             services.AddTransient<ILogEntryRepository<ObjectId>, MongoDbLogEntryRepository>();
 
-            services.AddHostedService<MongoDbAppHost>();
+            services.AddHostedService<AppHost<ObjectId>>();
 
             return services;
         };
@@ -140,7 +135,7 @@ namespace Rooster.App
                 .AddHttpClient<IKuduApiAdapter<int>, KuduApiAdapter<int>>(x => x.Timeout = TimeSpan.FromSeconds(10))
                 .SetHandlerLifetime(Timeout.InfiniteTimeSpan);
 
-            services.AddHostedService<SqlAppHost>();
+            services.AddHostedService<AppHost<int>>();
 
             return services;
         };

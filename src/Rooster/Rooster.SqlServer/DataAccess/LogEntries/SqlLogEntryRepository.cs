@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.LogEntries.Implementations
+namespace Rooster.DataAccess.LogEntries
 {
     public class SqlLogEntryRepository : LogEntryRepository<int>
     {

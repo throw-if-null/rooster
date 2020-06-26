@@ -3,11 +3,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.AppServices.Implementations
+namespace Rooster.DataAccess.AppServices
 {
     public abstract class AppServiceRepository<T> : IAppServiceRepository<T>
     {
-        protected abstract bool IsDefaultValue(T value);
         protected abstract Task<T> CreateImplementation(AppService<T> appService, CancellationToken cancellation);
         protected abstract Task<T> GetIdByNameImplementation(string name, CancellationToken cancellation);
         protected abstract Task<string> GetNameByIdImplementation(T id, CancellationToken cancellation);
@@ -25,6 +24,8 @@ namespace Rooster.DataAccess.AppServices.Implementations
 
             return id;
         }
+
+        public abstract bool IsDefaultValue(T value);
 
         public async Task<T> GetIdByName(string name, CancellationToken cancellation)
         {

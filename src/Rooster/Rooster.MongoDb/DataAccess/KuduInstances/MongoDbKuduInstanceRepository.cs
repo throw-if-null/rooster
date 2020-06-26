@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using Rooster.DataAccess.KuduInstances;
 using Rooster.DataAccess.KuduInstances.Entities;
-using Rooster.DataAccess.KuduInstances.Implementations;
 using Rooster.MongoDb.Connectors.Colections;
 using System;
 using System.Threading;
@@ -21,11 +21,6 @@ namespace Rooster.MongoDb.DataAccess.KuduInstances
         public MongoDbKuduInstanceRepository(IKuduInstanceCollectionFactory collectionFactory)
         {
             _collectionFactory = collectionFactory ?? throw new ArgumentNullException(nameof(collectionFactory));
-        }
-
-        protected override bool IsDefaultValue(ObjectId value)
-        {
-            return value == ObjectId.Empty;
         }
 
         protected override async Task<ObjectId> CreateImplementation(KuduInstance<ObjectId> kuduInstance, CancellationToken cancellation)
@@ -72,6 +67,11 @@ namespace Rooster.MongoDb.DataAccess.KuduInstances
             var kuduInstance = await cursor.FirstOrDefaultAsync();
 
             return kuduInstance?.Name;
+        }
+
+        public override bool IsDefaultValue(ObjectId value)
+        {
+            return value == ObjectId.Empty;
         }
     }
 }

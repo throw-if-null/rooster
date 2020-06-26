@@ -1,6 +1,6 @@
 ﻿using Dapper;
+using Rooster.DataAccess.AppServices;
 using Rooster.DataAccess.AppServices.Entities;
-using Rooster.DataAccess.AppServices.Implementations;
 using Rooster.SqlServer.Connectors;
 using System;
 using System.Text;
@@ -51,11 +51,6 @@ namespace Rooster.SqlServer.DataAccess.AppServices
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        protected override bool IsDefaultValue(int value)
-        {
-            return value == default;
-        }
-
         protected override async Task<int> CreateImplementation(AppService<int> appService, CancellationToken cancellation)
         {
             await using var connection = _connectionFactory.CreateConnection();
@@ -88,6 +83,11 @@ namespace Rooster.SqlServer.DataAccess.AppServices
             var name = await connection.QueryFirstOrDefaultAsync<string>(command);
 
             return name;
+        }
+
+        public override bool IsDefaultValue(int value)
+        {
+            return value == default;
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using Rooster.DataAccess.LogEntries;
 using Rooster.DataAccess.LogEntries.Entities;
-using Rooster.DataAccess.LogEntries.Implementations;
 using Rooster.MongoDb.Connectors.Colections;
 using System;
 using System.Threading;

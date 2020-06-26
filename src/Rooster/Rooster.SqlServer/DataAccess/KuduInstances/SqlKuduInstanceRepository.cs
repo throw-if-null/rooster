@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.KuduInstances.Implementations
+namespace Rooster.DataAccess.KuduInstances
 {
     public class SqlKuduInstanceRepository : KuduInstanceRepository<int>
     {
@@ -50,11 +50,6 @@ namespace Rooster.DataAccess.KuduInstances.Implementations
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        protected override bool IsDefaultValue(int value)
-        {
-            return value == default;
-        }
-
         protected override async Task<int> CreateImplementation(KuduInstance<int> kuduInstance, CancellationToken cancellation)
         {
             await using var connection = _connectionFactory.CreateConnection();
@@ -91,6 +86,11 @@ namespace Rooster.DataAccess.KuduInstances.Implementations
             var name = await connection.QueryFirstOrDefaultAsync<string>(command);
 
             return name;
+        }
+
+        public override bool IsDefaultValue(int value)
+        {
+            return value == default;
         }
     }
 }

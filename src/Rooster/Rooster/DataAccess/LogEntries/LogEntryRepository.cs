@@ -3,7 +3,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.LogEntries.Implementations
+namespace Rooster.DataAccess.LogEntries
 {
     public abstract class LogEntryRepository<T> : ILogEntryRepository<T>
     {
