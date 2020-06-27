@@ -20,6 +20,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rooster.Test", "Rooster.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rooster.DependencyInjection", "Rooster.DependencyInjection\Rooster.DependencyInjection.csproj", "{E6F50C18-71E9-4948-98DC-780A393A7BD5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{E7F8C51B-A2C1-4610-8BF0-CCCD335A62D8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0F406185-4A3A-4DD6-8C32-938DF3AECC17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +59,14 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FBDEC9C5-AF7A-4D2B-880D-58A10A735A2F} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
+		{39FCB127-420B-4821-A190-73A774B1D62B} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
+		{C6E4EF0E-1500-4417-B9CA-017C31DE1284} = {E7F8C51B-A2C1-4610-8BF0-CCCD335A62D8}
+		{53F7DE7A-8652-4DCB-85BF-478426F061CA} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
+		{A30D2462-E38D-4E0A-BE25-208A76FAE3A0} = {0F406185-4A3A-4DD6-8C32-938DF3AECC17}
+		{E6F50C18-71E9-4948-98DC-780A393A7BD5} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {657E0A32-900A-4651-AAC2-E21776973FAC}
