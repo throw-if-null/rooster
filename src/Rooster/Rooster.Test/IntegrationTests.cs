@@ -8,10 +8,11 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Xunit;
 
-namespace Rooster.App
+namespace Rooster.Test
 {
-    class Program
+    public class IntegrationTests
     {
         private const string SqlConfigPath = "Connectors:Sql";
         private const string MongoConfigPath = "Connectors:MongoDb";
@@ -30,9 +31,12 @@ namespace Rooster.App
             return source.Token;
         };
 
-        public static Task Main(string[] args)
+        [Fact]
+        public async Task ShouldThrowUnsupportedDatastoreEngineException()
         {
-            return HostBuilder(args).RunConsoleAsync(BuildCancellationTokne());
+            var excpetion = Assert.Throws<NotSupportedDataStoreException>(() => HostBuilder(new string[0]).Build());
+
+            Assert.Equal("Database: MySql is not supported. Supported values are: MongoDb and SqlServer.", excpetion.Message);
         }
 
         internal static IHostBuilder HostBuilder(string[] args) =>
@@ -40,7 +44,7 @@ namespace Rooster.App
             .ConfigureHostConfiguration(configurator =>
             {
                 configurator.SetBasePath(Directory.GetCurrentDirectory());
-                configurator.AddJsonFile("appsettings.json", optional: true);
+                configurator.AddJsonFile("appsettings.invalid.json", optional: true);
                 configurator.AddCommandLine(args);
             })
             .ConfigureLogging((ctx, builder) =>

@@ -1,11 +1,12 @@
 ﻿using Dapper;
+using Rooster.DataAccess.Logbooks;
 using Rooster.DataAccess.Logbooks.Entities;
 using Rooster.SqlServer.Connectors;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.Logbooks
+namespace Rooster.SqlServer.DataAccess.Logbooks
 {
     public class SqlLogbookRepository : LogbookRepository<int>
     {

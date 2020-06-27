@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Rooster.DataAccess.KuduInstances;
 using Rooster.DataAccess.KuduInstances.Entities;
 using Rooster.SqlServer.Connectors;
 using System;
@@ -6,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.KuduInstances
+namespace Rooster.SqlServer.DataAccess.KuduInstances
 {
     public class SqlKuduInstanceRepository : KuduInstanceRepository<int>
     {

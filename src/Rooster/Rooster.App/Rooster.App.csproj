@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,9 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rooster.MongoDb\Rooster.MongoDb.csproj" />
-    <ProjectReference Include="..\Rooster.SqlServer\Rooster.SqlServer.csproj" />
-    <ProjectReference Include="..\Rooster\Rooster.csproj" />
+    <ProjectReference Include="..\Rooster.DependencyInjection\Rooster.DependencyInjection.csproj" />
   </ItemGroup>
 
   <ItemGroup>

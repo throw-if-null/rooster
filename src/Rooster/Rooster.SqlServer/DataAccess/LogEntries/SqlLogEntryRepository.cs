@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Rooster.DataAccess.LogEntries;
 using Rooster.DataAccess.LogEntries.Entities;
 using Rooster.SqlServer.Connectors;
 using System;
@@ -6,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.DataAccess.LogEntries
+namespace Rooster.SqlServer.DataAccess.LogEntries
 {
     public class SqlLogEntryRepository : LogEntryRepository<int>
     {
