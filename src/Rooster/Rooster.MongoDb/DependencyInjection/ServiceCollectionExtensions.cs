@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using Rooster.Adapters.Kudu;
+using Rooster.Adapters.Kudu.Handlers;
 using Rooster.DataAccess.AppServices;
 using Rooster.DataAccess.KuduInstances;
 using Rooster.DataAccess.Logbooks;
@@ -42,7 +43,9 @@ namespace Rooster.MongoDb.DependencyInjection
             services.AddSingleton<ILogbookCollectionFactory, LogbookCollectionFactory>();
             services.AddSingleton<ILogEntryCollectionFactory, LogEntryCollectionFactory>();
 
-            services.AddHttpClient<IKuduApiAdapter<ObjectId>, KuduApiAdapter<ObjectId>>();
+            services
+                .AddHttpClient<IKuduApiAdapter<ObjectId>, KuduApiAdapter<ObjectId>>()
+                .AddHttpMessageHandler<RequestsInterceptor>();
 
             services.AddTransient<IAppServiceRepository<ObjectId>, MongoDbAppServiceRepository>();
             services.AddTransient<IKuduInstanceRepository<ObjectId>, MongoDbKuduInstanceRepository>();

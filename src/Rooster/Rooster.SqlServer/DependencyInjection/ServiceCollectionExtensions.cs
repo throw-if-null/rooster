@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rooster.Adapters.Kudu;
+using Rooster.Adapters.Kudu.Handlers;
 using Rooster.DataAccess.AppServices;
 using Rooster.DataAccess.KuduInstances;
 using Rooster.DataAccess.Logbooks;
@@ -29,7 +30,9 @@ namespace Rooster.SqlServer.DependencyInjection
             services.AddTransient<IAppServiceRepository<int>, SqlAppServiceRepository>();
             services.AddTransient<IKuduInstanceRepository<int>, SqlKuduInstanceRepository>();
 
-            services.AddHttpClient<IKuduApiAdapter<int>, KuduApiAdapter<int>>();
+            services
+                .AddHttpClient<IKuduApiAdapter<int>, KuduApiAdapter<int>>()
+                .AddHttpMessageHandler<RequestsInterceptor>();
 
             services.AddHostedService<AppHost<int>>();
 

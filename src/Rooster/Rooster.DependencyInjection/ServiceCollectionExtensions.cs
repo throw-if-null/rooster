@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rooster.Adapters.Kudu;
+using Rooster.Adapters.Kudu.Handlers;
 using Rooster.CrossCutting;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
@@ -19,6 +20,8 @@ namespace Rooster.DependencyInjection
             services.AddMemoryCache();
 
             services.AddTransient<ILogExtractor, LogExtractor>();
+
+            services.AddSingleton<RequestsInterceptor>();
 
             var databaseEngine = configuration.GetSection($"Hosts:{nameof(AppHostOptions)}").GetValue<string>("DatabaseEngine");
 

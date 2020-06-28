@@ -32,7 +32,7 @@ namespace Rooster.App
 
         public static Task Main(string[] args)
         {
-            return HostBuilder(args).RunConsoleAsync(BuildCancellationTokne());
+            return HostBuilder(args).UseEnvironment("Development").RunConsoleAsync(BuildCancellationTokne());
         }
 
         internal static IHostBuilder HostBuilder(string[] args) =>
