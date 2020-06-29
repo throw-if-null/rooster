@@ -6,6 +6,7 @@ using Rooster.CrossCutting;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
 using Rooster.MongoDb.DependencyInjection;
+using Rooster.Services;
 using Rooster.SqlServer.DependencyInjection;
 
 namespace Rooster.DependencyInjection

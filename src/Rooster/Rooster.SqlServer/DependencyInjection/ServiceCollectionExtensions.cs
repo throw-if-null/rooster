@@ -3,13 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Rooster.Adapters.Kudu;
 using Rooster.Adapters.Kudu.Handlers;
 using Rooster.DataAccess.AppServices;
-using Rooster.DataAccess.KuduInstances;
+using Rooster.DataAccess.ContainerInstances;
 using Rooster.DataAccess.Logbooks;
 using Rooster.DataAccess.LogEntries;
 using Rooster.Hosting;
+using Rooster.Services;
 using Rooster.SqlServer.Connectors;
 using Rooster.SqlServer.DataAccess.AppServices;
-using Rooster.SqlServer.DataAccess.KuduInstances;
+using Rooster.SqlServer.DataAccess.ContainerInstances;
 using Rooster.SqlServer.DataAccess.Logbooks;
 using Rooster.SqlServer.DataAccess.LogEntries;
 
@@ -28,11 +29,14 @@ namespace Rooster.SqlServer.DependencyInjection
             services.AddTransient<ILogEntryRepository<int>, SqlLogEntryRepository>();
             services.AddTransient<ILogbookRepository<int>, SqlLogbookRepository>();
             services.AddTransient<IAppServiceRepository<int>, SqlAppServiceRepository>();
-            services.AddTransient<IKuduInstanceRepository<int>, SqlKuduInstanceRepository>();
+            services.AddTransient<IContainerInstanceRepository<int>, SqlContainerInstanceRepository>();
 
             services
                 .AddHttpClient<IKuduApiAdapter<int>, KuduApiAdapter<int>>()
                 .AddHttpMessageHandler<RequestsInterceptor>();
+
+            services.AddTransient<IContainerInstanceService<int>, ContainerInstanceService<int>>();
+            services.AddTransient<ILogbookService<int>, LogbookService<int>>();
 
             services.AddHostedService<AppHost<int>>();
 

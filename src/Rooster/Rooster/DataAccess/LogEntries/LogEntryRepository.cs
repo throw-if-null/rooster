@@ -9,7 +9,7 @@ namespace Rooster.DataAccess.LogEntries
     {
         protected abstract bool IsDefaultValue(T value);
         protected abstract Task CreateImplementation(LogEntry<T> logEntry, CancellationToken cancellation);
-        protected abstract Task<DateTimeOffset> GetLatestForAppServiceImplementation(T appServiceId, CancellationToken cancellation);
+        protected abstract Task<DateTimeOffset> GetLatestForLogbookImplementation(T logbookId, CancellationToken cancellation);
 
 
         public Task Create(LogEntry<T> entry, CancellationToken cancellation)
@@ -19,29 +19,26 @@ namespace Rooster.DataAccess.LogEntries
             return CreateImplementation(entry, cancellation);
         }
 
-        public Task<DateTimeOffset> GetLatestForAppService(T appServiceId, CancellationToken cancellation)
+        public Task<DateTimeOffset> GetLatestForLogbook(T logbookId, CancellationToken cancellation)
         {
-            if (IsDefaultValue(appServiceId))
+            if (IsDefaultValue(logbookId))
                 return default;
 
-            return GetLatestForAppServiceImplementation(appServiceId, cancellation);
+            return GetLatestForLogbookImplementation(logbookId, cancellation);
         }
 
         private void Validate(LogEntry<T> logEntry)
         {
             _ = logEntry ?? throw new ArgumentNullException(nameof(logEntry));
 
-            if (IsDefaultValue(logEntry.AppServiceId))
-                ThrowArgumentException(nameof(logEntry.AppServiceId), logEntry.AppServiceId.ToString());
+            if (IsDefaultValue(logEntry.LogbookId))
+                ThrowArgumentException(nameof(logEntry.LogbookId), logEntry.LogbookId.ToString());
 
             if (string.IsNullOrWhiteSpace(logEntry.ContainerName))
                 ThrowArgumentException(nameof(logEntry.ContainerName), logEntry.ContainerName == null ? "NULL" : "EMPTY");
 
             if (logEntry.Date == default || logEntry.Date == DateTimeOffset.MaxValue)
                 ThrowArgumentException(nameof(logEntry.Date), logEntry.Date.ToString());
-
-            if (string.IsNullOrWhiteSpace(logEntry.HostName))
-                ThrowArgumentException(nameof(logEntry.HostName), logEntry.HostName == null ? "NULL" : "EMPTY");
 
             if (string.IsNullOrWhiteSpace(logEntry.ImageName))
                 ThrowArgumentException(nameof(logEntry.ImageName), logEntry.ImageName == null ? "NULL" : "EMPTY");
@@ -53,7 +50,6 @@ namespace Rooster.DataAccess.LogEntries
                 ThrowArgumentException(nameof(logEntry.OutboundPort), logEntry.InboundPort);
 
             logEntry.ContainerName = logEntry.ContainerName.Trim().ToLowerInvariant();
-            logEntry.HostName = logEntry.HostName.Trim().ToLowerInvariant();
             logEntry.ImageName = logEntry.ImageName.Trim().ToLowerInvariant();
         }
 

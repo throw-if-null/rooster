@@ -4,6 +4,7 @@ using Rooster.DataAccess.Logbooks.Entities;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -14,9 +15,9 @@ namespace Rooster.Adapters.Kudu
 {
     public interface IKuduApiAdapter<T>
     {
-        Task<IEnumerable<Logbook<T>>> GetLogs(CancellationToken cancellation);
+        Task<IEnumerable<Logbook<T>>> GetDockerLogs(CancellationToken cancellation);
 
-        Task ExtractLogsFromStream(Uri logUri, CancellationToken cancellation, Func<string, CancellationToken, Task> persistLogLine);
+        Task ExtractLogsFromStream(Logbook<T> logbook, CancellationToken cancellation, Func<string, T, CancellationToken, Task> persistLogLine);
     }
 
     public class KuduApiAdapter<T> : IKuduApiAdapter<T>
@@ -53,7 +54,7 @@ namespace Rooster.Adapters.Kudu
             _client = BuildHttpClient(client, options?.CurrentValue);
         }
 
-        public async Task<IEnumerable<Logbook<T>>> GetLogs(CancellationToken cancellation)
+        public async Task<IEnumerable<Logbook<T>>> GetDockerLogs(CancellationToken cancellation)
         {
             using var response = await _client.GetAsync("api/logs/docker", cancellation);
 
@@ -62,19 +63,28 @@ namespace Rooster.Adapters.Kudu
             var content = await response.Content.ReadAsStringAsync();
             var logs = JsonConvert.DeserializeObject<IEnumerable<Logbook<T>>>(content);
 
-            return logs;
+            return FilterDockerLogbooks(logs);
+
+            static IReadOnlyCollection<Logbook<T>> FilterDockerLogbooks(IEnumerable<Logbook<T>> all)
+            {
+                return all.Where(
+                    x =>
+                        !x.MachineName.EndsWith("_default", StringComparison.InvariantCultureIgnoreCase) &&
+                        !x.MachineName.EndsWith("_msi", StringComparison.InvariantCultureIgnoreCase))
+                    .ToArray();
+            }
         }
 
-        public async Task ExtractLogsFromStream(Uri logUrl, CancellationToken cancellation, Func<string, CancellationToken, Task> persistLogLine)
+        public async Task ExtractLogsFromStream(Logbook<T> logbook, CancellationToken cancellation, Func<string, T, CancellationToken, Task> persistLogLine)
         {
-            _ = logUrl ?? throw new ArgumentNullException(nameof(logUrl));
+            _ = logbook ?? throw new ArgumentNullException(nameof(logbook));
             _ = persistLogLine ?? throw new ArgumentNullException(nameof(persistLogLine));
 
             Stream stream = null;
 
             try
             {
-                stream = await _client.GetStreamAsync(logUrl);
+                stream = await _client.GetStreamAsync(logbook.Href);
 
                 using var logReader = new StreamReader(stream);
                 stream = null;
@@ -91,7 +101,7 @@ namespace Rooster.Adapters.Kudu
                     if (!line.Contains("docker", StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
-                    await persistLogLine(line, cancellation);
+                    await persistLogLine(line, logbook.ContainerInstanceId, cancellation);
                 }
             }
             finally

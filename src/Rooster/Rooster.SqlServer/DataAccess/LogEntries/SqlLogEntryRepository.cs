@@ -18,10 +18,9 @@ namespace Rooster.SqlServer.DataAccess.LogEntries
             var builder = new StringBuilder();
 
             builder
-                .Append($"{prefix}{nameof(LogEntry<int>.AppServiceId)}, ")
+                .Append($"{prefix}{nameof(LogEntry<int>.LogbookId)}, ")
                 .Append($"{prefix}{nameof(LogEntry<int>.ContainerName)}, ")
                 .Append($"{prefix}{nameof(LogEntry<int>.Date)}, ")
-                .Append($"{prefix}{nameof(LogEntry<int>.HostName)}, ")
                 .Append($"{prefix}{nameof(LogEntry<int>.ImageName)}, ")
                 .Append($"{prefix}{nameof(LogEntry<int>.InboundPort)}, ")
                 .Append($"{prefix}{nameof(LogEntry<int>.OutboundPort)}");
@@ -49,7 +48,7 @@ namespace Rooster.SqlServer.DataAccess.LogEntries
             {
                 return
                     $"SELECT TOP 1 {nameof(LogEntry<int>.Date)} FROM {nameof(LogEntry<int>)} " +
-                    $"WHERE {nameof(LogEntry<int>.AppServiceId)} = @{nameof(LogEntry<int>.AppServiceId)} " +
+                    $"WHERE {nameof(LogEntry<int>.LogbookId)} = @{nameof(LogEntry<int>.LogbookId)} " +
                     $"ORDER BY {nameof(LogEntry<int>.Created)} DESC";
             };
 
@@ -73,10 +72,9 @@ namespace Rooster.SqlServer.DataAccess.LogEntries
                 InsertLogEntryQuery(),
                 new
                 {
-                    entry.AppServiceId,
+                    entry.LogbookId,
                     entry.ContainerName,
                     entry.Date,
-                    entry.HostName,
                     entry.ImageName,
                     entry.InboundPort,
                     entry.OutboundPort
@@ -86,13 +84,13 @@ namespace Rooster.SqlServer.DataAccess.LogEntries
             await connection.ExecuteAsync(command);
         }
 
-        protected override async Task<DateTimeOffset> GetLatestForAppServiceImplementation(int appServiceId, CancellationToken cancellation)
+        protected override async Task<DateTimeOffset> GetLatestForLogbookImplementation(int logbookId, CancellationToken cancellation)
         {
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(
                 GetLastLogEntryDate(),
-                new { AppServiceId = appServiceId },
+                new { LogbookId = logbookId },
                 cancellationToken: cancellation);
 
             var lastDate = await connection.QueryFirstOrDefaultAsync<DateTimeOffset>(command);

@@ -35,11 +35,11 @@ namespace Rooster.MongoDb.DataAccess.LogEntries
             await collection.InsertOneAsync(entry, GetInsertOneOptions(), cancellation);
         }
 
-        protected override async Task<DateTimeOffset> GetLatestForAppServiceImplementation(ObjectId appServiceId, CancellationToken cancellation)
+        protected override async Task<DateTimeOffset> GetLatestForLogbookImplementation(ObjectId logbookId, CancellationToken cancellation)
         {
             var collection = await _collectionFactory.Get<LogEntry<ObjectId>>(cancellation);
 
-            var filter = Builders<LogEntry<ObjectId>>.Filter.Where(x => x.AppServiceId == appServiceId);
+            var filter = Builders<LogEntry<ObjectId>>.Filter.Where(x => x.LogbookId == logbookId);
             var sort = Builders<LogEntry<ObjectId>>.Sort.Descending(x => x.Created);
 
             var cursor = await collection.FindAsync(filter, new FindOptions<LogEntry<ObjectId>, LogEntry<ObjectId>>

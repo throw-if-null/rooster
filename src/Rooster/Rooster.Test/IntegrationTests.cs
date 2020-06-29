@@ -12,5 +12,11 @@ namespace Rooster.Test
 
             Assert.Equal("Database: MySql is not supported. Supported values are: MongoDb and SqlServer.", excpetion.Message);
         }
+
+        [Fact]
+        public void ShouldInsertLogEntry()
+        {
+
+        }
     }
 }

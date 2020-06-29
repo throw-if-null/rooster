@@ -9,7 +9,9 @@ namespace Rooster.DataAccess.Logbooks
     {
         protected abstract bool IsDefaultValue(T value);
         protected abstract Task CreateImplementation(Logbook<T> logbook, CancellationToken cancellation);
-        protected abstract Task<DateTimeOffset> GetLatestDateForKuduInstanceImplementation(T kuduInstanceId, CancellationToken cancellation);
+        protected abstract Task<DateTimeOffset> GetLastUpdatedDateForContainerInstanceImplementation(
+            T kuduInstanceId,
+            CancellationToken cancellation);
 
         public Task Create(Logbook<T> logbook, CancellationToken cancellation)
         {
@@ -22,8 +24,8 @@ namespace Rooster.DataAccess.Logbooks
         {
             _ = logbook ?? throw new ArgumentNullException(nameof(logbook));
 
-            if (IsDefaultValue(logbook.KuduInstanceId))
-                ThrowArgumentException(nameof(logbook.KuduInstanceId), logbook.KuduInstanceId.ToString());
+            if (IsDefaultValue(logbook.ContainerInstanceId))
+                ThrowArgumentException(nameof(logbook.ContainerInstanceId), logbook.ContainerInstanceId.ToString());
 
             if (logbook.LastUpdated == default || logbook.LastUpdated == DateTimeOffset.MaxValue)
                 ThrowArgumentException(nameof(logbook.LastUpdated), logbook.LastUpdated.ToString());
@@ -34,12 +36,12 @@ namespace Rooster.DataAccess.Logbooks
             logbook.MachineName = logbook.MachineName.Trim().ToLowerInvariant();
         }
 
-        public Task<DateTimeOffset> GetLastUpdateDateForKuduInstance(T kuduInstanceId, CancellationToken cancellation)
+        public Task<DateTimeOffset> GetLastUpdatedDateForContainerInstance(T kuduInstanceId, CancellationToken cancellation)
         {
             if (IsDefaultValue(kuduInstanceId))
                 return default;
 
-            return GetLatestDateForKuduInstanceImplementation(kuduInstanceId, cancellation);
+            return GetLastUpdatedDateForContainerInstanceImplementation(kuduInstanceId, cancellation);
         }
 
         private static readonly Action<string, string> ThrowArgumentException = delegate (string name, string value)

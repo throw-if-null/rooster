@@ -1,15 +1,15 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using Rooster.DataAccess.KuduInstances;
-using Rooster.DataAccess.KuduInstances.Entities;
+using Rooster.DataAccess.ContainerInstances;
+using Rooster.DataAccess.ContainerInstances.Entities;
 using Rooster.MongoDb.Connectors.Colections;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.MongoDb.DataAccess.KuduInstances
+namespace Rooster.MongoDb.DataAccess.ContainerInstances
 {
-    public class MongoDbKuduInstanceRepository : KuduInstanceRepository<ObjectId>
+    public class MongoDbContainerInstanceRepository : ContainerInstanceRepository<ObjectId>
     {
         private static readonly Func<InsertOneOptions> GetInsertOneOptions = delegate
         {
@@ -18,29 +18,29 @@ namespace Rooster.MongoDb.DataAccess.KuduInstances
 
         private readonly IKuduInstanceCollectionFactory _collectionFactory;
 
-        public MongoDbKuduInstanceRepository(IKuduInstanceCollectionFactory collectionFactory)
+        public MongoDbContainerInstanceRepository(IKuduInstanceCollectionFactory collectionFactory)
         {
             _collectionFactory = collectionFactory ?? throw new ArgumentNullException(nameof(collectionFactory));
         }
 
-        protected override async Task<ObjectId> CreateImplementation(KuduInstance<ObjectId> kuduInstance, CancellationToken cancellation)
+        protected override async Task<ObjectId> CreateImplementation(ContainerInstance<ObjectId> kuduInstance, CancellationToken cancellation)
         {
-            var collection = await _collectionFactory.Get<KuduInstance<ObjectId>>(cancellation);
+            var collection = await _collectionFactory.Get<ContainerInstance<ObjectId>>(cancellation);
 
             await collection.InsertOneAsync(kuduInstance, GetInsertOneOptions(), cancellation);
 
             return kuduInstance.Id;
         }
 
-        protected override async Task<ObjectId> GetIdByNameImplementation(string name, CancellationToken cancellation)
+        protected override async Task<ObjectId> GetIdByNameAndAppServiceIdImplementation(string name, ObjectId appServiceId, CancellationToken cancellation)
         {
-            var collection = await _collectionFactory.Get<KuduInstance<ObjectId>>(cancellation);
+            var collection = await _collectionFactory.Get<ContainerInstance<ObjectId>>(cancellation);
 
             var cursor = await collection.FindAsync(
-                x => x.Name == name,
-                new FindOptions<KuduInstance<ObjectId>, KuduInstance<ObjectId>>
+                x => x.Name == name && x.AppServiceId == appServiceId,
+                new FindOptions<ContainerInstance<ObjectId>, ContainerInstance<ObjectId>>
                 {
-                    Projection = Builders<KuduInstance<ObjectId>>.Projection.Include(x => x.Id)
+                    Projection = Builders<ContainerInstance<ObjectId>>.Projection.Include(x => x.Id)
                 },
                 cancellation);
 
@@ -54,13 +54,13 @@ namespace Rooster.MongoDb.DataAccess.KuduInstances
             if (id == ObjectId.Empty)
                 return default;
 
-            var collection = await _collectionFactory.Get<KuduInstance<ObjectId>>(cancellation);
+            var collection = await _collectionFactory.Get<ContainerInstance<ObjectId>>(cancellation);
 
             var cursor = await collection.FindAsync(
                 x => x.Id == id,
-                new FindOptions<KuduInstance<ObjectId>, KuduInstance<ObjectId>>
+                new FindOptions<ContainerInstance<ObjectId>, ContainerInstance<ObjectId>>
                 {
-                    Projection = Builders<KuduInstance<ObjectId>>.Projection.Include(x => x.Name)
+                    Projection = Builders<ContainerInstance<ObjectId>>.Projection.Include(x => x.Name)
                 },
                 cancellation); ;
 

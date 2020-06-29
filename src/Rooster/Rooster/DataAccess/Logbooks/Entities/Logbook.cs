@@ -27,6 +27,6 @@ namespace Rooster.DataAccess.Logbooks.Entities
         [JsonProperty("path")] [BsonIgnore]
         public string Path { get; set; }
 
-        public T KuduInstanceId { get; set; }
+        public T ContainerInstanceId { get; set; }
     }
 }

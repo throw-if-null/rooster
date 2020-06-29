@@ -12,7 +12,7 @@ namespace Rooster.SqlServer.DataAccess.Logbooks
     {
         private static readonly Func<string, string> BuildList = delegate (string prefix)
         {
-            return $"{prefix}{nameof(Logbook<int>.MachineName)}, {prefix}{nameof(Logbook<int>.LastUpdated)}, {prefix}{nameof(Logbook<int>.KuduInstanceId)}";
+            return $"{prefix}{nameof(Logbook<int>.LastUpdated)}, {prefix}{nameof(Logbook<int>.ContainerInstanceId)}";
         };
 
         private static readonly Func<string> BuildInsertPropertyList = delegate ()
@@ -32,11 +32,13 @@ namespace Rooster.SqlServer.DataAccess.Logbooks
                     $"INSERT INTO {nameof(Logbook<int>)} ({BuildInsertPropertyList()}) VALUES({BuildInsertValuesList()})";
             };
 
-        public static readonly Func<string> GetLatestLastUpdateForKuduInstance =
+        public static readonly Func<string> GetLatestLastUpdateForContainerInstance =
             delegate
             {
                 return
-                    $"SELECT TOP 1 {nameof(Logbook<int>.LastUpdated)} FROM {nameof(Logbook<int>)} WHERE {nameof(Logbook<int>.KuduInstanceId)} = @{nameof(Logbook<int>.KuduInstanceId)} ORDER BY {nameof(Logbook<int>.Created)} DESC";
+                    $"SELECT TOP 1 {nameof(Logbook<int>.LastUpdated)} FROM {nameof(Logbook<int>)} WHERE " +
+                    $"{nameof(Logbook<int>.ContainerInstanceId)} = @{nameof(Logbook<int>.ContainerInstanceId)} " +
+                    $"ORDER BY {nameof(Logbook<int>.Created)} DESC";
             };
 
         private readonly IConnectionFactory _connectionFactory;
@@ -57,19 +59,21 @@ namespace Rooster.SqlServer.DataAccess.Logbooks
 
             var command = new CommandDefinition(
                 InsertLogbook(),
-                new { logbook.MachineName, logbook.LastUpdated, logbook.KuduInstanceId },
+                new { logbook.LastUpdated, logbook.ContainerInstanceId },
                 cancellationToken: cancellation);
 
             await connection.ExecuteAsync(command);
         }
 
-        protected override async Task<DateTimeOffset> GetLatestDateForKuduInstanceImplementation(int kuduInstanceId, CancellationToken cancellation)
+        protected override async Task<DateTimeOffset> GetLastUpdatedDateForContainerInstanceImplementation(
+            int containerInstanceId,
+            CancellationToken cancellation)
         {
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(
-                GetLatestLastUpdateForKuduInstance(),
-                new { KuduInstanceId = kuduInstanceId },
+                GetLatestLastUpdateForContainerInstance(),
+                new { ContainerInstanceId = containerInstanceId },
                 cancellationToken: cancellation);
 
             var logbook = await connection.QueryFirstOrDefaultAsync<DateTimeOffset>(command);

@@ -9,9 +9,7 @@ namespace Rooster.DataAccess.LogEntries.Entities
 
         public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 
-        public T AppServiceId { get; set; }
-
-        public string HostName { get; set; }
+        public T LogbookId { get; set; }
 
         public string ImageName { get; set; }
 
@@ -23,10 +21,9 @@ namespace Rooster.DataAccess.LogEntries.Entities
 
         public DateTimeOffset Date { get; set; }
 
-        public LogEntry(T appServiceId, string hostName, string imageName, string containerName, string inboundPort, string outboundPort, DateTimeOffset date)
+        public LogEntry(T appServiceId, string imageName, string containerName, string inboundPort, string outboundPort, DateTimeOffset date)
         {
-            AppServiceId = appServiceId;
-            HostName = hostName;
+            LogbookId = appServiceId;
             ImageName = imageName;
             ContainerName = containerName;
             InboundPort = inboundPort;
@@ -39,8 +36,7 @@ namespace Rooster.DataAccess.LogEntries.Entities
             var builder = new StringBuilder();
 
             builder
-                .Append($"{nameof(AppServiceId)}: {AppServiceId}, ")
-                .Append($"{nameof(HostName)}:{HostName}, ")
+                .Append($"{nameof(LogbookId)}: {LogbookId}, ")
                 .Append($"{nameof(ImageName)}:{ImageName}, ")
                 .Append($"{nameof(ContainerName)}:{ContainerName}, ")
                 .Append($"{nameof(InboundPort)}:{InboundPort}, ")

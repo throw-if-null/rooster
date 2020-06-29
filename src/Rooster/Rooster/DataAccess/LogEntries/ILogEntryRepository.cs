@@ -9,6 +9,6 @@ namespace Rooster.DataAccess.LogEntries
     {
         Task Create(LogEntry<T> entry, CancellationToken cancellation);
 
-        Task<DateTimeOffset> GetLatestForAppService(T appServiceId, CancellationToken cancellation);
+        Task<DateTimeOffset> GetLatestForLogbook(T logbookId, CancellationToken cancellation);
     }
 }

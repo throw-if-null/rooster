@@ -10,8 +10,6 @@ namespace Rooster.CrossCutting
 
         string ExtractWebsiteName(string line);
 
-        string ExtractHostName(string line);
-
         string ExtractContainerName(string line);
 
         DateTimeOffset ExtractDate(string line);
@@ -35,11 +33,6 @@ namespace Rooster.CrossCutting
         public string ExtractWebsiteName(string line)
         {
             return ExtractValue(line, "WEBSITE_SITE_NAME", "-e");
-        }
-
-        public string ExtractHostName(string line)
-        {
-            return ExtractValue(line, "WEBSITE_HOSTNAME", "-e");
         }
 
         public string ExtractContainerName(string line)

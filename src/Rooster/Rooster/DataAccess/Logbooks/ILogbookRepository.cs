@@ -9,6 +9,6 @@ namespace Rooster.DataAccess.Logbooks
     {
         Task Create(Logbook<T> logbook, CancellationToken cancellation);
 
-        Task<DateTimeOffset> GetLastUpdateDateForKuduInstance(T kuduInstanceId, CancellationToken cancellation);
+        Task<DateTimeOffset> GetLastUpdatedDateForContainerInstance(T containerInstanceId, CancellationToken cancellation);
     }
 }
