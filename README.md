@@ -1,5 +1,8 @@
 # rooster
-Rooster :rooster: is log extractor. It extracts docker logs like `docker run` from your Azure App Service console logs and sends them to AppInsights. 
+Rooster :rooster: is log extractor. It extracts docker logs like `docker run` from your Azure App Service console logs and sends them to a configurable location. Currently supported locations include:
+* Sql Database
+* MongoDb
+* Slack
 
 # Motivation
 
