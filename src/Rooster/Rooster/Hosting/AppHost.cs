@@ -1,9 +1,12 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using MediatR;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Rooster.Adapters.Kudu;
-using Rooster.Services;
+using Rooster.Handlers;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,25 +16,19 @@ namespace Rooster.Hosting
     {
         private readonly AppHostOptions _options;
         private readonly IKuduApiAdapter<T> _kudu;
-        private readonly ILogbookService<T> _logbookService;
-        private readonly IAppServiceService<T> _appServiceService;
-        private readonly IContainerInstanceService<T> _containerInstanceService;
+        private readonly IMediator _mediator;
         private readonly ILogger _logger;
 
         public AppHost(
             IOptionsMonitor<AppHostOptions> options,
             IKuduApiAdapter<T> kudu,
-            ILogbookService<T> logbookService,
-            IAppServiceService<T> appServiceService,
-            IContainerInstanceService<T> containerInstanceService,
+            IMediator mediator,
             ILogger<AppHost<T>> logger)
         {
             _options = options.CurrentValue ?? throw new ArgumentNullException(nameof(options));
             _kudu = kudu ?? throw new ArgumentNullException(nameof(kudu));
-            _logbookService = logbookService?? throw new ArgumentNullException(nameof(logbookService));
-            _appServiceService = appServiceService ?? throw new ArgumentNullException(nameof(appServiceService));
-            _containerInstanceService = containerInstanceService ?? throw new ArgumentNullException(nameof(containerInstanceService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -45,17 +42,7 @@ namespace Rooster.Hosting
                     if (logbook.LastUpdated.Date < DateTimeOffset.UtcNow.Date)
                         continue;
 
-                    var websiteName = logbook.Href.Host.Replace(".scm.azurewebsites.net", string.Empty);
-                    var appServiceId = await _appServiceService.GetOrAdd(websiteName, cancellationToken);
-
-                    logbook.ContainerInstanceId = await _containerInstanceService.GetOrAdd(logbook.MachineName, appServiceId, cancellationToken);
-
-                    var lastUpdateDate = await _logbookService.GetOrAddIfNewer(logbook, cancellationToken);
-
-                    if (logbook.LastUpdated < lastUpdateDate)
-                        continue;
-
-                    await _kudu.ExtractLogsFromStream(logbook, cancellationToken);
+                    await _mediator.Publish(new LogbookNotification<T>(logbook), cancellationToken);
                 }
 
                 if (!_options.UseInternalPoller)
@@ -63,6 +50,8 @@ namespace Rooster.Hosting
 
                 await Task.Delay(TimeSpan.FromSeconds(_options.PoolingIntervalInSeconds));
             }
+
+            _logger.LogDebug("Finished extracting docker logs.", null);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

@@ -20,7 +20,7 @@ namespace Rooster.Handlers
         private readonly ILogEntryRepository<T> _logEntryRepository;
         private readonly ILogExtractor _extractor;
 
-        public LogEntryNotificationHandler(ILogEntryRepository<T> logEntryRepository, ILogExtractor extractor, IMediator mediator)
+        public LogEntryNotificationHandler(ILogEntryRepository<T> logEntryRepository, ILogExtractor extractor)
         {
             _logEntryRepository = logEntryRepository ?? throw new ArgumentNullException(nameof(logEntryRepository));
             _extractor = extractor ?? throw new ArgumentNullException(nameof(extractor));

@@ -60,7 +60,7 @@ namespace Rooster.SqlServer.DataAccess.ContainerInstances
                 new { kuduInstance.Name, kuduInstance.AppServiceId },
                 cancellationToken: cancellation);
 
-            kuduInstance.Id = await connection.ExecuteAsync(command);
+            kuduInstance.Id = await connection.QuerySingleAsync<int>(command);
 
             return kuduInstance.Id;
         }

@@ -41,7 +41,7 @@ namespace Rooster.DependencyInjection
                     throw new NotSupportedDataStoreException(databaseEngine);
             }
 
-            services.AddMediatR(new[] { typeof(LogEntryNotification<>) });
+            services.AddMediatR(new[] { typeof(LogEntryNotification<>), typeof(LogbookNotification<>) });
 
             return services;
         }

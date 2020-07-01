@@ -61,6 +61,7 @@ namespace Rooster.MongoDb.DependencyInjection
             services.AddTransient<ILogbookService<ObjectId>, LogbookService<ObjectId>>();
 
             services.AddTransient<INotificationHandler<LogEntryNotification<ObjectId>>, MongoDbLogEntryNotificationHandler>();
+            services.AddTransient<INotificationHandler<LogbookNotification<ObjectId>>, MongoDbLogbookNotificationHandler>();
 
             services.AddHostedService<AppHost<ObjectId>>();
 
@@ -84,7 +85,6 @@ namespace Rooster.MongoDb.DependencyInjection
             var section = configuration.GetSection($"{MongoDbPath}:{nameof(DatabaseFactoryOptions)}");
 
             return services.Configure<DatabaseFactoryOptions>(section);
-
         }
 
         private static IServiceCollection ConfigureAppServiceCollectionFactoryOptions(

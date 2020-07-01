@@ -1,5 +1,4 @@
-﻿using MediatR;
-using Rooster.CrossCutting;
+﻿using Rooster.CrossCutting;
 using Rooster.DataAccess.LogEntries;
 using Rooster.Handlers;
 
@@ -9,9 +8,8 @@ namespace Rooster.SqlServer.Handlers
     {
         public SqlLogEntryNotificationHandler(
             ILogEntryRepository<int> logEntryRepository,
-            ILogExtractor extractor,
-            IMediator mediator)
-            : base(logEntryRepository, extractor, mediator)
+            ILogExtractor extractor)
+            : base(logEntryRepository, extractor)
         {
         }
     }

@@ -6,6 +6,7 @@ using Rooster.Adapters.Kudu.Handlers;
 using Rooster.DataAccess.AppServices;
 using Rooster.DataAccess.ContainerInstances;
 using Rooster.DataAccess.Logbooks;
+using Rooster.DataAccess.Logbooks.Entities;
 using Rooster.DataAccess.LogEntries;
 using Rooster.Handlers;
 using Rooster.Hosting;
@@ -43,6 +44,7 @@ namespace Rooster.SqlServer.DependencyInjection
             services.AddTransient<ILogbookService<int>, LogbookService<int>>();
 
             services.AddTransient<INotificationHandler<LogEntryNotification<int>>, SqlLogEntryNotificationHandler>();
+            services.AddTransient<INotificationHandler<LogbookNotification<int>>, SqlLogbookNotificationHandler>();
 
             services.AddHostedService<AppHost<int>>();
 
