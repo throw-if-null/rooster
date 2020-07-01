@@ -1,12 +1,13 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rooster.Adapters.Kudu;
 using Rooster.Adapters.Kudu.Handlers;
 using Rooster.CrossCutting;
 using Rooster.DependencyInjection.Exceptions;
+using Rooster.Handlers;
 using Rooster.Hosting;
 using Rooster.MongoDb.DependencyInjection;
-using Rooster.Services;
 using Rooster.SqlServer.DependencyInjection;
 
 namespace Rooster.DependencyInjection
@@ -39,6 +40,8 @@ namespace Rooster.DependencyInjection
                 default:
                     throw new NotSupportedDataStoreException(databaseEngine);
             }
+
+            services.AddMediatR(new[] { typeof(LogEntryNotification<>) });
 
             return services;
         }

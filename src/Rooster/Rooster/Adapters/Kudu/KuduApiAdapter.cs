@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Options;
+﻿using MediatR;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Rooster.DataAccess.Logbooks.Entities;
+using Rooster.Handlers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,13 +13,15 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using static System.Convert;
+
 namespace Rooster.Adapters.Kudu
 {
     public interface IKuduApiAdapter<T>
     {
         Task<IEnumerable<Logbook<T>>> GetDockerLogs(CancellationToken cancellation);
 
-        Task ExtractLogsFromStream(Logbook<T> logbook, CancellationToken cancellation, Func<string, T, CancellationToken, Task> persistLogLine);
+        Task ExtractLogsFromStream(Logbook<T> logbook, CancellationToken cancellation);
     }
 
     public class KuduApiAdapter<T> : IKuduApiAdapter<T>
@@ -31,8 +35,7 @@ namespace Rooster.Adapters.Kudu
                 if (string.IsNullOrWhiteSpace(password))
                     throw new ArgumentNullException(nameof(password));
 
-                return
-                    new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{user}:{password}")));
+                return new AuthenticationHeaderValue("Basic", ToBase64String(Encoding.ASCII.GetBytes($"{user}:{password}")));
             };
 
         private static readonly Func<HttpClient, KuduAdapterOptions, HttpClient> BuildHttpClient =
@@ -45,11 +48,13 @@ namespace Rooster.Adapters.Kudu
             };
 
         private readonly HttpClient _client;
+        private readonly IMediator _mediator;
 
-        public KuduApiAdapter(IOptionsMonitor<KuduAdapterOptions> options, HttpClient client)
+        public KuduApiAdapter(IOptionsMonitor<KuduAdapterOptions> options, HttpClient client, IMediator mediator)
         {
             _ = client ?? throw new ArgumentNullException(nameof(client));
             _ = options?.CurrentValue ?? throw new ArgumentNullException(nameof(options));
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 
             _client = BuildHttpClient(client, options?.CurrentValue);
         }
@@ -75,10 +80,9 @@ namespace Rooster.Adapters.Kudu
             }
         }
 
-        public async Task ExtractLogsFromStream(Logbook<T> logbook, CancellationToken cancellation, Func<string, T, CancellationToken, Task> persistLogLine)
+        public async Task ExtractLogsFromStream(Logbook<T> logbook, CancellationToken cancellation)
         {
             _ = logbook ?? throw new ArgumentNullException(nameof(logbook));
-            _ = persistLogLine ?? throw new ArgumentNullException(nameof(persistLogLine));
 
             Stream stream = null;
 
@@ -101,7 +105,7 @@ namespace Rooster.Adapters.Kudu
                     if (!line.Contains("docker", StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
-                    await persistLogLine(line, logbook.ContainerInstanceId, cancellation);
+                    await _mediator.Publish(new LogEntryNotification<T> { ContainerInstanceId = logbook.ContainerInstanceId, LogLine = line });
                 }
             }
             finally

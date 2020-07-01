@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using Rooster.Adapters.Kudu;
@@ -7,6 +8,7 @@ using Rooster.DataAccess.AppServices;
 using Rooster.DataAccess.ContainerInstances;
 using Rooster.DataAccess.Logbooks;
 using Rooster.DataAccess.LogEntries;
+using Rooster.Handlers;
 using Rooster.Hosting;
 using Rooster.MongoDb.Connectors.Clients;
 using Rooster.MongoDb.Connectors.Colections;
@@ -15,6 +17,7 @@ using Rooster.MongoDb.DataAccess.AppServices;
 using Rooster.MongoDb.DataAccess.ContainerInstances;
 using Rooster.MongoDb.DataAccess.Logbooks;
 using Rooster.MongoDb.DataAccess.LogEntries;
+using Rooster.MongoDb.Handlers;
 using Rooster.Services;
 
 namespace Rooster.MongoDb.DependencyInjection
@@ -53,8 +56,11 @@ namespace Rooster.MongoDb.DependencyInjection
             services.AddTransient<ILogbookRepository<ObjectId>, MongoDbLogbookRepository>();
             services.AddTransient<ILogEntryRepository<ObjectId>, MongoDbLogEntryRepository>();
 
+            services.AddTransient<IAppServiceService<ObjectId>, AppServiceService<ObjectId>>();
             services.AddTransient<IContainerInstanceService<ObjectId>, ContainerInstanceService<ObjectId>>();
             services.AddTransient<ILogbookService<ObjectId>, LogbookService<ObjectId>>();
+
+            services.AddTransient<INotificationHandler<LogEntryNotification<ObjectId>>, MongoDbLogEntryNotificationHandler>();
 
             services.AddHostedService<AppHost<ObjectId>>();
 

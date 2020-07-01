@@ -7,8 +7,15 @@ namespace Rooster.DataAccess.Logbooks
 {
     public abstract class LogbookRepository<T> : ILogbookRepository<T>
     {
+        private static readonly Action<string, string> ThrowArgumentException = delegate (string name, string value)
+        {
+            throw new ArgumentException($"{name} has invalid value: [{value}].");
+        };
+
         protected abstract bool IsDefaultValue(T value);
+
         protected abstract Task CreateImplementation(Logbook<T> logbook, CancellationToken cancellation);
+
         protected abstract Task<DateTimeOffset> GetLastUpdatedDateForContainerInstanceImplementation(
             T kuduInstanceId,
             CancellationToken cancellation);
@@ -43,10 +50,5 @@ namespace Rooster.DataAccess.Logbooks
 
             return GetLastUpdatedDateForContainerInstanceImplementation(kuduInstanceId, cancellation);
         }
-
-        private static readonly Action<string, string> ThrowArgumentException = delegate (string name, string value)
-        {
-            throw new ArgumentException($"{name} has invalid value: [{value}].");
-        };
     }
 }

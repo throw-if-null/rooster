@@ -39,7 +39,7 @@ namespace Rooster.Services
             if (_containerInstanceRepository.IsDefaultValue(containerInstanceId))
                 containerInstanceId = await _containerInstanceRepository.Create(NewKuduInstance(machineName, appServiceId), cancellation);
 
-            _cache.Set($"{machineName}-{appServiceId}", containerInstanceId);
+            _cache.Set($"{machineName}-{appServiceId}", containerInstanceId, TimeSpan.FromMinutes(10));
 
             return containerInstanceId;
         }
