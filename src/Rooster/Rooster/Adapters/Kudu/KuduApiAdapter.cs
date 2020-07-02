@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Rooster.DataAccess.Logbooks.Entities;
-using Rooster.Handlers;
+using Rooster.Mediator.Notifications;
 using System;
 using System.Collections.Generic;
 using System.IO;

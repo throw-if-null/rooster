@@ -6,10 +6,9 @@ using Rooster.Adapters.Kudu.Handlers;
 using Rooster.DataAccess.AppServices;
 using Rooster.DataAccess.ContainerInstances;
 using Rooster.DataAccess.Logbooks;
-using Rooster.DataAccess.Logbooks.Entities;
 using Rooster.DataAccess.LogEntries;
-using Rooster.Handlers;
 using Rooster.Hosting;
+using Rooster.Mediator.Notifications;
 using Rooster.Services;
 using Rooster.SqlServer.Connectors;
 using Rooster.SqlServer.DataAccess.AppServices;
@@ -17,6 +16,7 @@ using Rooster.SqlServer.DataAccess.ContainerInstances;
 using Rooster.SqlServer.DataAccess.Logbooks;
 using Rooster.SqlServer.DataAccess.LogEntries;
 using Rooster.SqlServer.Handlers;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Rooster.SqlServer.DependencyInjection
 {

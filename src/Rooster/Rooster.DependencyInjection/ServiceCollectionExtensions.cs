@@ -5,9 +5,11 @@ using Rooster.Adapters.Kudu;
 using Rooster.Adapters.Kudu.Handlers;
 using Rooster.CrossCutting;
 using Rooster.DependencyInjection.Exceptions;
-using Rooster.Handlers;
 using Rooster.Hosting;
+using Rooster.Mediator.Notifications;
 using Rooster.MongoDb.DependencyInjection;
+using Rooster.QoS;
+using Rooster.Slack.DependencyInjection;
 using Rooster.SqlServer.DependencyInjection;
 
 namespace Rooster.DependencyInjection
@@ -18,12 +20,14 @@ namespace Rooster.DependencyInjection
         {
             services.Configure<KuduAdapterOptions>(configuration.GetSection($"Adapters:{nameof(KuduAdapterOptions)}"));
             services.Configure<AppHostOptions>(configuration.GetSection($"Hosts:{nameof(AppHostOptions)}"));
+            services.Configure<RetryProviderOptions>(configuration.GetSection($"{nameof(RetryProviderOptions)}"));
 
             services.AddMemoryCache();
 
             services.AddTransient<ILogExtractor, LogExtractor>();
 
-            services.AddSingleton<RequestsInterceptor>();
+            services.AddSingleton<IRetryProvider, RetryProvider>();
+            services.AddTransient<RequestsInterceptor>();
 
             var databaseEngine = configuration.GetSection($"Hosts:{nameof(AppHostOptions)}").GetValue<string>("DatabaseEngine");
 
@@ -35,6 +39,10 @@ namespace Rooster.DependencyInjection
 
                 case "SqlServer":
                     services = services.AddSqlServer(configuration);
+                    break;
+
+                case "Slack":
+                    services = services.AddSlack(configuration);
                     break;
 
                 default:

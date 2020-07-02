@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson;
 using Rooster.Adapters.Kudu;
-using Rooster.Handlers;
+using Rooster.Mediator.Handlers;
 using Rooster.Services;
 
 namespace Rooster.MongoDb.Handlers

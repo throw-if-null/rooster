@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using Rooster.CrossCutting;
 using Rooster.DataAccess.LogEntries;
-using Rooster.Handlers;
+using Rooster.Mediator.Handlers;
 
 namespace Rooster.MongoDb.Handlers
 {

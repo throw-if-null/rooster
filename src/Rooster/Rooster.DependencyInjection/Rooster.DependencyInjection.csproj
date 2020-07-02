@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Rooster.MongoDb\Rooster.MongoDb.csproj" />
+    <ProjectReference Include="..\Rooster.Slack\Rooster.Slack.csproj" />
     <ProjectReference Include="..\Rooster.SqlServer\Rooster.SqlServer.csproj" />
     <ProjectReference Include="..\Rooster\Rooster.csproj" />
   </ItemGroup>
