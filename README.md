@@ -1,5 +1,5 @@
-# rooster
-Rooster :rooster: is log extractor. It extracts docker logs like `docker run` from your Azure App Service console logs and sends them to a configurable location. Currently supported locations include:
+# Rooster
+Rooster :rooster: is log extractor. It extracts docker logs about new container deployment (`docker run`) Kudu API and sends them to SqlServer, MongoDb or Slack. Currently supported locations include:
 * Sql Database
 * MongoDb
 * Slack
