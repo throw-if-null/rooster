@@ -1,32 +1,29 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 using Rooster.DataAccess.ContainerInstances;
 using Rooster.DataAccess.ContainerInstances.Entities;
+using Rooster.Mediator.Requests;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Services
+namespace Rooster.Mediator.Handlers
 {
-    public interface IContainerInstanceService<T>
-    {
-        Task<T> GetOrAdd(string machineName, T appServiceId, CancellationToken cancellation);
-    }
-
-    public class ContainerInstanceService<T> : IContainerInstanceService<T>
+    public abstract class ContainerInstanceRequestHandler<T> : IRequestHandler<ContainerInstanceRequest<T>, T>
     {
         private readonly IContainerInstanceRepository<T> _containerInstanceRepository;
         private readonly IMemoryCache _cache;
 
-        public ContainerInstanceService(IContainerInstanceRepository<T> containerInstanceRepository, IMemoryCache cache)
+        protected ContainerInstanceRequestHandler(IContainerInstanceRepository<T> containerInstanceRepository, IMemoryCache cache)
         {
             _containerInstanceRepository = containerInstanceRepository ?? throw new ArgumentNullException(nameof(containerInstanceRepository));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
-        public async Task<T> GetOrAdd(string machineName, T appServiceId, CancellationToken cancellation)
+        public virtual async Task<T> Handle(ContainerInstanceRequest<T> request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(machineName))
-                throw new ArgumentNullException(nameof(machineName));
+            var machineName = request.MachineName;
+            var appServiceId = request.AppServiceId;
 
             if (_cache.TryGetValue<T>($"{machineName}-{appServiceId}", out var containerInstanceId))
                 return containerInstanceId;
@@ -34,10 +31,10 @@ namespace Rooster.Services
             if (_containerInstanceRepository.IsDefaultValue(appServiceId))
                 throw new ArgumentNullException(nameof(appServiceId));
 
-            containerInstanceId = await _containerInstanceRepository.GetIdByNameAndAppServiceId(machineName, appServiceId, cancellation);
+            containerInstanceId = await _containerInstanceRepository.GetIdByNameAndAppServiceId(machineName, appServiceId, cancellationToken);
 
             if (_containerInstanceRepository.IsDefaultValue(containerInstanceId))
-                containerInstanceId = await _containerInstanceRepository.Create(NewKuduInstance(machineName, appServiceId), cancellation);
+                containerInstanceId = await _containerInstanceRepository.Create(NewKuduInstance(machineName, appServiceId), cancellationToken);
 
             _cache.Set($"{machineName}-{appServiceId}", containerInstanceId, TimeSpan.FromMinutes(10));
 

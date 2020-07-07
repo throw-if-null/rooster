@@ -8,8 +8,7 @@ using Rooster.DataAccess.ContainerInstances;
 using Rooster.DataAccess.Logbooks;
 using Rooster.DataAccess.LogEntries;
 using Rooster.Hosting;
-using Rooster.Mediator.Notifications;
-using Rooster.Services;
+using Rooster.Mediator.Requests;
 using Rooster.Slack.Handlers;
 using Rooster.Slack.Reporting;
 using System;
@@ -35,12 +34,7 @@ namespace Rooster.Slack.DependencyInjection
                 .AddHttpClient<IReporter, WebHookReporter>(x => x.BaseAddress = new Uri("https://hooks.slack.com"))
                 .AddHttpMessageHandler<RequestsInterceptor>();
 
-            services.AddTransient<IAppServiceService<object>, AppServiceService<object>>();
-            services.AddTransient<IContainerInstanceService<object>, ContainerInstanceService<object>>();
-            services.AddTransient<ILogbookService<object>, LogbookService<object>>();
-
-            services.AddTransient<INotificationHandler<LogEntryNotification<object>>, SlackLogEntryNotificationHandler>();
-            services.AddTransient<INotificationHandler<LogbookNotification<object>>, SlackLogbookNotificationHandler>();
+            services.AddTransient<IRequestHandler<LogEntryRequest<object>>, SlackLogEntryRequestHandler>();
 
             services.AddHostedService<AppHost<object>>();
 

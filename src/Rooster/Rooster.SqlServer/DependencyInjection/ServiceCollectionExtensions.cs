@@ -8,15 +8,13 @@ using Rooster.DataAccess.ContainerInstances;
 using Rooster.DataAccess.Logbooks;
 using Rooster.DataAccess.LogEntries;
 using Rooster.Hosting;
-using Rooster.Mediator.Notifications;
-using Rooster.Services;
+using Rooster.Mediator.Requests;
 using Rooster.SqlServer.Connectors;
 using Rooster.SqlServer.DataAccess.AppServices;
 using Rooster.SqlServer.DataAccess.ContainerInstances;
 using Rooster.SqlServer.DataAccess.Logbooks;
 using Rooster.SqlServer.DataAccess.LogEntries;
 using Rooster.SqlServer.Handlers;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Rooster.SqlServer.DependencyInjection
 {
@@ -39,12 +37,7 @@ namespace Rooster.SqlServer.DependencyInjection
                 .AddHttpClient<IKuduApiAdapter<int>, KuduApiAdapter<int>>()
                 .AddHttpMessageHandler<RequestsInterceptor>();
 
-            services.AddTransient<IAppServiceService<int>, AppServiceService<int>>();
-            services.AddTransient<IContainerInstanceService<int>, ContainerInstanceService<int>>();
-            services.AddTransient<ILogbookService<int>, LogbookService<int>>();
-
-            services.AddTransient<INotificationHandler<LogEntryNotification<int>>, SqlLogEntryNotificationHandler>();
-            services.AddTransient<INotificationHandler<LogbookNotification<int>>, SqlLogbookNotificationHandler>();
+            services.AddTransient<IRequestHandler<LogEntryRequest<int>>, SqlLogEntryRequestHandler>();
 
             services.AddHostedService<AppHost<int>>();
 

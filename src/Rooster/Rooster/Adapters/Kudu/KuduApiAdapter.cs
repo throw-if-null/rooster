@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Rooster.DataAccess.Logbooks.Entities;
-using Rooster.Mediator.Notifications;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,7 +20,7 @@ namespace Rooster.Adapters.Kudu
     {
         Task<IEnumerable<Logbook<T>>> GetDockerLogs(CancellationToken cancellation);
 
-        Task ExtractLogsFromStream(Logbook<T> logbook, CancellationToken cancellation);
+        IAsyncEnumerable<string> ExtractLogsFromStream(Logbook<T> logbook);
     }
 
     public class KuduApiAdapter<T> : IKuduApiAdapter<T>
@@ -80,7 +79,7 @@ namespace Rooster.Adapters.Kudu
             }
         }
 
-        public async Task ExtractLogsFromStream(Logbook<T> logbook, CancellationToken cancellation)
+        public async IAsyncEnumerable<string> ExtractLogsFromStream(Logbook<T> logbook)
         {
             _ = logbook ?? throw new ArgumentNullException(nameof(logbook));
 
@@ -105,7 +104,7 @@ namespace Rooster.Adapters.Kudu
                     if (!line.Contains("docker", StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
-                    await _mediator.Publish(new LogEntryNotification<T> { ContainerInstanceId = logbook.ContainerInstanceId, LogLine = line });
+                    yield return line;
                 }
             }
             finally

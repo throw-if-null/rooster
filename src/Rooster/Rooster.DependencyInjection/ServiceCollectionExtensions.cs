@@ -6,7 +6,7 @@ using Rooster.Adapters.Kudu.Handlers;
 using Rooster.CrossCutting;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
-using Rooster.Mediator.Notifications;
+using Rooster.Mediator.Requests;
 using Rooster.MongoDb.DependencyInjection;
 using Rooster.QoS;
 using Rooster.Slack.DependencyInjection;
@@ -49,7 +49,13 @@ namespace Rooster.DependencyInjection
                     throw new NotSupportedDataStoreException(databaseEngine);
             }
 
-            services.AddMediatR(new[] { typeof(LogEntryNotification<>), typeof(LogbookNotification<>) });
+            services.AddMediatR(new[]
+            {
+                typeof(AppServiceRequest<>),
+                typeof(ContainerInstanceRequest<>),
+                typeof(LogbookRequest<>),
+                typeof(LogEntryRequest<>)
+            });
 
             return services;
         }

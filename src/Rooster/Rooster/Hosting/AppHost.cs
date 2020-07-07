@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Rooster.Adapters.Kudu;
-using Rooster.Mediator.Notifications;
+using Rooster.Mediator.Requests;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,7 +40,40 @@ namespace Rooster.Hosting
                     if (logbook.LastUpdated.Date < DateTimeOffset.UtcNow.Date)
                         continue;
 
-                    await _mediator.Publish(new LogbookNotification<T>(logbook), cancellationToken);
+                    var appServiceId =
+                        await
+                            _mediator.Send(
+                                new AppServiceRequest<T> { KuduLogUri = logbook.Href },
+                                cancellationToken);
+
+                    var containerInstanceId =
+                        await
+                            _mediator.Send(
+                                new ContainerInstanceRequest<T> { MachineName = logbook.MachineName, AppServiceId = appServiceId },
+                                cancellationToken);
+
+                    var lastUpdateDate =
+                        await
+                            _mediator.Send(
+                                new LogbookRequest<T>
+                                {
+                                    ContainerInstanceId = containerInstanceId,
+                                    LastUpdated = logbook.LastUpdated,
+                                    MachineName = logbook.MachineName
+                                },
+                                cancellationToken);
+
+                    if (logbook.LastUpdated < lastUpdateDate)
+                        return;
+
+                    var lines = _kudu.ExtractLogsFromStream(logbook);
+
+                    await foreach (var line in lines)
+                    {
+                        LogEntryRequest<T> logEntryRequest = await _mediator.Send(new RawLogEntryRequest<T> { LogLine = line }, cancellationToken);
+
+                        await _mediator.Send(logEntryRequest, cancellationToken);
+                    }
                 }
 
                 if (!_options.UseInternalPoller)

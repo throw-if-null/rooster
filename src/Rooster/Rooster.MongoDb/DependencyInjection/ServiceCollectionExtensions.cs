@@ -9,7 +9,7 @@ using Rooster.DataAccess.ContainerInstances;
 using Rooster.DataAccess.Logbooks;
 using Rooster.DataAccess.LogEntries;
 using Rooster.Hosting;
-using Rooster.Mediator.Notifications;
+using Rooster.Mediator.Requests;
 using Rooster.MongoDb.Connectors.Clients;
 using Rooster.MongoDb.Connectors.Colections;
 using Rooster.MongoDb.Connectors.Databases;
@@ -18,7 +18,6 @@ using Rooster.MongoDb.DataAccess.ContainerInstances;
 using Rooster.MongoDb.DataAccess.Logbooks;
 using Rooster.MongoDb.DataAccess.LogEntries;
 using Rooster.MongoDb.Handlers;
-using Rooster.Services;
 
 namespace Rooster.MongoDb.DependencyInjection
 {
@@ -56,12 +55,7 @@ namespace Rooster.MongoDb.DependencyInjection
             services.AddTransient<ILogbookRepository<ObjectId>, MongoDbLogbookRepository>();
             services.AddTransient<ILogEntryRepository<ObjectId>, MongoDbLogEntryRepository>();
 
-            services.AddTransient<IAppServiceService<ObjectId>, AppServiceService<ObjectId>>();
-            services.AddTransient<IContainerInstanceService<ObjectId>, ContainerInstanceService<ObjectId>>();
-            services.AddTransient<ILogbookService<ObjectId>, LogbookService<ObjectId>>();
-
-            services.AddTransient<INotificationHandler<LogEntryNotification<ObjectId>>, MongoDbLogEntryNotificationHandler>();
-            services.AddTransient<INotificationHandler<LogbookNotification<ObjectId>>, MongoDbLogbookNotificationHandler>();
+            services.AddTransient<IRequestHandler<LogEntryRequest<ObjectId>>, MongoDbLogEntryRequestHandler>();
 
             services.AddHostedService<AppHost<ObjectId>>();
 

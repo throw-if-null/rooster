@@ -13,6 +13,8 @@ namespace Rooster.DataAccess.LogEntries.Entities
 
         public string ImageName { get; set; }
 
+        public string WebsiteName { get; set; }
+
         public string ContainerName { get; set; }
 
         public string InboundPort { get; set; }
@@ -21,16 +23,6 @@ namespace Rooster.DataAccess.LogEntries.Entities
 
         public DateTimeOffset Date { get; set; }
 
-        public LogEntry(T appServiceId, string imageName, string containerName, string inboundPort, string outboundPort, DateTimeOffset date)
-        {
-            LogbookId = appServiceId;
-            ImageName = imageName;
-            ContainerName = containerName;
-            InboundPort = inboundPort;
-            OutboundPort = outboundPort;
-            Date = date;
-        }
-
         public override string ToString()
         {
             var builder = new StringBuilder();
@@ -38,6 +30,7 @@ namespace Rooster.DataAccess.LogEntries.Entities
             builder
                 .Append($"{nameof(LogbookId)}: {LogbookId}, ")
                 .Append($"{nameof(ImageName)}:{ImageName}, ")
+                .Append($"{nameof(WebsiteName)}:{WebsiteName}, ")
                 .Append($"{nameof(ContainerName)}:{ContainerName}, ")
                 .Append($"{nameof(InboundPort)}:{InboundPort}, ")
                 .Append($"{nameof(OutboundPort)}:{OutboundPort}, ")
