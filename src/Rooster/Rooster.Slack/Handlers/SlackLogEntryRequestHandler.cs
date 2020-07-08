@@ -17,13 +17,6 @@ namespace Rooster.Slack.Handlers
             _reporter = reporter ?? throw new ArgumentNullException(nameof(reporter));
         }
 
-        private static double UtcNowToUnixTimestamp(DateTimeOffset date)
-        {
-            TimeSpan difference = date.ToUniversalTime() - DateTimeOffset.UnixEpoch;
-
-            return Math.Floor(difference.TotalSeconds);
-        }
-
         protected override Task Handle(LogEntryRequest<object> request, CancellationToken cancellationToken)
         {
             var message = $"Container restarted.";

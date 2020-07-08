@@ -54,7 +54,8 @@ namespace Rooster.DependencyInjection
                 typeof(AppServiceRequest<>),
                 typeof(ContainerInstanceRequest<>),
                 typeof(LogbookRequest<>),
-                typeof(LogEntryRequest<>)
+                typeof(LogEntryRequest<>),
+                typeof(RawLogEntryRequest<>)
             });
 
             return services;
