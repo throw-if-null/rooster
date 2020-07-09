@@ -7,8 +7,8 @@ namespace Rooster.DataAccess.LogEntries
 {
     public interface ILogEntryRepository<T>
     {
-        Task Create(LogEntry<T> entry, CancellationToken cancellation) => Task.CompletedTask;
+        Task Create(LogEntry<T> entry, CancellationToken cancellation);
 
-        Task<DateTimeOffset> GetLatestForLogbook(T logbookId, CancellationToken cancellation) => Task.FromResult(DateTimeOffset.MinValue);
+        Task<DateTimeOffset> GetLatest(CancellationToken cancellation);
     }
 }

@@ -13,13 +13,13 @@ namespace Rooster.Hosting
     public class AppHost<T> : IHostedService
     {
         private readonly AppHostOptions _options;
-        private readonly IKuduApiAdapter<T> _kudu;
+        private readonly IKuduApiAdapter _kudu;
         private readonly IMediator _mediator;
         private readonly ILogger _logger;
 
         public AppHost(
             IOptionsMonitor<AppHostOptions> options,
-            IKuduApiAdapter<T> kudu,
+            IKuduApiAdapter kudu,
             IMediator mediator,
             ILogger<AppHost<T>> logger)
         {
@@ -33,40 +33,29 @@ namespace Rooster.Hosting
         {
             while (true)
             {
-                var logbooks = await _kudu.GetDockerLogs(cancellationToken);
+                var kuduLogs = await _kudu.GetDockerLogs(cancellationToken);
 
-                foreach (var logbook in logbooks)
+                foreach ((DateTimeOffset LastUpdated, Uri LogUri, string MachineName) in kuduLogs)
                 {
-                    if (logbook.LastUpdated.Date < DateTimeOffset.UtcNow.Date)
+                    if (LastUpdated.Date < DateTimeOffset.UtcNow.Date)
                         continue;
 
                     var appServiceId =
                         await
                             _mediator.Send(
-                                new AppServiceRequest<T> { KuduLogUri = logbook.Href },
+                                new AppServiceRequest<T> { KuduLogUri = LogUri },
                                 cancellationToken);
 
                     var containerInstanceId =
                         await
                             _mediator.Send(
-                                new ContainerInstanceRequest<T> { MachineName = logbook.MachineName, AppServiceId = appServiceId },
+                                new ContainerInstanceRequest<T> { MachineName = MachineName, AppServiceId = appServiceId },
                                 cancellationToken);
 
-                    var lastUpdateDate =
-                        await
-                            _mediator.Send(
-                                new LogbookRequest<T>
-                                {
-                                    ContainerInstanceId = containerInstanceId,
-                                    LastUpdated = logbook.LastUpdated,
-                                    MachineName = logbook.MachineName
-                                },
-                                cancellationToken);
-
-                    if (logbook.LastUpdated < lastUpdateDate)
+                    if (LastUpdated < DateTimeOffset.UtcNow.AddMinutes(_options.CurrentDateVariance))
                         return;
 
-                    var lines = _kudu.ExtractLogsFromStream(logbook);
+                    var lines = _kudu.ExtractLogsFromStream(LogUri);
 
                     await foreach (var line in lines)
                     {

@@ -37,26 +37,10 @@ CREATE TABLE [dbo].[ContainerInstance]
 	[AppServiceId] INT NOT NULL,
 
 	CONSTRAINT [PK_KuduInstance_Id] PRIMARY KEY ([Id] ASC),
-	CONSTRAINT [FK_Logbook_AppServicea_Id] FOREIGN KEY ([AppServiceId]) REFERENCES [dbo].[AppService] ([Id])
+	CONSTRAINT [FK_ContainerInstance_AppServicea_Id] FOREIGN KEY ([AppServiceId]) REFERENCES [dbo].[AppService] ([Id])
 );
 
 CREATE NONCLUSTERED INDEX [IX_ContainerInstance_Name] on [dbo].[ContainerInstance] ([Name]);
-GO
-
--- Create table Logbook
-CREATE TABLE [dbo].[Logbook]
-(
-	[Id] INT NOT NULL IDENTITY(1, 1),
-	[Created] DATETIMEOFFSET NOT NULL DEFAULT(GETDATE()),
-	[LastUpdated] DATETIMEOFFSET NOT NULL,
-	[ContainerInstanceId] INT NOT NULL,
-	CONSTRAINT [PK_Logbook_Id] PRIMARY KEY ([Id] ASC),
-	CONSTRAINT [FK_Logbook_ContainerInstance_Id] FOREIGN KEY ([ContainerInstanceId]) REFERENCES [dbo].[ContainerInstance] ([Id])
-);
-
-GO
-
-CREATE NONCLUSTERED INDEX [IX_Logbook_LastUpdated] on [dbo].[Logbook] ([ContainerInstanceId], [LastUpdated]);
 GO
 
 -- Create table LogEntry
@@ -69,13 +53,8 @@ CREATE TABLE [dbo].[LogEntry]
 	[Date] DATETIMEOFFSET NOT NULL,
 	[InboundPort] INT NOT NULL,
 	[OutboundPort] INT NOT NULL,
-	[LogBookId] INT NOT NULL,
 
-	CONSTRAINT [PK_LogEntry_Id] PRIMARY KEY ([Id] ASC),
-	CONSTRAINT [FK_LogEntry_LogBook_Id] FOREIGN KEY ([LogBookId]) REFERENCES [dbo].[LogBook] ([Id])
+	CONSTRAINT [PK_LogEntry_Id] PRIMARY KEY ([Id] ASC)
 );
 
-GO
-
-CREATE NONCLUSTERED INDEX [IX_LogEntry_AppServiceId] ON [dbo].[LogEntry] ([LogBookId], [Created] DESC);
 GO

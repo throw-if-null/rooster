@@ -9,7 +9,7 @@ namespace Rooster.DataAccess.LogEntries
     {
         protected abstract bool IsDefaultValue(T value);
         protected abstract Task CreateImplementation(LogEntry<T> logEntry, CancellationToken cancellation);
-        protected abstract Task<DateTimeOffset> GetLatestForLogbookImplementation(T logbookId, CancellationToken cancellation);
+        protected abstract Task<DateTimeOffset> GetLatestImplementation(CancellationToken cancellation);
 
 
         public Task Create(LogEntry<T> entry, CancellationToken cancellation)
@@ -19,20 +19,14 @@ namespace Rooster.DataAccess.LogEntries
             return CreateImplementation(entry, cancellation);
         }
 
-        public Task<DateTimeOffset> GetLatestForLogbook(T logbookId, CancellationToken cancellation)
+        public Task<DateTimeOffset> GetLatest(CancellationToken cancellation)
         {
-            if (IsDefaultValue(logbookId))
-                return default;
-
-            return GetLatestForLogbookImplementation(logbookId, cancellation);
+            return GetLatestImplementation(cancellation);
         }
 
         private void Validate(LogEntry<T> logEntry)
         {
             _ = logEntry ?? throw new ArgumentNullException(nameof(logEntry));
-
-            if (IsDefaultValue(logEntry.LogbookId))
-                ThrowArgumentException(nameof(logEntry.LogbookId), logEntry.LogbookId.ToString());
 
             if (string.IsNullOrWhiteSpace(logEntry.ContainerName))
                 ThrowArgumentException(nameof(logEntry.ContainerName), logEntry.ContainerName == null ? "NULL" : "EMPTY");

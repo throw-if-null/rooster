@@ -5,7 +5,6 @@ using Rooster.Adapters.Kudu;
 using Rooster.Adapters.Kudu.Handlers;
 using Rooster.DataAccess.AppServices;
 using Rooster.DataAccess.ContainerInstances;
-using Rooster.DataAccess.Logbooks;
 using Rooster.DataAccess.LogEntries;
 using Rooster.Hosting;
 using Rooster.Mediator.Requests;
@@ -23,12 +22,7 @@ namespace Rooster.Slack.DependencyInjection
 
             services.AddTransient<IAppServiceRepository<object>, NullAppServiceRepository>();
             services.AddTransient<IContainerInstanceRepository<object>, NullContainerInstanceRepository>();
-            services.AddTransient<ILogbookRepository<object>, NullLogbookRepository>();
             services.AddTransient<ILogEntryRepository<object>, NullLogEntryRepository>();
-
-            services
-                .AddHttpClient<IKuduApiAdapter<object>, KuduApiAdapter<object>>()
-                .AddHttpMessageHandler<RequestsInterceptor>();
 
             services
                 .AddHttpClient<IReporter, WebHookReporter>(x => x.BaseAddress = new Uri("https://hooks.slack.com"))
@@ -37,7 +31,6 @@ namespace Rooster.Slack.DependencyInjection
 
             services.AddTransient<IRequestHandler<AppServiceRequest<object>, object>, SlackAppServiceRequestHandler>();
             services.AddTransient<IRequestHandler<ContainerInstanceRequest<object>, object>, SlackContainerInstanceRequestHandler>();
-            services.AddTransient<IRequestHandler<LogbookRequest<object>, DateTimeOffset>, SlackLogbookRequestHandler>();
             services.AddTransient<IRequestHandler<RawLogEntryRequest<object>, LogEntryRequest<object>>, SlackRawLogEntryRequestHandler>();
             services.AddTransient<IRequestHandler<LogEntryRequest<object>, Unit>, SlackLogEntryRequestHandler>();
 

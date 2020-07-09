@@ -18,6 +18,8 @@ namespace Rooster.Slack.Reporting
 
     public class WebHookReporter : IReporter
     {
+        private static readonly object[] EmptyParams = Array.Empty<object>();
+
         private static readonly Func<HttpResponseMessage, bool> TransientHttpStatusCodePredicate = delegate (HttpResponseMessage response)
         {
             if (response.StatusCode < HttpStatusCode.InternalServerError)
@@ -46,22 +48,21 @@ namespace Rooster.Slack.Reporting
 
             try
             {
+                var serializedContent = JsonConvert.SerializeObject(payload, Formatting.Indented);
                 await
                     _retryProvider.RetryOn<HttpRequestException, HttpResponseMessage>(
                         CheckError,
                         TransientHttpStatusCodePredicate,
-                        () => Send(_client, _options, JsonConvert.SerializeObject(payload, Formatting.Indented), _logger, linkedSource.Token));
+                        () => Send(_client, _options, serializedContent, _logger, linkedSource.Token));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Report sending failed");
+                _logger.LogError(ex, "Report sending failed", EmptyParams);
             }
         }
 
-        private bool CheckError(HttpRequestException x)
+        private static bool CheckError(HttpRequestException x)
         {
-            _logger.LogError(x, "Report sending failed");
-
             if (!x.Data.Contains(nameof(HttpStatusCode)))
                 return false;
 
@@ -73,7 +74,11 @@ namespace Rooster.Slack.Reporting
             return false;
         }
 
-        private static async Task<HttpResponseMessage> Send(HttpClient client, WebHookReporterOptions options, string payload, ILogger logger, CancellationToken cancellation)
+        private static async Task<HttpResponseMessage> Send(
+            HttpClient client, WebHookReporterOptions options,
+            string payload,
+            ILogger logger,
+            CancellationToken cancellation)
         {
 
             var request = new HttpRequestMessage
@@ -93,7 +98,7 @@ namespace Rooster.Slack.Reporting
 
             var response = await client.SendAsync(request, cancellation);
 
-            logger.LogDebug($"Report send  to URL: {client.BaseAddress + options.Url} with received status: {response.StatusCode}");
+            logger.LogDebug($"Report send  to URL: {client.BaseAddress + options.Url} with received status: {response.StatusCode}", EmptyParams);
 
             if (!response.IsSuccessStatusCode)
                 throw new HttpRequestException(response.ReasonPhrase) { Data = { [nameof(HttpStatusCode)] = response.StatusCode } };

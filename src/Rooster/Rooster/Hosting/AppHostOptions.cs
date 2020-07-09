@@ -19,5 +19,15 @@
         /// some scheduler of your choice will execute the app again, in this scenario Rooster app becomes a job.
         /// </remarks>
         public bool UseInternalPoller { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the value in minutes that will be deduced from current date when compared to log's last update date.
+        /// </summary>
+        /// <remarks>
+        /// Meaning if the current date is `2020-07-07 12:15:00` and the log's last update date is `2020-07-07 12:10:00` and if the CurrentDateVariance
+        /// has the value 5, application would consider the to dates to be equal and it would proceed with reading the log.
+        /// Default value is 5 (minutes).
+        /// </remarks>
+        public int CurrentDateVariance { get; set; } = 5;
     }
 }

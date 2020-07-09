@@ -13,10 +13,6 @@
     {
     }
 
-    public sealed class LogbookCollectionFactoryOptions : CollectionFactoryOptions
-    {
-    }
-
     public sealed class LogEntryCollectionFactoryOptions : CollectionFactoryOptions
     {
     }

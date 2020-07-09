@@ -18,7 +18,6 @@ namespace Rooster.SqlServer.DataAccess.LogEntries
             var builder = new StringBuilder();
 
             builder
-                .Append($"{prefix}{nameof(LogEntry<int>.LogbookId)}, ")
                 .Append($"{prefix}{nameof(LogEntry<int>.ContainerName)}, ")
                 .Append($"{prefix}{nameof(LogEntry<int>.Date)}, ")
                 .Append($"{prefix}{nameof(LogEntry<int>.ImageName)}, ")
@@ -48,7 +47,6 @@ namespace Rooster.SqlServer.DataAccess.LogEntries
             {
                 return
                     $"SELECT TOP 1 {nameof(LogEntry<int>.Date)} FROM {nameof(LogEntry<int>)} " +
-                    $"WHERE {nameof(LogEntry<int>.LogbookId)} = @{nameof(LogEntry<int>.LogbookId)} " +
                     $"ORDER BY {nameof(LogEntry<int>.Created)} DESC";
             };
 
@@ -72,7 +70,6 @@ namespace Rooster.SqlServer.DataAccess.LogEntries
                 InsertLogEntryQuery(),
                 new
                 {
-                    entry.LogbookId,
                     entry.ContainerName,
                     entry.Date,
                     entry.ImageName,
@@ -84,13 +81,12 @@ namespace Rooster.SqlServer.DataAccess.LogEntries
             await connection.ExecuteAsync(command);
         }
 
-        protected override async Task<DateTimeOffset> GetLatestForLogbookImplementation(int logbookId, CancellationToken cancellation)
+        protected override async Task<DateTimeOffset> GetLatestImplementation(CancellationToken cancellation)
         {
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(
                 GetLastLogEntryDate(),
-                new { LogbookId = logbookId },
                 cancellationToken: cancellation);
 
             var lastDate = await connection.QueryFirstOrDefaultAsync<DateTimeOffset>(command);

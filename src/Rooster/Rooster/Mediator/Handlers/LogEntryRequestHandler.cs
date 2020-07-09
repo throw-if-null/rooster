@@ -19,7 +19,8 @@ namespace Rooster.Mediator.Handlers
 
         protected override async Task Handle(LogEntryRequest<T> request, CancellationToken cancellationToken)
         {
-            var latestLogEntry = await _logEntryRepository.GetLatestForLogbook(request.LogbookId, cancellationToken);
+            // TODO: Do I actually need this check?
+            var latestLogEntry = await _logEntryRepository.GetLatest(cancellationToken);
 
             if (request.Date <= latestLogEntry)
                 return;
@@ -32,7 +33,6 @@ namespace Rooster.Mediator.Handlers
                 Id = request.Id,
                 ImageName = request.ImageName,
                 InboundPort = request.InboundPort,
-                LogbookId = request.LogbookId,
                 OutboundPort = request.OutboundPort,
                 WebsiteName = request.WebsiteName
             };

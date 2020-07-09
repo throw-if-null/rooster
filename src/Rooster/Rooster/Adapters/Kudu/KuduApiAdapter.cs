@@ -1,7 +1,5 @@
-﻿using MediatR;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Rooster.DataAccess.Logbooks.Entities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,14 +14,14 @@ using static System.Convert;
 
 namespace Rooster.Adapters.Kudu
 {
-    public interface IKuduApiAdapter<T>
+    public interface IKuduApiAdapter
     {
-        Task<IEnumerable<Logbook<T>>> GetDockerLogs(CancellationToken cancellation);
+        Task<IEnumerable<(DateTimeOffset LastUpdated, Uri LogUri, string MachineName)>> GetDockerLogs(CancellationToken cancellation);
 
-        IAsyncEnumerable<string> ExtractLogsFromStream(Logbook<T> logbook);
+        IAsyncEnumerable<string> ExtractLogsFromStream(Uri logUri);
     }
 
-    public class KuduApiAdapter<T> : IKuduApiAdapter<T>
+    public class KuduApiAdapter : IKuduApiAdapter
     {
         private static readonly Func<string, string, AuthenticationHeaderValue> BuildBasicAuthHeader =
             delegate (string user, string password)
@@ -47,47 +45,50 @@ namespace Rooster.Adapters.Kudu
             };
 
         private readonly HttpClient _client;
-        private readonly IMediator _mediator;
 
-        public KuduApiAdapter(IOptionsMonitor<KuduAdapterOptions> options, HttpClient client, IMediator mediator)
+        public KuduApiAdapter(IOptionsMonitor<KuduAdapterOptions> options, HttpClient client)
         {
             _ = client ?? throw new ArgumentNullException(nameof(client));
             _ = options?.CurrentValue ?? throw new ArgumentNullException(nameof(options));
-            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 
             _client = BuildHttpClient(client, options?.CurrentValue);
         }
 
-        public async Task<IEnumerable<Logbook<T>>> GetDockerLogs(CancellationToken cancellation)
+        public async Task<IEnumerable<(DateTimeOffset LastUpdated, Uri LogUri, string MachineName)>> GetDockerLogs(CancellationToken cancellation)
         {
             using var response = await _client.GetAsync("api/logs/docker", cancellation);
 
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
-            var logs = JsonConvert.DeserializeObject<IEnumerable<Logbook<T>>>(content);
-
-            return FilterDockerLogbooks(logs);
-
-            static IReadOnlyCollection<Logbook<T>> FilterDockerLogbooks(IEnumerable<Logbook<T>> all)
+            var kuduLog = new[]
             {
-                return all.Where(
+                new
+                {
+                    lastUpdated = DateTimeOffset.UtcNow,
+                    href = _client.BaseAddress,
+                    machineName = string.Empty
+                }
+            };
+
+            var logs = JsonConvert.DeserializeAnonymousType(content, kuduLog);
+
+            var values = logs.Select(x => (x.lastUpdated, x.href, x.machineName));
+
+            return values.Where(
                     x =>
-                        !x.MachineName.EndsWith("_default", StringComparison.InvariantCultureIgnoreCase) &&
-                        !x.MachineName.EndsWith("_msi", StringComparison.InvariantCultureIgnoreCase))
+                        !x.machineName.EndsWith("_default", StringComparison.InvariantCultureIgnoreCase) &&
+                        !x.machineName.EndsWith("_msi", StringComparison.InvariantCultureIgnoreCase))
                     .ToArray();
-            }
         }
 
-        public async IAsyncEnumerable<string> ExtractLogsFromStream(Logbook<T> logbook)
+        public async IAsyncEnumerable<string> ExtractLogsFromStream(Uri logUri)
         {
-            _ = logbook ?? throw new ArgumentNullException(nameof(logbook));
-
             Stream stream = null;
 
             try
             {
-                stream = await _client.GetStreamAsync(logbook.Href);
+                stream = await _client.GetStreamAsync(logUri);
 
                 using var logReader = new StreamReader(stream);
                 stream = null;

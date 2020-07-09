@@ -17,6 +17,13 @@ namespace Rooster.QoS
 
     public class RetryProvider : IRetryProvider
     {
+        private static readonly Func<double> GetJitter = delegate ()
+        {
+            var jitter = TimeSpan.FromMilliseconds(new Random().Next(0, 100)).TotalMilliseconds;
+
+            return jitter;
+        };
+
         private readonly RetryProviderOptions _options;
         private readonly ILogger _logger;
 
@@ -34,24 +41,17 @@ namespace Rooster.QoS
         {
             return
                 Policy
-                    .Handle(exceptionPredicate)
+                    .Handle<TException>(exceptionPredicate)
                     .OrResult(resultPredicate)
                     .WaitAndRetryAsync(
                         _options.Delays.Count,
                         i =>
-                        {
-                            _logger.LogInformation("Retry attempt: {0}", i);
+                            {
+                                _logger.LogInformation($"Retry attempt: {i}", Array.Empty<object>());
 
-                            return TimeSpan.FromMilliseconds(_options.Delays[i - 1] + GetJitter());
-                        })
+                                return TimeSpan.FromMilliseconds(_options.Delays[i - 1] + GetJitter());
+                            })
                     .ExecuteAsync(execute);
         }
-
-        private static readonly Func<double> GetJitter = delegate ()
-        {
-            var jitter = TimeSpan.FromMilliseconds(new Random().Next(0, 100)).TotalMilliseconds;
-
-            return jitter;
-        };
     }
 }

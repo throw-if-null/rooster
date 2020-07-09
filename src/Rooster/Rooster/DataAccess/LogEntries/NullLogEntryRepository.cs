@@ -14,7 +14,7 @@ namespace Rooster.DataAccess.LogEntries
             return Task.CompletedTask;
         }
 
-        protected override Task<DateTimeOffset> GetLatestForLogbookImplementation(object logbookId, CancellationToken cancellation)
+        protected override Task<DateTimeOffset> GetLatestImplementation(CancellationToken cancellation)
         {
             return Task.FromResult(DateTimeOffset.MinValue);
         }

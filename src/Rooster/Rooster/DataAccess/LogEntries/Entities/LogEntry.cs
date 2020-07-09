@@ -9,8 +9,6 @@ namespace Rooster.DataAccess.LogEntries.Entities
 
         public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 
-        public T LogbookId { get; set; }
-
         public string ImageName { get; set; }
 
         public string WebsiteName { get; set; }
@@ -28,7 +26,6 @@ namespace Rooster.DataAccess.LogEntries.Entities
             var builder = new StringBuilder();
 
             builder
-                .Append($"{nameof(LogbookId)}: {LogbookId}, ")
                 .Append($"{nameof(ImageName)}:{ImageName}, ")
                 .Append($"{nameof(WebsiteName)}:{WebsiteName}, ")
                 .Append($"{nameof(ContainerName)}:{ContainerName}, ")

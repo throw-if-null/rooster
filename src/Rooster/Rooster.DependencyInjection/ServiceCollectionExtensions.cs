@@ -29,6 +29,8 @@ namespace Rooster.DependencyInjection
             services.AddSingleton<IRetryProvider, RetryProvider>();
             services.AddTransient<RequestsInterceptor>();
 
+            services.AddHttpClient<IKuduApiAdapter, KuduApiAdapter>().AddHttpMessageHandler<RequestsInterceptor>();
+
             var databaseEngine = configuration.GetSection($"Hosts:{nameof(AppHostOptions)}").GetValue<string>("DatabaseEngine");
 
             switch (databaseEngine)
@@ -53,7 +55,6 @@ namespace Rooster.DependencyInjection
             {
                 typeof(AppServiceRequest<>),
                 typeof(ContainerInstanceRequest<>),
-                typeof(LogbookRequest<>),
                 typeof(LogEntryRequest<>),
                 typeof(RawLogEntryRequest<>)
             });

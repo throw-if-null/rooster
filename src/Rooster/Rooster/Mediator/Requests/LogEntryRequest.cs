@@ -9,8 +9,6 @@ namespace Rooster.Mediator.Requests
 
         public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 
-        public T LogbookId { get; set; }
-
         public string ImageName { get; set; }
 
         public string WebsiteName { get; set; }
