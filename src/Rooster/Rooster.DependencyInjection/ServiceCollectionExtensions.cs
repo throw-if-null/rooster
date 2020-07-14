@@ -53,10 +53,8 @@ namespace Rooster.DependencyInjection
 
             services.AddMediatR(new[]
             {
-                typeof(AppServiceRequest<>),
-                typeof(ContainerInstanceRequest<>),
-                typeof(LogEntryRequest<>),
-                typeof(RawLogEntryRequest<>)
+                typeof(ProcessLogEntryRequest<>),
+                typeof(ExportLogEntryRequest<>)
             });
 
             return services;

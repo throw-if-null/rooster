@@ -18,11 +18,13 @@ namespace Rooster.SqlServer.DataAccess.LogEntries
             var builder = new StringBuilder();
 
             builder
+                .Append($"{prefix}{nameof(LogEntry<int>.ServiceName)}, ")
                 .Append($"{prefix}{nameof(LogEntry<int>.ContainerName)}, ")
-                .Append($"{prefix}{nameof(LogEntry<int>.Date)}, ")
                 .Append($"{prefix}{nameof(LogEntry<int>.ImageName)}, ")
+                .Append($"{prefix}{nameof(LogEntry<int>.ImageTag)}, ")
                 .Append($"{prefix}{nameof(LogEntry<int>.InboundPort)}, ")
-                .Append($"{prefix}{nameof(LogEntry<int>.OutboundPort)}");
+                .Append($"{prefix}{nameof(LogEntry<int>.OutboundPort)}, ")
+                .Append($"{prefix}{nameof(LogEntry<int>.EventDate)}");
 
             return builder.ToString();
         };
@@ -42,11 +44,13 @@ namespace Rooster.SqlServer.DataAccess.LogEntries
             return $"INSERT INTO {TableName} ({BuildPropertiesList()}) VALUES ({BuildValuesList()})";
         };
 
-        private static readonly Func<string> GetLastLogEntryDate =
+        private static readonly Func<string> GetLastLogEntryDateForAppServiceAndContainer =
             delegate
             {
                 return
-                    $"SELECT TOP 1 {nameof(LogEntry<int>.Date)} FROM {nameof(LogEntry<int>)} " +
+                    $"SELECT TOP 1 {nameof(LogEntry<int>.EventDate)} FROM {nameof(LogEntry<int>)} " +
+                    $"WHERE {nameof(LogEntry<int>.ServiceName)} = @{nameof(LogEntry<int>.ServiceName)} AND " +
+                    $"{nameof(LogEntry<int>.ContainerName)} = @{nameof(LogEntry<int>.ContainerName)} " +
                     $"ORDER BY {nameof(LogEntry<int>.Created)} DESC";
             };
 
@@ -70,23 +74,26 @@ namespace Rooster.SqlServer.DataAccess.LogEntries
                 InsertLogEntryQuery(),
                 new
                 {
+                    entry.ServiceName,
                     entry.ContainerName,
-                    entry.Date,
                     entry.ImageName,
+                    entry.ImageTag,
                     entry.InboundPort,
-                    entry.OutboundPort
+                    entry.OutboundPort,
+                    entry.EventDate
                 },
                 cancellationToken: cancellation);
 
             await connection.ExecuteAsync(command);
         }
 
-        protected override async Task<DateTimeOffset> GetLatestImplementation(CancellationToken cancellation)
+        protected override async Task<DateTimeOffset> GetLatestByServiceAndContainerNamesImplementation(string serviceName, string containerName, CancellationToken cancellation)
         {
             await using var connection = _connectionFactory.CreateConnection();
 
             var command = new CommandDefinition(
-                GetLastLogEntryDate(),
+                GetLastLogEntryDateForAppServiceAndContainer(),
+                new { ServiceName = serviceName, ContainerName = containerName },
                 cancellationToken: cancellation);
 
             var lastDate = await connection.QueryFirstOrDefaultAsync<DateTimeOffset>(command);

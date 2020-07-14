@@ -8,22 +8,22 @@ using System.Threading.Tasks;
 
 namespace Rooster.Slack.Handlers
 {
-    public class SlackLogEntryRequestHandler : AsyncRequestHandler<LogEntryRequest<object>>
+    public class SlackProcessLogEntryRequestHandler : AsyncRequestHandler<ProcessLogEntryRequest<object>>
     {
         private readonly IReporter _reporter;
 
-        public SlackLogEntryRequestHandler(IReporter reporter)
+        public SlackProcessLogEntryRequestHandler(IReporter reporter)
         {
             _reporter = reporter ?? throw new ArgumentNullException(nameof(reporter));
         }
 
-        protected override Task Handle(LogEntryRequest<object> request, CancellationToken cancellationToken)
+        protected override Task Handle(ProcessLogEntryRequest<object> request, CancellationToken cancellationToken)
         {
             var message = $"Container restarted.";
 
             var fields = new List<object>
             {
-                new { title = "Date", value = $"`{request.Date}`" },
+                new { title = "Date", value = $"`{request.EventDate}`" },
                 new { title = "Container name", value = $"`{request.ContainerName}`"},
                 new { title = "Ports", value = $"`{request.InboundPort}` : `{request.OutboundPort}`"},
                 new { title = "Image", value = $"`{request.ImageName}`" }
@@ -38,7 +38,7 @@ namespace Rooster.Slack.Handlers
                         {
                             mrkdwn_in = new[] { "text" },
                             color = "warning",
-                            pretext = $"*Service:* {request.WebsiteName}",
+                            pretext = $"*Service:* {request.ServiceName}",
                             text = $"_{message}_",
                             fields = fields
                         },

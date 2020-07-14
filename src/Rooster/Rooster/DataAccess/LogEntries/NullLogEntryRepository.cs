@@ -14,7 +14,7 @@ namespace Rooster.DataAccess.LogEntries
             return Task.CompletedTask;
         }
 
-        protected override Task<DateTimeOffset> GetLatestImplementation(CancellationToken cancellation)
+        protected override Task<DateTimeOffset> GetLatestByServiceAndContainerNamesImplementation(string serviceName, string containerName, CancellationToken cancellation)
         {
             return Task.FromResult(DateTimeOffset.MinValue);
         }

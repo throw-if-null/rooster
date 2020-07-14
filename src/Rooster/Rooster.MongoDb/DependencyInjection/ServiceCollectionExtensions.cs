@@ -2,18 +2,12 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
-using Rooster.Adapters.Kudu;
-using Rooster.Adapters.Kudu.Handlers;
-using Rooster.DataAccess.AppServices;
-using Rooster.DataAccess.ContainerInstances;
 using Rooster.DataAccess.LogEntries;
 using Rooster.Hosting;
 using Rooster.Mediator.Requests;
 using Rooster.MongoDb.Connectors.Clients;
 using Rooster.MongoDb.Connectors.Colections;
 using Rooster.MongoDb.Connectors.Databases;
-using Rooster.MongoDb.DataAccess.AppServices;
-using Rooster.MongoDb.DataAccess.ContainerInstances;
 using Rooster.MongoDb.DataAccess.LogEntries;
 using Rooster.MongoDb.Handlers;
 
@@ -32,21 +26,16 @@ namespace Rooster.MongoDb.DependencyInjection
         {
             services.ConfigureClientFactoryOptions(configuration);
             services.ConfigureDatabaseFactoryOptions(configuration);
-            services.ConfigureAppServiceCollectionFactoryOptions(configuration);
-            services.ConfigureKuduInstanceCollectionFactoryOptions(configuration);
             services.ConfigureLogEntryCollectionFactoryOptions(configuration);
 
             services.AddSingleton<IClientFactory, ClientFactory>();
             services.AddSingleton<IDatabaseFactory, DatabaseFactory>();
-            services.AddSingleton<IAppServiceCollectionFactory, AppServiceCollectionFactory>();
-            services.AddSingleton<IKuduInstanceCollectionFactory, KuduInstanceCollectionFactory>();
             services.AddSingleton<ILogEntryCollectionFactory, LogEntryCollectionFactory>();
 
-            services.AddTransient<IAppServiceRepository<ObjectId>, MongoDbAppServiceRepository>();
-            services.AddTransient<IContainerInstanceRepository<ObjectId>, MongoDbContainerInstanceRepository>();
             services.AddTransient<ILogEntryRepository<ObjectId>, MongoDbLogEntryRepository>();
 
-            services.AddTransient<IRequestHandler<LogEntryRequest<ObjectId>>, MongoDbLogEntryRequestHandler>();
+            services.AddTransient<IRequestHandler<ExportLogEntryRequest<ObjectId>, ProcessLogEntryRequest<ObjectId>>, MongoDbExportLogEntryRequestHandler>();
+            services.AddTransient<IRequestHandler<ProcessLogEntryRequest<ObjectId>, Unit>, MongoDbProcessLogEntryRequestHandler>();
 
             services.AddHostedService<AppHost<ObjectId>>();
 
@@ -70,24 +59,6 @@ namespace Rooster.MongoDb.DependencyInjection
             var section = configuration.GetSection($"{MongoDbPath}:{nameof(DatabaseFactoryOptions)}");
 
             return services.Configure<DatabaseFactoryOptions>(section);
-        }
-
-        private static IServiceCollection ConfigureAppServiceCollectionFactoryOptions(
-            this IServiceCollection services,
-            IConfiguration configuration)
-        {
-            var section = configuration.GetSection(BuildMongoCollectionFactoryPath<AppServiceCollectionFactoryOptions>());
-
-            return services.Configure<AppServiceCollectionFactoryOptions>(section);
-        }
-
-        private static IServiceCollection ConfigureKuduInstanceCollectionFactoryOptions(
-            this IServiceCollection services,
-            IConfiguration configuration)
-        {
-            var section = configuration.GetSection(BuildMongoCollectionFactoryPath<KuduInstanceCollectionFactoryOptions>());
-
-            return services.Configure<KuduInstanceCollectionFactoryOptions>(section);
         }
 
         private static IServiceCollection ConfigureLogEntryCollectionFactoryOptions(

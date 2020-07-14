@@ -6,9 +6,9 @@ namespace Rooster.CrossCutting
     {
         (string inbound, string outbound) ExtractPorts(string line);
 
-        string ExtractImageName(string line);
+        (string name, string tag) ExtractImageName(string line);
 
-        string ExtractWebsiteName(string line);
+        string ExtractServiceName(string line);
 
         string ExtractContainerName(string line);
 
@@ -17,6 +17,15 @@ namespace Rooster.CrossCutting
 
     public class LogExtractor : ILogExtractor
     {
+        private static readonly Func<string, string, string, string> ExtractValue = delegate (string input, string key, string splitter)
+        {
+            var index = input.IndexOf(key);
+            var value = input.Substring(index + key.Length + 1);
+            value = value.Remove(value.IndexOf(splitter));
+
+            return value;
+        };
+
         public (string inbound, string outbound) ExtractPorts(string line)
         {
             var portsValue = ExtractValue(line, "-p", "-");
@@ -25,12 +34,15 @@ namespace Rooster.CrossCutting
             return (ports[0], ports[1]);
         }
 
-        public string ExtractImageName(string line)
+        public (string name, string tag) ExtractImageName(string line)
         {
-            return ExtractValue(line, "DOCKER_CUSTOM_IMAGE_NAME", "-e");
+            var imageWithTag = ExtractValue(line, "DOCKER_CUSTOM_IMAGE_NAME", "-e");
+            var parts = imageWithTag.Split(":");
+
+            return (parts[0], parts[1]);
         }
 
-        public string ExtractWebsiteName(string line)
+        public string ExtractServiceName(string line)
         {
             return ExtractValue(line, "WEBSITE_SITE_NAME", "-e");
         }
@@ -47,14 +59,5 @@ namespace Rooster.CrossCutting
 
             return convertedDate;
         }
-
-        private static readonly Func<string, string, string, string> ExtractValue = delegate (string input, string key, string splitter)
-        {
-            var index = input.IndexOf(key);
-            var value = input.Substring(index + key.Length + 1);
-            value = value.Remove(value.IndexOf(splitter));
-
-            return value;
-        };
     }
 }

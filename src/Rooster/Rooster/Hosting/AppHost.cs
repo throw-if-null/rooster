@@ -31,37 +31,24 @@ namespace Rooster.Hosting
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            var ct = cancellationToken;
+
             while (true)
             {
-                var kuduLogs = await _kudu.GetDockerLogs(cancellationToken);
+                var kuduLogs = await _kudu.GetDockerLogs(ct);
 
-                foreach ((DateTimeOffset LastUpdated, Uri LogUri, string MachineName) in kuduLogs)
+                foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in kuduLogs)
                 {
-                    if (LastUpdated.Date < DateTimeOffset.UtcNow.Date)
+                    if (lastUpdated < DateTimeOffset.UtcNow.AddMinutes(_options.CurrentDateVariance))
                         continue;
 
-                    var appServiceId =
-                        await
-                            _mediator.Send(
-                                new AppServiceRequest<T> { KuduLogUri = LogUri },
-                                cancellationToken);
-
-                    var containerInstanceId =
-                        await
-                            _mediator.Send(
-                                new ContainerInstanceRequest<T> { MachineName = MachineName, AppServiceId = appServiceId },
-                                cancellationToken);
-
-                    if (LastUpdated < DateTimeOffset.UtcNow.AddMinutes(_options.CurrentDateVariance))
-                        return;
-
-                    var lines = _kudu.ExtractLogsFromStream(LogUri);
+                    var lines = _kudu.ExtractLogsFromStream(logUri);
 
                     await foreach (var line in lines)
                     {
-                        LogEntryRequest<T> logEntryRequest = await _mediator.Send(new RawLogEntryRequest<T> { LogLine = line }, cancellationToken);
+                        ProcessLogEntryRequest<T> logEntryRequest = await _mediator.Send(new ExportLogEntryRequest<T> { LogLine = line }, ct);
 
-                        await _mediator.Send(logEntryRequest, cancellationToken);
+                        await _mediator.Send(logEntryRequest, ct);
                     }
                 }
 

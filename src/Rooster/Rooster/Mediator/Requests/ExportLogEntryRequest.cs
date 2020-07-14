@@ -2,7 +2,7 @@
 
 namespace Rooster.Mediator.Requests
 {
-    public class RawLogEntryRequest<T> : IRequest<LogEntryRequest<T>>
+    public class ExportLogEntryRequest<T> : IRequest<ProcessLogEntryRequest<T>>
     {
         public string LogLine { get; set; }
     }

@@ -9,29 +9,32 @@ namespace Rooster.DataAccess.LogEntries.Entities
 
         public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 
-        public string ImageName { get; set; }
-
-        public string WebsiteName { get; set; }
+        public string ServiceName { get; set; }
 
         public string ContainerName { get; set; }
+
+        public string ImageName { get; set; }
+
+        public string ImageTag { get; set; }
 
         public string InboundPort { get; set; }
 
         public string OutboundPort { get; set; }
 
-        public DateTimeOffset Date { get; set; }
+        public DateTimeOffset EventDate { get; set; }
 
         public override string ToString()
         {
             var builder = new StringBuilder();
 
             builder
-                .Append($"{nameof(ImageName)}:{ImageName}, ")
-                .Append($"{nameof(WebsiteName)}:{WebsiteName}, ")
+                .Append($"{nameof(ServiceName)}:{ServiceName}, ")
                 .Append($"{nameof(ContainerName)}:{ContainerName}, ")
+                .Append($"{nameof(ImageName)}:{ImageName}, ")
+                .Append($"{nameof(ImageTag)}:{ImageTag}, ")
                 .Append($"{nameof(InboundPort)}:{InboundPort}, ")
                 .Append($"{nameof(OutboundPort)}:{OutboundPort}, ")
-                .Append($"{nameof(Date)}:{Date}");
+                .Append($"{nameof(EventDate)}:{EventDate}");
 
             return builder.ToString();
         }

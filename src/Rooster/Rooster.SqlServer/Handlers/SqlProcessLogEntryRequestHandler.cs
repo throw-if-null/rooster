@@ -3,9 +3,9 @@ using Rooster.Mediator.Handlers;
 
 namespace Rooster.SqlServer.Handlers
 {
-    public class SqlLogEntryRequestHandler : LogEntryRequestHandler<int>
+    public class SqlProcessLogEntryRequestHandler : ProcessLogEntryRequestHandler<int>
     {
-        public SqlLogEntryRequestHandler(ILogEntryRepository<int> logEntryRepository)
+        public SqlProcessLogEntryRequestHandler(ILogEntryRepository<int> logEntryRepository)
             : base(logEntryRepository)
         {
         }

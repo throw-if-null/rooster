@@ -4,9 +4,9 @@ using Rooster.Mediator.Handlers;
 
 namespace Rooster.MongoDb.Handlers
 {
-    public class MongoDbLogEntryRequestHandler : LogEntryRequestHandler<ObjectId>
+    public class MongoDbProcessLogEntryRequestHandler : ProcessLogEntryRequestHandler<ObjectId>
     {
-        public MongoDbLogEntryRequestHandler(ILogEntryRepository<ObjectId> logEntryRepository)
+        public MongoDbProcessLogEntryRequestHandler(ILogEntryRepository<ObjectId> logEntryRepository)
             : base(logEntryRepository)
         {
         }

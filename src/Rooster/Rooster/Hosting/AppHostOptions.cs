@@ -29,5 +29,15 @@
         /// Default value is 5 (minutes).
         /// </remarks>
         public int CurrentDateVariance { get; set; } = 5;
+
+        /// <summary>
+        /// Gets or sets the flag that determines whether logs are going to be persisted to one of supported stores.
+        /// </summary>
+        public bool UsePersistance { get; set; }
+
+        /// <summary>
+        /// Gets or sets the flag that determines whether notification are going to be sent when log gets extracted.
+        /// </summary>
+        public bool UseReporting { get; set; }
     }
 }

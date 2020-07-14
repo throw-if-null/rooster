@@ -35,23 +35,23 @@ namespace Rooster.MongoDb.DataAccess.LogEntries
             await collection.InsertOneAsync(entry, GetInsertOneOptions(), cancellation);
         }
 
-        protected override async Task<DateTimeOffset> GetLatestImplementation(CancellationToken cancellation)
+        protected override async Task<DateTimeOffset> GetLatestByServiceAndContainerNamesImplementation(string serviceName, string containerName, CancellationToken cancellation)
         {
             var collection = await _collectionFactory.Get<LogEntry<ObjectId>>(cancellation);
 
-            var filter = Builders<LogEntry<ObjectId>>.Filter.Where(x => x != null);
+            var filter = Builders<LogEntry<ObjectId>>.Filter.Where(x => x.ServiceName == serviceName&& x.ContainerName == containerName);
             var sort = Builders<LogEntry<ObjectId>>.Sort.Descending(x => x.Created);
 
             var cursor = await collection.FindAsync(filter, new FindOptions<LogEntry<ObjectId>, LogEntry<ObjectId>>
             {
                 Sort = sort,
                 Limit = 1,
-                Projection = Builders<LogEntry<ObjectId>>.Projection.Include(x => x.Date)
+                Projection = Builders<LogEntry<ObjectId>>.Projection.Include(x => x.EventDate)
             });
 
             var entry = await cursor.FirstOrDefaultAsync();
 
-            return entry == null ? default : entry.Date;
+            return entry == null ? default : entry.EventDate;
         }
     }
 }
