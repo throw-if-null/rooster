@@ -1,27 +1,28 @@
 ﻿using MediatR;
 using Rooster.CrossCutting;
 using Rooster.Mediator.Requests;
+using Rooster.Mediator.Results;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rooster.Mediator.Handlers
 {
-    public abstract class ExportLogEntryRequestHandler<T> : IRequestHandler<ExportLogEntryRequest<T>, ProcessLogEntryRequest<T>>
+    public class ExportLogEntryRequestHandler : IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>
     {
         private readonly ILogExtractor _extractor;
 
-        protected ExportLogEntryRequestHandler(ILogExtractor extractor)
+        public ExportLogEntryRequestHandler(ILogExtractor extractor)
         {
             _extractor = extractor ?? throw new ArgumentNullException(nameof(extractor));
         }
 
-        public Task<ProcessLogEntryRequest<T>> Handle(ExportLogEntryRequest<T> request, CancellationToken cancellationToken)
+        public Task<ExportLogEntryResponse> Handle(ExportLogEntryRequest request, CancellationToken cancellationToken)
         {
             var (inboundPort, outboundPort) = _extractor.ExtractPorts(request.LogLine);
             var (imageName, imageTag) = _extractor.ExtractImageName(request.LogLine);
 
-            var logEntry = new ProcessLogEntryRequest<T>
+            var logEntry = new ExportLogEntryResponse
             {
                 ServiceName = _extractor.ExtractServiceName(request.LogLine),
                 ContainerName = _extractor.ExtractContainerName(request.LogLine),

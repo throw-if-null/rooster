@@ -46,9 +46,9 @@ namespace Rooster.Hosting
 
                     await foreach (var line in lines)
                     {
-                        ProcessLogEntryRequest<T> logEntryRequest = await _mediator.Send(new ExportLogEntryRequest<T> { LogLine = line }, ct);
+                        var exportedLogEntry = await _mediator.Send(new ExportLogEntryRequest { LogLine = line }, ct);
 
-                        await _mediator.Send(logEntryRequest, ct);
+                        await _mediator.Send(new ProcessLogEntryRequest<T> { ExportedLogEntry = exportedLogEntry }, ct);
                     }
                 }
 

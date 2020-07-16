@@ -2,13 +2,12 @@
 using Rooster.Mediator.Requests;
 using Rooster.Slack.Reporting;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rooster.Slack.Handlers
 {
-    public class SlackProcessLogEntryRequestHandler : AsyncRequestHandler<ProcessLogEntryRequest<object>>
+    public class SlackProcessLogEntryRequestHandler : AsyncRequestHandler<ProcessLogEntryRequest<Nop>>
     {
         private readonly IReporter _reporter;
 
@@ -17,28 +16,28 @@ namespace Rooster.Slack.Handlers
             _reporter = reporter ?? throw new ArgumentNullException(nameof(reporter));
         }
 
-        protected override Task Handle(ProcessLogEntryRequest<object> request, CancellationToken cancellationToken)
+        protected override Task Handle(ProcessLogEntryRequest<Nop> request, CancellationToken cancellationToken)
         {
             var message = $"Container restarted.";
 
-            var fields = new List<object>
+            var fields = new object[4]
             {
-                new { title = "Date", value = $"`{request.EventDate}`" },
-                new { title = "Container name", value = $"`{request.ContainerName}`"},
-                new { title = "Ports", value = $"`{request.InboundPort}` : `{request.OutboundPort}`"},
-                new { title = "Image", value = $"`{request.ImageName}`" }
+                new { title = "Date", value = $"`{request.ExportedLogEntry.EventDate}`" },
+                new { title = "Container name", value = $"`{request.ExportedLogEntry.ContainerName}`"},
+                new { title = "Ports", value = $"`{request.ExportedLogEntry.InboundPort}` : `{request.ExportedLogEntry.OutboundPort}`"},
+                new { title = "Image", value = $"`{request.ExportedLogEntry.ImageName}`" }
             };
 
             var content =
                 new
                 {
-                    attachments = new object[]
+                    attachments = new object[1]
                     {
                         new
                         {
-                            mrkdwn_in = new[] { "text" },
+                            mrkdwn_in = new object[1] { "text" },
                             color = "warning",
-                            pretext = $"*Service:* {request.ServiceName}",
+                            pretext = $"*Service:* {request.ExportedLogEntry.ServiceName}",
                             text = $"_{message}_",
                             fields = fields
                         },

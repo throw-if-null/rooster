@@ -22,24 +22,23 @@ namespace Rooster.Mediator.Handlers
             var latestLogEntry =
                 await
                     _logEntryRepository.GetLatestByServiceAndContainerNames(
-                        request.ServiceName,
-                        request.ContainerName,
+                        request.ExportedLogEntry.ServiceName,
+                        request.ExportedLogEntry.ContainerName,
                         cancellationToken);
 
-            if (request.EventDate <= latestLogEntry)
+            if (request.ExportedLogEntry.EventDate <= latestLogEntry)
                 return;
 
             var logEntry = new LogEntry<T>
             {
-                Id = request.Id,
-                Created = request.Created,
-                ServiceName = request.ServiceName,
-                ContainerName = request.ContainerName,
-                ImageName = request.ImageName,
-                ImageTag = request.ImageTag,
-                InboundPort = request.InboundPort,
-                OutboundPort = request.OutboundPort,
-                EventDate = request.EventDate
+                Created = request.ExportedLogEntry.Created,
+                ServiceName = request.ExportedLogEntry.ServiceName,
+                ContainerName = request.ExportedLogEntry.ContainerName,
+                ImageName = request.ExportedLogEntry.ImageName,
+                ImageTag = request.ExportedLogEntry.ImageTag,
+                InboundPort = request.ExportedLogEntry.InboundPort,
+                OutboundPort = request.ExportedLogEntry.OutboundPort,
+                EventDate = request.ExportedLogEntry.EventDate
             };
 
             await _logEntryRepository.Create(logEntry, cancellationToken);

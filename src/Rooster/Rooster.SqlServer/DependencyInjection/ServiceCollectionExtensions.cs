@@ -22,7 +22,6 @@ namespace Rooster.SqlServer.DependencyInjection
 
             services.AddTransient<ILogEntryRepository<int>, SqlLogEntryRepository>();
 
-            services.AddTransient<IRequestHandler<ExportLogEntryRequest<int>, ProcessLogEntryRequest<int>>, SqlExportLogEntryRequestHandler>();
             services.AddTransient<IRequestHandler<ProcessLogEntryRequest<int>, Unit>, SqlProcessLogEntryRequestHandler>();
 
             services.AddHostedService<AppHost<int>>();

@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace Rooster.DataAccess.LogEntries
 {
-    public class NullLogEntryRepository : LogEntryRepository<object>
+    public class NopLogEntryRepository : LogEntryRepository<Nop>
     {
-        protected override bool IsDefaultValue(object value) => false;
+        protected override bool IsDefaultValue(Nop value) => false;
 
-        protected override Task CreateImplementation(LogEntry<object> logEntry, CancellationToken cancellation)
+        protected override Task CreateImplementation(LogEntry<Nop> logEntry, CancellationToken cancellation)
         {
             return Task.CompletedTask;
         }

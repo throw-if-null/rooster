@@ -4,9 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Rooster.Adapters.Kudu;
 using Rooster.Adapters.Kudu.Handlers;
 using Rooster.CrossCutting;
+using Rooster.DataAccess.LogEntries;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
+using Rooster.Mediator.Handlers;
 using Rooster.Mediator.Requests;
+using Rooster.Mediator.Results;
 using Rooster.MongoDb.DependencyInjection;
 using Rooster.QoS;
 using Rooster.Slack.DependencyInjection;
@@ -28,6 +31,8 @@ namespace Rooster.DependencyInjection
 
             services.AddSingleton<IRetryProvider, RetryProvider>();
             services.AddTransient<RequestsInterceptor>();
+
+            services.AddTransient<ILogEntryRepository<Nop>, NopLogEntryRepository>();
 
             services.AddHttpClient<IKuduApiAdapter, KuduApiAdapter>().AddHttpMessageHandler<RequestsInterceptor>();
 
@@ -54,8 +59,10 @@ namespace Rooster.DependencyInjection
             services.AddMediatR(new[]
             {
                 typeof(ProcessLogEntryRequest<>),
-                typeof(ExportLogEntryRequest<>)
+                typeof(ExportLogEntryRequest)
             });
+
+            services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryRequestHandler>();
 
             return services;
         }

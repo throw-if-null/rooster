@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rooster.Adapters.Kudu.Handlers;
-using Rooster.DataAccess.LogEntries;
 using Rooster.Hosting;
+using Rooster.Mediator.Handlers;
 using Rooster.Mediator.Requests;
 using Rooster.Slack.Handlers;
 using Rooster.Slack.Reporting;
@@ -17,16 +17,13 @@ namespace Rooster.Slack.DependencyInjection
         {
             services.Configure<WebHookReporterOptions>(configuration.GetSection($"Connectors:Slack:{nameof(WebHookReporterOptions)}"));
 
-            services.AddTransient<ILogEntryRepository<object>, NullLogEntryRepository>();
-
             services
                 .AddHttpClient<IReporter, WebHookReporter>(x => x.BaseAddress = new Uri("https://hooks.slack.com"))
                 .AddHttpMessageHandler<RequestsInterceptor>();
 
-            services.AddTransient<IRequestHandler<ExportLogEntryRequest<object>, ProcessLogEntryRequest<object>>, SlackExportLogEntryRequestHandler>();
-            services.AddTransient<IRequestHandler<ProcessLogEntryRequest<object>, Unit>, SlackProcessLogEntryRequestHandler>();
+            services.AddTransient<IRequestHandler<ProcessLogEntryRequest<Nop>, Unit>, SlackProcessLogEntryRequestHandler>();
 
-            services.AddHostedService<AppHost<object>>();
+            services.AddHostedService<AppHost<Nop>>();
 
             return services;
         }

@@ -1,21 +1,18 @@
 ﻿using System;
-using System.Text;
 
-namespace Rooster.DataAccess.LogEntries.Entities
+namespace Rooster.Mediator.Results
 {
-    public class LogEntry<T>
+    public class ExportLogEntryResponse : Response
     {
-        public T Id { get; set; }
-
-        public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
-
         public string ServiceName { get; set; }
 
-        public string ContainerName { get; set; }
+        public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 
         public string ImageName { get; set; }
 
         public string ImageTag { get; set; }
+
+        public string ContainerName { get; set; }
 
         public string InboundPort { get; set; }
 
