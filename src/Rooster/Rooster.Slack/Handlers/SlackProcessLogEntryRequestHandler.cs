@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.Slack.Handlers
 {
-    public class SlackProcessLogEntryRequestHandler : AsyncRequestHandler<ProcessLogEntryRequest<Nop>>
+    public class SlackProcessLogEntryRequestHandler : AsyncRequestHandler<ProcessLogEntryRequest>
     {
         private readonly IReporter _reporter;
 
@@ -16,7 +16,7 @@ namespace Rooster.Slack.Handlers
             _reporter = reporter ?? throw new ArgumentNullException(nameof(reporter));
         }
 
-        protected override Task Handle(ProcessLogEntryRequest<Nop> request, CancellationToken cancellationToken)
+        protected override Task Handle(ProcessLogEntryRequest request, CancellationToken cancellationToken)
         {
             var message = $"Container restarted.";
 

@@ -1,6 +1,6 @@
 ﻿using MediatR;
-using Rooster.DataAccess.LogEntries;
-using Rooster.DataAccess.LogEntries.Entities;
+using Rooster.Mediator.Commands.Requests;
+using Rooster.Mediator.Queries.Requests;
 using Rooster.Mediator.Requests;
 using System;
 using System.Threading;
@@ -8,28 +8,31 @@ using System.Threading.Tasks;
 
 namespace Rooster.Mediator.Handlers
 {
-    public abstract class ProcessLogEntryRequestHandler<T> : AsyncRequestHandler<ProcessLogEntryRequest<T>>
+    public class ProcessLogEntryRequestHandler : AsyncRequestHandler<ProcessLogEntryRequest>
     {
-        private readonly ILogEntryRepository<T> _logEntryRepository;
+        private readonly IMediator _mediator;
 
-        protected ProcessLogEntryRequestHandler(ILogEntryRepository<T> logEntryRepository)
+        public ProcessLogEntryRequestHandler(IMediator mediator)
         {
-            _logEntryRepository = logEntryRepository ?? throw new ArgumentNullException(nameof(logEntryRepository));
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
-        protected override async Task Handle(ProcessLogEntryRequest<T> request, CancellationToken cancellationToken)
+        protected override async Task Handle(ProcessLogEntryRequest request, CancellationToken cancellationToken)
         {
             var latestLogEntry =
                 await
-                    _logEntryRepository.GetLatestByServiceAndContainerNames(
-                        request.ExportedLogEntry.ServiceName,
-                        request.ExportedLogEntry.ContainerName,
+                    _mediator.Send(
+                        new GetLatestByServiceAndContainerNamesRequest
+                        {
+                            ContainerName = request.ExportedLogEntry.ContainerName,
+                            ServiceName = request.ExportedLogEntry.ServiceName
+                        },
                         cancellationToken);
 
             if (request.ExportedLogEntry.EventDate <= latestLogEntry)
                 return;
 
-            var logEntry = new LogEntry<T>
+            var createLogEntryRequest = new CreateLogEntryRequest
             {
                 Created = request.ExportedLogEntry.Created,
                 ServiceName = request.ExportedLogEntry.ServiceName,
@@ -41,7 +44,7 @@ namespace Rooster.Mediator.Handlers
                 EventDate = request.ExportedLogEntry.EventDate
             };
 
-            await _logEntryRepository.Create(logEntry, cancellationToken);
+            await _mediator.Send(createLogEntryRequest, cancellationToken);
         }
     }
 }

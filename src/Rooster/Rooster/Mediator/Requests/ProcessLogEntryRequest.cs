@@ -3,7 +3,7 @@ using Rooster.Mediator.Results;
 
 namespace Rooster.Mediator.Requests
 {
-    public class ProcessLogEntryRequest<T> : IRequest
+    public class ProcessLogEntryRequest : IRequest
     {
         public ExportLogEntryResponse ExportedLogEntry { get; set; }
     }

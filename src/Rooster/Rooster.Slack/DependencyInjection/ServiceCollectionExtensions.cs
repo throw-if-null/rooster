@@ -21,7 +21,7 @@ namespace Rooster.Slack.DependencyInjection
                 .AddHttpClient<IReporter, WebHookReporter>(x => x.BaseAddress = new Uri("https://hooks.slack.com"))
                 .AddHttpMessageHandler<RequestsInterceptor>();
 
-            services.AddTransient<IRequestHandler<ProcessLogEntryRequest<Nop>, Unit>, SlackProcessLogEntryRequestHandler>();
+            services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, SlackProcessLogEntryRequestHandler>();
 
             services.AddHostedService<AppHost<Nop>>();
 

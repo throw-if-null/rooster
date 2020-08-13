@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Text;
 
-namespace Rooster.DataAccess.LogEntries.Entities
+namespace Rooster.DataAccess.Entities
 {
     public class LogEntry<T>
     {

@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Rooster.Adapters.Kudu;
 using Rooster.Adapters.Kudu.Handlers;
 using Rooster.CrossCutting;
-using Rooster.DataAccess.LogEntries;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
 using Rooster.Mediator.Handlers;
@@ -32,8 +31,6 @@ namespace Rooster.DependencyInjection
             services.AddSingleton<IRetryProvider, RetryProvider>();
             services.AddTransient<RequestsInterceptor>();
 
-            services.AddTransient<ILogEntryRepository<Nop>, NopLogEntryRepository>();
-
             services.AddHttpClient<IKuduApiAdapter, KuduApiAdapter>().AddHttpMessageHandler<RequestsInterceptor>();
 
             var databaseEngine = configuration.GetSection($"Hosts:{nameof(AppHostOptions)}").GetValue<string>("DatabaseEngine");
@@ -58,12 +55,12 @@ namespace Rooster.DependencyInjection
 
             services.AddMediatR(new[]
             {
-                typeof(ProcessLogEntryRequest<>),
+                typeof(ProcessLogEntryRequest),
                 typeof(ExportLogEntryRequest)
             });
 
             services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryRequestHandler>();
-
+            services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, ProcessLogEntryRequestHandler>();
             return services;
         }
     }
