@@ -1,7 +1,6 @@
 ﻿using Dapper;
 using Rooster.DataAccess.Entities;
-using Rooster.Mediator.Queries;
-using Rooster.Mediator.Queries.Requests;
+using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;
 using Rooster.SqlServer.Connectors;
 using System;
 using System.Threading;

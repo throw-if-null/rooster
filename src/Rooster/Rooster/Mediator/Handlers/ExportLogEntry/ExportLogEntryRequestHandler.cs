@@ -1,12 +1,10 @@
 ﻿using MediatR;
 using Rooster.CrossCutting;
-using Rooster.Mediator.Requests;
-using Rooster.Mediator.Results;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Mediator.Handlers
+namespace Rooster.Mediator.Handlers.ExportLogEntry
 {
     public class ExportLogEntryRequestHandler : IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>
     {

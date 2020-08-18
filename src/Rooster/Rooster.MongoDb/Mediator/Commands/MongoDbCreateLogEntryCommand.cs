@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using MongoDB.Driver;
-using Rooster.Mediator.Commands;
-using Rooster.Mediator.Commands.Requests;
+using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.MongoDb.Connectors.Colections;
 using System;
 using System.Threading;

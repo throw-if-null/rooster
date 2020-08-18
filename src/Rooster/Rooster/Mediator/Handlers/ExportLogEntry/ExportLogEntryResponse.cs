@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Rooster.Mediator.Results
+namespace Rooster.Mediator.Handlers.ExportLogEntry
 {
-    public class ExportLogEntryResponse : Response
+    public class ExportLogEntryResponse
     {
         public string ServiceName { get; set; }
 

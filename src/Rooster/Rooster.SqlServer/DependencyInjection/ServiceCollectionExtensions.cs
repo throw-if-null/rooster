@@ -2,8 +2,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rooster.Hosting;
-using Rooster.Mediator.Commands.Requests;
-using Rooster.Mediator.Queries.Requests;
+using Rooster.Mediator.Commands.CreateLogEntry;
+using Rooster.Mediator.Handlers.ProcessLogEntry;
+using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;
 using Rooster.SqlServer.Connectors;
 using Rooster.SqlServer.Mediator.Commands;
 using Rooster.SqlServer.Mediator.Queries;
@@ -23,6 +24,7 @@ namespace Rooster.SqlServer.DependencyInjection
 
             services.AddTransient<IRequestHandler<CreateLogEntryRequest, Unit>, SqlCreateLogEntryCommand>();
             services.AddTransient<IRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>, SqlGetLatestByServiceAndContainerNamesQuery>();
+            services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, ProcessLogEntryRequestHandler>();
 
             services.AddHostedService<AppHost<int>>();
 

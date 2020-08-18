@@ -1,8 +1,7 @@
 ﻿using Dapper;
 using MediatR;
 using Rooster.DataAccess.Entities;
-using Rooster.Mediator.Commands;
-using Rooster.Mediator.Commands.Requests;
+using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.SqlServer.Connectors;
 using System;
 using System.Text;

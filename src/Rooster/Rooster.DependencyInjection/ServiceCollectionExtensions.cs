@@ -6,9 +6,8 @@ using Rooster.Adapters.Kudu.Handlers;
 using Rooster.CrossCutting;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
-using Rooster.Mediator.Handlers;
-using Rooster.Mediator.Requests;
-using Rooster.Mediator.Results;
+using Rooster.Mediator.Handlers.ExportLogEntry;
+using Rooster.Mediator.Handlers.ProcessLogEntry;
 using Rooster.MongoDb.DependencyInjection;
 using Rooster.QoS;
 using Rooster.Slack.DependencyInjection;
@@ -60,7 +59,7 @@ namespace Rooster.DependencyInjection
             });
 
             services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryRequestHandler>();
-            services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, ProcessLogEntryRequestHandler>();
+
             return services;
         }
     }

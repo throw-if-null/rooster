@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using Rooster.Mediator.Results;
+using Rooster.Mediator.Handlers.ExportLogEntry;
 
-namespace Rooster.Mediator.Requests
+namespace Rooster.Mediator.Handlers.ProcessLogEntry
 {
     public class ProcessLogEntryRequest : IRequest
     {

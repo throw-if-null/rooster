@@ -1,8 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using Rooster.DataAccess.Entities;
-using Rooster.Mediator.Queries;
-using Rooster.Mediator.Queries.Requests;
+using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;
 using Rooster.MongoDb.Connectors.Colections;
 using System;
 using System.Threading;

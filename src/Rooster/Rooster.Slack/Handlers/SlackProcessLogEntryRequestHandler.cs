@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Rooster.Mediator.Requests;
+using Rooster.Mediator.Handlers.ProcessLogEntry;
 using Rooster.Slack.Reporting;
 using System;
 using System.Threading;

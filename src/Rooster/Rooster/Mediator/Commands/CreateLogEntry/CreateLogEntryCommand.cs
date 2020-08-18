@@ -1,10 +1,9 @@
 ﻿using MediatR;
-using Rooster.Mediator.Commands.Requests;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Mediator.Commands
+namespace Rooster.Mediator.Commands.CreateLogEntry
 {
     public abstract class CreateLogEntryCommand : IRequestHandler<CreateLogEntryRequest>
     {

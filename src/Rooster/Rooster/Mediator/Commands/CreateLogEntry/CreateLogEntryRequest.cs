@@ -1,20 +1,19 @@
 ﻿using MediatR;
-using Rooster.Mediator.Results;
 using System;
 
-namespace Rooster.Mediator.Requests
+namespace Rooster.Mediator.Commands.CreateLogEntry
 {
-    public class PrintLogEntryRequest : IRequest<Response>
+    public class CreateLogEntryRequest : IRequest
     {
+        public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
+
         public string ServiceName { get; set; }
 
-        public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
+        public string ContainerName { get; set; }
 
         public string ImageName { get; set; }
 
         public string ImageTag { get; set; }
-
-        public string ContainerName { get; set; }
 
         public string InboundPort { get; set; }
 

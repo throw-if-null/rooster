@@ -1,12 +1,11 @@
 ﻿using MediatR;
-using Rooster.Mediator.Commands.Requests;
-using Rooster.Mediator.Queries.Requests;
-using Rooster.Mediator.Requests;
+using Rooster.Mediator.Commands.CreateLogEntry;
+using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Mediator.Handlers
+namespace Rooster.Mediator.Handlers.ProcessLogEntry
 {
     public class ProcessLogEntryRequestHandler : AsyncRequestHandler<ProcessLogEntryRequest>
     {
