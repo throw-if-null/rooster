@@ -6,6 +6,7 @@ using Rooster.Adapters.Kudu;
 using Rooster.Mediator.Handlers.ExportLogEntry;
 using Rooster.Mediator.Handlers.ProcessLogEntry;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,18 +15,18 @@ namespace Rooster.Hosting
     public class AppHost<T> : IHostedService
     {
         private readonly AppHostOptions _options;
-        private readonly IKuduApiAdapter _kudu;
+        private readonly IEnumerable<IKuduApiAdapter> _kudus;
         private readonly IMediator _mediator;
         private readonly ILogger _logger;
 
         public AppHost(
             IOptionsMonitor<AppHostOptions> options,
-            IKuduApiAdapter kudu,
+            IEnumerable<IKuduApiAdapter> kudus,
             IMediator mediator,
             ILogger<AppHost<T>> logger)
         {
             _options = options.CurrentValue ?? throw new ArgumentNullException(nameof(options));
-            _kudu = kudu ?? throw new ArgumentNullException(nameof(kudu));
+            _kudus = kudus ?? throw new ArgumentNullException(nameof(kudus));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
@@ -36,20 +37,25 @@ namespace Rooster.Hosting
 
             while (true)
             {
-                var kuduLogs = await _kudu.GetDockerLogs(ct);
-
-                foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in kuduLogs)
+                foreach(var kudu in _kudus)
                 {
-                    if (lastUpdated < DateTimeOffset.UtcNow.AddMinutes(_options.CurrentDateVariance))
-                        continue;
+                    var kuduLogs = await kudu.GetDockerLogs(ct);
 
-                    var lines = _kudu.ExtractLogsFromStream(logUri);
-
-                    await foreach (var line in lines)
+                    foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in kuduLogs)
                     {
-                        var exportedLogEntry = await _mediator.Send(new ExportLogEntryRequest { LogLine = line }, ct);
+                        if (lastUpdated < DateTimeOffset.UtcNow.AddMinutes(_options.CurrentDateVariance))
+                            continue;
 
-                        await _mediator.Send(new ProcessLogEntryRequest { ExportedLogEntry = exportedLogEntry }, ct);
+                        var lines = kudu.ExtractLogsFromStream(logUri);
+
+                        await foreach (var line in lines)
+                        {
+                            var exportedLogEntry = await _mediator.Send(new ExportLogEntryRequest { LogLine = line }, ct);
+
+                            await _mediator.Send(new ProcessLogEntryRequest { ExportedLogEntry = exportedLogEntry }, ct);
+                        }
+
+                        _logger.LogDebug($"Finished extracting docker logs from: {logUri}.", null);
                     }
                 }
 
@@ -58,8 +64,6 @@ namespace Rooster.Hosting
 
                 await Task.Delay(TimeSpan.FromSeconds(_options.PoolingIntervalInSeconds));
             }
-
-            _logger.LogDebug("Finished extracting docker logs.", null);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
