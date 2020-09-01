@@ -10,7 +10,7 @@ services:
 
   portainer:
     <<: *base-service-template
-    image: portainer/portainer:1.24.0
+    image: portainer/portainer:latest
     container_name: portainer.ctn
     command: -p :80
     ports:
@@ -91,6 +91,12 @@ services:
       retries: 3
       start_period: 1s
 
+  rooster:
+    <<: *base-service-template
+    container_name: rooster
+    build:
+      context: .
+      dockerfile: Rooster.App/Dockerfile
 networks:
   local:
     name: local

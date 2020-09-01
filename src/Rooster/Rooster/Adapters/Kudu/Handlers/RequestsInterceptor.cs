@@ -18,10 +18,10 @@ namespace Rooster.Adapters.Kudu.Handlers
         private readonly char[] _splitter = Slash.ToCharArray();
 
         private readonly Collection<HttpInterceptorOptions> _options;
-        private readonly IHostingEnvironment _environment;
+        private readonly IHostEnvironment _environment;
         private readonly ILogger _logger;
 
-        public RequestsInterceptor(IOptions<Collection<HttpInterceptorOptions>> options, IHostingEnvironment environment, ILogger<RequestsInterceptor> logger)
+        public RequestsInterceptor(IOptions<Collection<HttpInterceptorOptions>> options, IHostEnvironment environment, ILogger<RequestsInterceptor> logger)
         {
             _options = options?.Value ?? new Collection<HttpInterceptorOptions>();
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
