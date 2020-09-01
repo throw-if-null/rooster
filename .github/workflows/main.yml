@@ -15,5 +15,5 @@ jobs:
           name: mirzamerdovic/rooster
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          dockerfile:  ./src/Rooster/Rooster.App/Dockerfile 
+          dockerfile: ./src/Rooster/Rooster.App/Dockerfile 
           context: .
