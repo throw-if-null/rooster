@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/core/runtime:3.1-buster-slim AS base
+FROM mcr.microsoft.com/dotnet/core/runtime:3.1.7-alpine AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS build
 WORKDIR /src
 COPY ["Rooster.App/Rooster.App.csproj", "Rooster.App/"]
 COPY ["Rooster.DependencyInjection/Rooster.DependencyInjection.csproj", "Rooster.DependencyInjection/"]
