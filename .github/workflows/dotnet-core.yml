@@ -19,7 +19,7 @@ jobs:
         dotnet-version: 3.1.301
     - name: Install dependencies
       run: dotnet restore src/Rooster/
-    - name: Build
+    - name: Build src/Rooster/Rooster.sln
       run: dotnet build --configuration Release --no-restore
     - name: Test
-      run: dotnet test --no-restore --verbosity normal
+      run: dotnet test src/Rooster/Rooster.sln --no-restore --verbosity normal
