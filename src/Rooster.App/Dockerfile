@@ -1,4 +1,5 @@
 FROM mcr.microsoft.com/dotnet/core/runtime:3.1.7-alpine AS base
+ADD ./Rooster.App/VERSION .
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS build
