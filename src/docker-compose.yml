@@ -99,19 +99,19 @@ services:
       context: .
       dockerfile: Rooster.App/Dockerfile
     environment:
-      - "Hosts:AppHostOptions:DatabaseEngine=Slack"
-      - "Hosts:AppHostOptions:UseInternalPoller=true"
-      - "Hosts:AppHostOptions:PoolingIntervalInSeconds=60"
-      - "Hosts:AppHostOptions:CurrentDateVariance=5"
+      - Hosts__AppHostOptions__DatabaseEngine=Slack
+      - Hosts__AppHostOptions__UseInternalPoller=true
+      - Hosts__AppHostOptions__PoolingIntervalInSeconds=60
+      - Hosts__AppHostOptions__CurrentDateVarianceInMinutes=5
 
-      - "Slack:WebHookReporterOptions:Url=services/TQCU0B4F4/B016UTQ3TPT/VvX207y6qL6IiqY5arnVJezE"
-      - "Slack:WebHookReporterOptions:TimeoutInMs=3000"
-      - "Slack:WebHookReporterOptions:Headers:0:Name=User-Agent"
-      - "Slack:WebHookReporterOptions:Headers:0:Value=Rooster App"
+      - Slack__WebHookReporterOptions__Url=services/TQCU0B4F4/B016UTQ3TPT/VvX207y6qL6IiqY5arnVJezE
+      - Slack__WebHookReporterOptions__TimeoutInMs=3000
+      - Slack__WebHookReporterOptions__Headers__0__Name=User-Agent
+      - Slack__WebHookReporterOptions__Headers__0__Value=Rooster App
 
-      - "Adapters:KuduAdapterOptions:0:User=$$bf-studioapi-sandbox"
-      - "Adapters:KuduAdapterOptions:0:Password=vuicJaYWb9lzK1snu0mD1my8SJ6mkAofemR4LwtCcwmMqYqTG6Cplwkd28qH"
-      - "Adapters:KuduAdapterOptions:0:BaseUri=https://bf-studioapi-sandbox.scm.azurewebsites.net/"
+      - Adapters__KuduAdapterOptions__0__User=$$bf-studioapi-sandbox
+      - Adapters__KuduAdapterOptions__0__Password=vuicJaYWb9lzK1snu0mD1my8SJ6mkAofemR4LwtCcwmMqYqTG6Cplwkd28qH
+      - Adapters__KuduAdapterOptions__0__BaseUri=https://bf-studioapi-sandbox.scm.azurewebsites.net/
 networks:
   local:
     name: local
