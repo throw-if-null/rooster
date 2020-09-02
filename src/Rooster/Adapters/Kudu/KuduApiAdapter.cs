@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,14 +20,18 @@ namespace Rooster.Adapters.Kudu
     public class KuduApiAdapter : IKuduApiAdapter
     {
         private readonly HttpClient _client;
+        private readonly ILogger _logger;
 
-        public KuduApiAdapter(HttpClient client)
+        public KuduApiAdapter(HttpClient client, ILogger<KuduApiAdapter> logger)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
+            _logger = logger;
         }
 
         public async Task<IEnumerable<(DateTimeOffset LastUpdated, Uri LogUri, string MachineName)>> GetDockerLogs(CancellationToken cancellation)
         {
+            _logger.LogDebug($"Log url: {_client.BaseAddress}api/logs/docker");
+
             using var response = await _client.GetAsync("api/logs/docker", cancellation);
 
             response.EnsureSuccessStatusCode();

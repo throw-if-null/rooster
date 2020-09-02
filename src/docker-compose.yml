@@ -93,10 +93,25 @@ services:
 
   rooster:
     <<: *base-service-template
+    #image: mirzamerdovic/rooster:1.0.0
     container_name: rooster
     build:
       context: .
       dockerfile: Rooster.App/Dockerfile
+    environment:
+      - "Hosts:AppHostOptions:DatabaseEngine=Slack"
+      - "Hosts:AppHostOptions:UseInternalPoller=true"
+      - "Hosts:AppHostOptions:PoolingIntervalInSeconds=60"
+      - "Hosts:AppHostOptions:CurrentDateVariance=5"
+
+      - "Slack:WebHookReporterOptions:Url=services/TQCU0B4F4/B016UTQ3TPT/VvX207y6qL6IiqY5arnVJezE"
+      - "Slack:WebHookReporterOptions:TimeoutInMs=3000"
+      - "Slack:WebHookReporterOptions:Headers:0:Name=User-Agent"
+      - "Slack:WebHookReporterOptions:Headers:0:Value=Rooster App"
+
+      - "Adapters:KuduAdapterOptions:0:User=$$bf-studioapi-sandbox"
+      - "Adapters:KuduAdapterOptions:0:Password=vuicJaYWb9lzK1snu0mD1my8SJ6mkAofemR4LwtCcwmMqYqTG6Cplwkd28qH"
+      - "Adapters:KuduAdapterOptions:0:BaseUri=https://bf-studioapi-sandbox.scm.azurewebsites.net/"
 networks:
   local:
     name: local

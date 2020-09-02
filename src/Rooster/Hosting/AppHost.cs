@@ -43,7 +43,7 @@ namespace Rooster.Hosting
 
                     foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in kuduLogs)
                     {
-                        if (lastUpdated < DateTimeOffset.UtcNow.AddMinutes(_options.CurrentDateVariance))
+                        if (lastUpdated < DateTimeOffset.UtcNow.AddMinutes(_options.CurrentDateVarianceInMinutes))
                         {
                             _logger.LogDebug($"Log: {logUri} is old. Last updated: {lastUpdated}. Machine: {machineName}");
                             continue;

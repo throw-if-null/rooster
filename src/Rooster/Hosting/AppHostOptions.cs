@@ -28,7 +28,7 @@
         /// has the value 5, application would consider the to dates to be equal and it would proceed with reading the log.
         /// Default value is 5 (minutes).
         /// </remarks>
-        public int CurrentDateVariance { get; set; } = 5;
+        public int CurrentDateVarianceInMinutes { get; set; } = 5;
 
         /// <summary>
         /// Gets or sets the flag that determines whether logs are going to be persisted to one of supported stores.
