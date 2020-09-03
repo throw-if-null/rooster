@@ -7,6 +7,7 @@ using Rooster.Mediator.Handlers.ExportLogEntry;
 using Rooster.Mediator.Handlers.ProcessLogEntry;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -41,11 +42,14 @@ namespace Rooster.Hosting
                 {
                     var kuduLogs = await kudu.GetDockerLogs(ct);
 
-                    foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in kuduLogs)
+                    foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in kuduLogs.Where(x => x.LastUpdated.Date == DateTimeOffset.UtcNow.Date))
                     {
-                        if (lastUpdated < DateTimeOffset.UtcNow.AddMinutes(_options.CurrentDateVarianceInMinutes))
+                        var extendedLastUpdated = lastUpdated.AddMinutes(_options.CurrentDateVarianceInMinutes);
+
+                        if (extendedLastUpdated < DateTimeOffset.UtcNow)
                         {
                             _logger.LogDebug($"Log: {logUri} is old. Last updated: {lastUpdated}. Machine: {machineName}");
+
                             continue;
                         }
 
