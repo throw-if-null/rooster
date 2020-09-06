@@ -14,7 +14,7 @@ namespace Rooster.SqlServer.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        private const string SqlConfigPath = "Connectors:Sql";
+        private const string SqlConfigPath = "DataStores:Sql";
 
         public static IServiceCollection AddSqlServer(this IServiceCollection services, IConfiguration configuration)
         {

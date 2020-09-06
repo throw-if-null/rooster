@@ -17,7 +17,7 @@ namespace Rooster.MongoDb.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        private const string MongoDbPath = "Connectors:MongoDb";
+        private const string MongoDbPath = "DataStores:MongoDb";
 
         private static string BuildMongoCollectionFactoryPath<T>()
         {

@@ -23,7 +23,7 @@ namespace Rooster.CrossCutting
             var value = input.Substring(index + key.Length + 1);
             value = value.Remove(value.IndexOf(splitter));
 
-            return value;
+            return value.ToLowerInvariant();
         };
 
         public (string inbound, string outbound) ExtractPorts(string line)

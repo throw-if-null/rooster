@@ -14,7 +14,7 @@ namespace Rooster.Slack.DependencyInjection
     {
         public static IServiceCollection AddSlack(this IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<WebHookReporterOptions>(configuration.GetSection($"Connectors:Slack:{nameof(WebHookReporterOptions)}"));
+            services.Configure<WebHookReporterOptions>(configuration.GetSection($"Reporters:Slack:{nameof(WebHookReporterOptions)}"));
 
             services
                 .AddHttpClient<IReporter, WebHookReporter>(x => x.BaseAddress = new Uri("https://hooks.slack.com"))

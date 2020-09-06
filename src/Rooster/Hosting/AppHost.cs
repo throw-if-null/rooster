@@ -6,6 +6,7 @@ using Rooster.Adapters.Kudu;
 using Rooster.Mediator.Handlers.ExportLogEntry;
 using Rooster.Mediator.Handlers.ProcessLogEntry;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -15,6 +16,8 @@ namespace Rooster.Hosting
 {
     public class AppHost<T> : IHostedService
     {
+        private readonly ConcurrentDictionary<string, long> _containers = new ConcurrentDictionary<string, long>();
+
         private readonly AppHostOptions _options;
         private readonly IEnumerable<IKuduApiAdapter> _kudus;
         private readonly IMediator _mediator;
@@ -59,7 +62,13 @@ namespace Rooster.Hosting
                         {
                             var exportedLogEntry = await _mediator.Send(new ExportLogEntryRequest { LogLine = line }, ct);
 
+                            if (_containers.ContainsKey(exportedLogEntry.ContainerName) &&
+                                _containers[exportedLogEntry.ContainerName] <= exportedLogEntry.EventDate.Ticks)
+                                continue;
+
                             await _mediator.Send(new ProcessLogEntryRequest { ExportedLogEntry = exportedLogEntry }, ct);
+
+                            _containers[exportedLogEntry.ContainerName] = exportedLogEntry.EventDate.Ticks;
                         }
 
                         _logger.LogDebug($"Finished extracting docker logs from: {logUri}.", null);
