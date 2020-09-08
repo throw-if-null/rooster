@@ -1,8 +1,7 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
-using Rooster.DataAccess.Entities;
+﻿using MongoDB.Driver;
 using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;
 using Rooster.MongoDb.Connectors.Colections;
+using Rooster.MongoDb.Schema;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,16 +21,16 @@ namespace Rooster.MongoDb.Mediator.Queries
             GetLatestByServiceAndContainerNamesRequest request,
             CancellationToken cancellation)
         {
-            var collection = await _collectionFactory.Get<LogEntry<ObjectId>>(cancellation);
+            var collection = await _collectionFactory.Get<LogEntry>(cancellation);
 
-            var filter = Builders<LogEntry<ObjectId>>.Filter.Where(x => x.ServiceName == request.ServiceName && x.ContainerName == request.ContainerName);
-            var sort = Builders<LogEntry<ObjectId>>.Sort.Descending(x => x.Created);
+            var filter = Builders<LogEntry>.Filter.Where(x => x.ServiceName == request.ServiceName && x.ContainerName == request.ContainerName);
+            var sort = Builders<LogEntry>.Sort.Descending(x => x.Created);
 
-            var cursor = await collection.FindAsync(filter, new FindOptions<LogEntry<ObjectId>, LogEntry<ObjectId>>
+            var cursor = await collection.FindAsync(filter, new FindOptions<LogEntry, LogEntry>
             {
                 Sort = sort,
                 Limit = 1,
-                Projection = Builders<LogEntry<ObjectId>>.Projection.Include(x => x.EventDate)
+                Projection = Builders<LogEntry>.Projection.Include(x => x.EventDate)
             });
 
             var entry = await cursor.FirstOrDefaultAsync();

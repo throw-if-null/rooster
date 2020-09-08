@@ -1,8 +1,8 @@
 ﻿using Dapper;
 using MediatR;
-using Rooster.DataAccess.Entities;
 using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.SqlServer.Connectors;
+using Rooster.SqlServer.Schema;
 using System;
 using System.Text;
 using System.Threading;
@@ -19,13 +19,13 @@ namespace Rooster.SqlServer.Mediator.Commands
             var builder = new StringBuilder();
 
             builder
-                .Append($"{prefix}{nameof(LogEntry<int>.ServiceName)}, ")
-                .Append($"{prefix}{nameof(LogEntry<int>.ContainerName)}, ")
-                .Append($"{prefix}{nameof(LogEntry<int>.ImageName)}, ")
-                .Append($"{prefix}{nameof(LogEntry<int>.ImageTag)}, ")
-                .Append($"{prefix}{nameof(LogEntry<int>.InboundPort)}, ")
-                .Append($"{prefix}{nameof(LogEntry<int>.OutboundPort)}, ")
-                .Append($"{prefix}{nameof(LogEntry<int>.EventDate)}");
+                .Append($"{prefix}{nameof(LogEntry.ServiceName)}, ")
+                .Append($"{prefix}{nameof(LogEntry.ContainerName)}, ")
+                .Append($"{prefix}{nameof(LogEntry.ImageName)}, ")
+                .Append($"{prefix}{nameof(LogEntry.ImageTag)}, ")
+                .Append($"{prefix}{nameof(LogEntry.InboundPort)}, ")
+                .Append($"{prefix}{nameof(LogEntry.OutboundPort)}, ")
+                .Append($"{prefix}{nameof(LogEntry.EventDate)}");
 
             return builder.ToString();
         };

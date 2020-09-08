@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace Rooster.DataAccess.Entities
+namespace Rooster.SqlServer.Schema
 {
-    public class LogEntry<T>
+    public class LogEntry
     {
-        public T Id { get; set; }
+        public int Id { get; set; }
 
         public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 

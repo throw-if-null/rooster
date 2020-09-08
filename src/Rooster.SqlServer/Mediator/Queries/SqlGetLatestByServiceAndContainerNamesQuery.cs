@@ -1,7 +1,7 @@
 ﻿using Dapper;
-using Rooster.DataAccess.Entities;
 using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;
 using Rooster.SqlServer.Connectors;
+using Rooster.SqlServer.Schema;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,10 +14,10 @@ namespace Rooster.SqlServer.Mediator.Queries
                delegate
                {
                    return
-                       $"SELECT TOP 1 {nameof(LogEntry<int>.EventDate)} FROM {nameof(LogEntry<int>)} " +
-                       $"WHERE {nameof(LogEntry<int>.ServiceName)} = @{nameof(LogEntry<int>.ServiceName)} AND " +
-                       $"{nameof(LogEntry<int>.ContainerName)} = @{nameof(LogEntry<int>.ContainerName)} " +
-                       $"ORDER BY {nameof(LogEntry<int>.Created)} DESC";
+                       $"SELECT TOP 1 {nameof(LogEntry.EventDate)} FROM {nameof(LogEntry)} " +
+                       $"WHERE {nameof(LogEntry.ServiceName)} = @{nameof(LogEntry.ServiceName)} AND " +
+                       $"{nameof(LogEntry.ContainerName)} = @{nameof(LogEntry.ContainerName)} " +
+                       $"ORDER BY {nameof(LogEntry.Created)} DESC";
                };
 
         private readonly IConnectionFactory _connectionFactory;
