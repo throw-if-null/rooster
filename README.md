@@ -1,9 +1,15 @@
+[![Actions Status](https://github.com/MirzaMerdovic/rooster/workflows/Docker/badge.svg)](https://github.com/MirzaMerdovic/rooster/actions)
+[![Docker Pulls](https://img.shields.io/docker/pulls/mirzamerdovic/rooster?style=flat)](https://hub.docker.com/r/mirzamerdovic/rooster)
+
 # Rooster
 Rooster :rooster: is docker log extractor for Azure Web Apps on Linux.  
-It extracts docker logs about new container deployment (`docker run`) using Kudu API and sends them to SqlServer, MongoDb or Slack. Currently supported locations include:
+It extracts docker logs about new container deployment (`docker run`) using Kudu API and persits them to:
 * Sql Database
-* MongoDb
+* MongoDb  
+
+and/or reports them to:  
 * Slack
+* AppInsights
 
 # Motivation
 
@@ -12,4 +18,4 @@ Now if you try getting the logs from Kudu API, you will see that in your logs yo
 
 # How it works
 
-Simple console app tha fetech the Docker logs list from endpoint provided by Kudu `https://{appservice-name}.scm.azurewebsites.net/api/logs/docker`. App remembers the timestamp of the last match if found in logs, in order to avoid sending the same entries many times. Entries that match will be sent to Application Insight as structured logs.
+Simple console app that feteches Docker log list from endpoint provided by Kudu `https://{appservice-name}.scm.azurewebsites.net/api/logs/docker`. App remembers the timestamp of the last match if found in logs, in order to avoid sending the same entries many times. Entries that match will be send and or persisted to one of the supported desitnations.
