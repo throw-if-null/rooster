@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Rooster.AppInsights\Rooster.AppInsights.csproj" />
     <ProjectReference Include="..\Rooster.MongoDb\Rooster.MongoDb.csproj" />
     <ProjectReference Include="..\Rooster.Slack\Rooster.Slack.csproj" />
     <ProjectReference Include="..\Rooster.SqlServer\Rooster.SqlServer.csproj" />

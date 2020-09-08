@@ -10,6 +10,7 @@ using Rooster.Mediator.Handlers.ExportLogEntry;
 using Rooster.Mediator.Handlers.ProcessLogEntry;
 using Rooster.MongoDb.DependencyInjection;
 using Rooster.QoS;
+using Rooster.AppInsights.DependencyInjection;
 using Rooster.Slack.DependencyInjection;
 using Rooster.SqlServer.DependencyInjection;
 using System;
@@ -73,6 +74,10 @@ namespace Rooster.DependencyInjection
 
                 case "Slack":
                     services = services.AddSlack(configuration);
+                    break;
+
+                case "AppInsights":
+                    services = services.AddAppInsights(configuration);
                     break;
 
                 default:
