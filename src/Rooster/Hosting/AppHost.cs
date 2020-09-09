@@ -3,8 +3,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Rooster.Adapters.Kudu;
-using Rooster.Mediator.Handlers.ExportLogEntry;
-using Rooster.Mediator.Handlers.ProcessLogEntry;
+using Rooster.Mediator.Commands.ExportLogEntry;
+using Rooster.Mediator.Commands.ProcessLogEntry;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -41,6 +41,7 @@ namespace Rooster.Hosting
 
             while (true)
             {
+                // TODO: Parallelize
                 foreach(var kudu in _kudus)
                 {
                     var kuduLogs = await kudu.GetDockerLogs(ct);

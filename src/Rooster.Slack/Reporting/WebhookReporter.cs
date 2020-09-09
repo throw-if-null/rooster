@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Rooster.QoS;
+using Rooster.QoS.Resilency;
 using System;
 using System.Net;
 using System.Net.Http;

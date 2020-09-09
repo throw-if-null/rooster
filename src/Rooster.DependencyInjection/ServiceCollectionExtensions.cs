@@ -2,15 +2,15 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rooster.Adapters.Kudu;
-using Rooster.Adapters.Kudu.Handlers;
+using Rooster.AppInsights.DependencyInjection;
 using Rooster.CrossCutting;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
-using Rooster.Mediator.Handlers.ExportLogEntry;
-using Rooster.Mediator.Handlers.ProcessLogEntry;
+using Rooster.Mediator.Commands.ExportLogEntry;
+using Rooster.Mediator.Commands.ProcessLogEntry;
 using Rooster.MongoDb.DependencyInjection;
-using Rooster.QoS;
-using Rooster.AppInsights.DependencyInjection;
+using Rooster.QoS.Intercepting;
+using Rooster.QoS.Resilency;
 using Rooster.Slack.DependencyInjection;
 using Rooster.SqlServer.DependencyInjection;
 using System;
@@ -90,7 +90,7 @@ namespace Rooster.DependencyInjection
                 typeof(ExportLogEntryRequest)
             });
 
-            services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryRequestHandler>();
+            services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryCommand>();
 
             return services;
         }

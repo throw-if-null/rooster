@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using Rooster.Hosting;
 using Rooster.Mediator.Commands.CreateLogEntry;
-using Rooster.Mediator.Handlers.ProcessLogEntry;
+using Rooster.Mediator.Commands.ProcessLogEntry;
 using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;
 using Rooster.MongoDb.Connectors.Clients;
 using Rooster.MongoDb.Connectors.Colections;
@@ -36,7 +36,7 @@ namespace Rooster.MongoDb.DependencyInjection
 
             services.AddTransient<IRequestHandler<CreateLogEntryRequest, Unit>, MongoDbCreateLogEntryCommand>();
             services.AddTransient<IRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>, MongoDbGetLatestByServiceAndContainerNamesQuery>();
-            services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, ProcessLogEntryRequestHandler>();
+            services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, ProcessLogEntryCommand>();
 
             services.AddHostedService<AppHost<ObjectId>>();
 

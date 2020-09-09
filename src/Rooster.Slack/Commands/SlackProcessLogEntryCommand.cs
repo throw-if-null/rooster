@@ -1,17 +1,17 @@
 ﻿using MediatR;
-using Rooster.Mediator.Handlers.ProcessLogEntry;
+using Rooster.Mediator.Commands.ProcessLogEntry;
 using Rooster.Slack.Reporting;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Slack.Handlers
+namespace Rooster.Slack.Commands
 {
-    public class SlackProcessLogEntryRequestHandler : AsyncRequestHandler<ProcessLogEntryRequest>
+    public class SlackProcessLogEntryCommand : AsyncRequestHandler<ProcessLogEntryRequest>
     {
         private readonly IReporter _reporter;
 
-        public SlackProcessLogEntryRequestHandler(IReporter reporter)
+        public SlackProcessLogEntryCommand(IReporter reporter)
         {
             _reporter = reporter ?? throw new ArgumentNullException(nameof(reporter));
         }

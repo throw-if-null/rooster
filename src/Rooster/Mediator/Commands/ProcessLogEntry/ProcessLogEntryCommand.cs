@@ -5,13 +5,13 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Mediator.Handlers.ProcessLogEntry
+namespace Rooster.Mediator.Commands.ProcessLogEntry
 {
-    public class ProcessLogEntryRequestHandler : AsyncRequestHandler<ProcessLogEntryRequest>
+    public class ProcessLogEntryCommand : AsyncRequestHandler<ProcessLogEntryRequest>
     {
         private readonly IMediator _mediator;
 
-        public ProcessLogEntryRequestHandler(IMediator mediator)
+        public ProcessLogEntryCommand(IMediator mediator)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }

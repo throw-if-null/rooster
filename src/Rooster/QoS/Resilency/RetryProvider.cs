@@ -4,7 +4,7 @@ using Polly;
 using System;
 using System.Threading.Tasks;
 
-namespace Rooster.QoS
+namespace Rooster.QoS.Resilency
 {
     public interface IRetryProvider
     {

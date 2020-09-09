@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Adapters.Kudu.Handlers
+namespace Rooster.QoS.Intercepting
 {
     public sealed class RequestsInterceptor : DelegatingHandler
     {

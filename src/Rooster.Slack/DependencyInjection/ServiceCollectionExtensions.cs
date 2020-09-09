@@ -1,10 +1,10 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Rooster.Adapters.Kudu.Handlers;
 using Rooster.Hosting;
-using Rooster.Mediator.Handlers.ProcessLogEntry;
-using Rooster.Slack.Handlers;
+using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.QoS.Intercepting;
+using Rooster.Slack.Commands;
 using Rooster.Slack.Reporting;
 using System;
 
@@ -20,7 +20,7 @@ namespace Rooster.Slack.DependencyInjection
                 .AddHttpClient<IReporter, WebHookReporter>(x => x.BaseAddress = new Uri("https://hooks.slack.com"))
                 .AddHttpMessageHandler<RequestsInterceptor>();
 
-            services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, SlackProcessLogEntryRequestHandler>();
+            services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, SlackProcessLogEntryCommand>();
 
             services.AddHostedService<AppHost<Nop>>();
 

@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 
-namespace Rooster.Adapters.Kudu.Handlers
+namespace Rooster.QoS.Intercepting
 {
     internal static class Extensions
     {

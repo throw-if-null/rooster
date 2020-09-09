@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace Rooster.Adapters.Kudu.Handlers
+namespace Rooster.QoS.Intercepting
 {
     public class HttpInterceptorOptions
     {

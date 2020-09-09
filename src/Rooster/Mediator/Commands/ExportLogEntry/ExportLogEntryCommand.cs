@@ -4,13 +4,13 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Mediator.Handlers.ExportLogEntry
+namespace Rooster.Mediator.Commands.ExportLogEntry
 {
-    public class ExportLogEntryRequestHandler : IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>
+    public class ExportLogEntryCommand : IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>
     {
         private readonly ILogExtractor _extractor;
 
-        public ExportLogEntryRequestHandler(ILogExtractor extractor)
+        public ExportLogEntryCommand(ILogExtractor extractor)
         {
             _extractor = extractor ?? throw new ArgumentNullException(nameof(extractor));
         }

@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Rooster.AppInsights.Reporters;
-using Rooster.Mediator.Handlers.ProcessLogEntry;
+using Rooster.Mediator.Commands.ProcessLogEntry;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace Rooster.AppInsights.Handlers
 {
-    public class AppInsightsProcessLogEntryRequestHandler : AsyncRequestHandler<ProcessLogEntryRequest>
+    public class AppInsightsProcessLogEntryCommand : AsyncRequestHandler<ProcessLogEntryRequest>
     {
         private readonly ITelemetryReporter _reporter;
 
-        public AppInsightsProcessLogEntryRequestHandler(ITelemetryReporter reporter)
+        public AppInsightsProcessLogEntryCommand(ITelemetryReporter reporter)
         {
             _reporter = reporter ?? throw new ArgumentNullException(nameof(reporter));
         }

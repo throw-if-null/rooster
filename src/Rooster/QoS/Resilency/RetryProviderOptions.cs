@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace Rooster.QoS
+namespace Rooster.QoS.Resilency
 {
     public class RetryProviderOptions
     {

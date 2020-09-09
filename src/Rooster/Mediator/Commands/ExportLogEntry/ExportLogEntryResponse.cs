@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Rooster.Mediator.Handlers.ExportLogEntry
+namespace Rooster.Mediator.Commands.ExportLogEntry
 {
     public class ExportLogEntryResponse
     {
