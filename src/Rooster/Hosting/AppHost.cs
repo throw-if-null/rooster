@@ -37,58 +37,57 @@ namespace Rooster.Hosting
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            var ct = cancellationToken;
+            var tasks = _kudus.Select(x => ProcessKuduLogs(x, cancellationToken));
 
-            while (true)
-            {
-                // TODO: Parallelize
-                foreach(var kudu in _kudus)
-                {
-                    var kuduLogs = await kudu.GetDockerLogs(ct);
-
-                    foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in kuduLogs.Where(x => x.LastUpdated.Date == DateTimeOffset.UtcNow.Date))
-                    {
-                        var extendedLastUpdated = lastUpdated.AddMinutes(_options.CurrentDateVarianceInMinutes);
-
-                        if (extendedLastUpdated < DateTimeOffset.UtcNow)
-                        {
-                            _logger.LogDebug($"Log: {logUri} is old. Last updated: {lastUpdated}. Machine: {machineName}");
-
-                            continue;
-                        }
-
-                        var lines = kudu.ExtractLogsFromStream(logUri);
-
-                        await foreach (var line in lines)
-                        {
-                            var exportedLogEntry = await _mediator.Send(new ExportLogEntryRequest { LogLine = line }, ct);
-
-                            if (exportedLogEntry.ContainerName.EndsWith("_msiproxy", StringComparison.InvariantCultureIgnoreCase))
-                                continue;
-
-                            if (_containers.ContainsKey(exportedLogEntry.ContainerName) &&
-                                _containers[exportedLogEntry.ContainerName] <= exportedLogEntry.EventDate.Ticks)
-                                continue;
-
-                            await _mediator.Send(new ProcessLogEntryRequest { ExportedLogEntry = exportedLogEntry }, ct);
-
-                            _containers[exportedLogEntry.ContainerName] = exportedLogEntry.EventDate.Ticks;
-                        }
-
-                        _logger.LogDebug($"Finished extracting docker logs from: {logUri}.", null);
-                    }
-                }
-
-                if (!_options.UseInternalPoller)
-                    break;
-
-                await Task.Delay(TimeSpan.FromSeconds(_options.PoolingIntervalInSeconds));
-            }
+            await Task.WhenAll(tasks);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
+        }
+
+        private async Task ProcessKuduLogs(IKuduApiAdapter kudu, CancellationToken ct)
+        {
+            var kuduLogs = await kudu.GetDockerLogs(ct);
+
+            foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in kuduLogs.Where(x => x.LastUpdated.Date == DateTimeOffset.UtcNow.Date))
+            {
+                var extendedLastUpdated = lastUpdated.AddMinutes(_options.CurrentDateVarianceInMinutes);
+
+                if (extendedLastUpdated < DateTimeOffset.UtcNow)
+                {
+                    _logger.LogDebug($"Log: {logUri} is old. Last updated: {lastUpdated}. Machine: {machineName}");
+
+                    continue;
+                }
+
+                var lines = kudu.ExtractLogsFromStream(logUri);
+
+                await foreach (var line in lines)
+                {
+                    var exportedLogEntry = await _mediator.Send(new ExportLogEntryRequest { LogLine = line }, ct);
+
+                    if (exportedLogEntry.ContainerName.EndsWith("_msiproxy", StringComparison.InvariantCultureIgnoreCase))
+                        continue;
+
+                    if (_containers.ContainsKey(exportedLogEntry.ContainerName) &&
+                        _containers[exportedLogEntry.ContainerName] <= exportedLogEntry.EventDate.Ticks)
+                        continue;
+
+                    await _mediator.Send(new ProcessLogEntryRequest { ExportedLogEntry = exportedLogEntry }, ct);
+
+                    _containers[exportedLogEntry.ContainerName] = exportedLogEntry.EventDate.Ticks;
+                }
+
+                _logger.LogDebug($"Finished extracting docker logs from: {logUri}.", null);
+
+                if (!_options.UseInternalPoller)
+                    break;
+
+                await Task.Delay(TimeSpan.FromSeconds(_options.PoolingIntervalInSeconds));
+                await ProcessKuduLogs(kudu, ct);
+            }
         }
     }
 }
