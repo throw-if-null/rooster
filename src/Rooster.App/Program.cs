@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Rooster.DependencyInjection;
@@ -40,7 +39,8 @@ namespace Rooster.App
             .ConfigureHostConfiguration(configurator =>
             {
                 configurator.SetBasePath(Directory.GetCurrentDirectory());
-                configurator.AddJsonFile("appsettings.json", optional: true);
+                configurator.AddJsonFile("systemSettings.json", false);
+                configurator.AddJsonFile("appsettings.json", optional: false);
                 configurator.AddCommandLine(args);
             })
             .ConfigureLogging((ctx, builder) =>
@@ -49,8 +49,6 @@ namespace Rooster.App
             })
             .ConfigureServices((context, services) =>
             {
-                services.AddLogging(x => x.SetMinimumLevel(LogLevel.Trace));
-
                 services.AddRooster(context.Configuration);
             });
     }

@@ -63,6 +63,9 @@ namespace Rooster.Hosting
                         {
                             var exportedLogEntry = await _mediator.Send(new ExportLogEntryRequest { LogLine = line }, ct);
 
+                            if (exportedLogEntry.ContainerName.EndsWith("_msiproxy", StringComparison.InvariantCultureIgnoreCase))
+                                continue;
+
                             if (_containers.ContainsKey(exportedLogEntry.ContainerName) &&
                                 _containers[exportedLogEntry.ContainerName] <= exportedLogEntry.EventDate.Ticks)
                                 continue;

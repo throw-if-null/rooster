@@ -1,9 +1,12 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Rooster.Adapters.Kudu;
 using Rooster.AppInsights.DependencyInjection;
 using Rooster.CrossCutting;
+using Rooster.CrossCutting.Docker;
+using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
 using Rooster.Mediator.Commands.ExportLogEntry;
@@ -13,6 +16,10 @@ using Rooster.QoS.Intercepting;
 using Rooster.QoS.Resilency;
 using Rooster.Slack.DependencyInjection;
 using Rooster.SqlServer.DependencyInjection;
+using Serilog;
+using Serilog.Core;
+using Serilog.Exceptions;
+using Serilog.Extensions.Logging;
 using System;
 using System.Collections.ObjectModel;
 using System.Net.Http.Headers;
@@ -44,8 +51,23 @@ namespace Rooster.DependencyInjection
 
             services.AddTransient<ILogExtractor, LogExtractor>();
 
+            services.AddSingleton<IInstrumentationContext, InstrumentationContext>();
             services.AddSingleton<IRetryProvider, RetryProvider>();
+            services.AddSingleton<CorrelationIdEnricher>();
+
             services.AddTransient<RequestsInterceptor>();
+
+            services.AddLogging(builder =>
+            {
+                using var provider = services.BuildServiceProvider();
+
+                builder.AddProvider(new SerilogLoggerProvider(
+                    new LoggerConfiguration()
+                    .ReadFrom.Configuration(configuration)
+                    .Enrich.WithExceptionDetails()
+                    .Enrich.With(new ILogEventEnricher[] { provider.GetRequiredService<CorrelationIdEnricher>() })
+                    .CreateLogger(), true));
+            });
 
             var options = configuration.GetSection($"Adapters:{nameof(KuduAdapterOptions)}").Get<Collection<KuduAdapterOptions>>();
 
@@ -62,27 +84,14 @@ namespace Rooster.DependencyInjection
 
             var databaseEngine = configuration.GetSection($"Hosts:{nameof(AppHostOptions)}").GetValue<string>("DatabaseEngine");
 
-            switch (databaseEngine)
+            services = databaseEngine switch
             {
-                case "MongoDb":
-                    services = services.AddMongoDb(configuration);
-                    break;
-
-                case "SqlServer":
-                    services = services.AddSqlServer(configuration);
-                    break;
-
-                case "Slack":
-                    services = services.AddSlack(configuration);
-                    break;
-
-                case "AppInsights":
-                    services = services.AddAppInsights(configuration);
-                    break;
-
-                default:
-                    throw new NotSupportedDataStoreException(databaseEngine);
-            }
+                "MongoDb" => services.AddMongoDb(configuration),
+                "SqlServer" => services.AddSqlServer(configuration),
+                "Slack" => services.AddSlack(configuration),
+                "AppInsights" => services.AddAppInsights(configuration),
+                _ => throw new NotSupportedDataStoreException(databaseEngine),
+            };
 
             services.AddMediatR(new[]
             {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Rooster.CrossCutting
+namespace Rooster.CrossCutting.Docker
 {
     public interface ILogExtractor
     {
@@ -23,7 +23,7 @@ namespace Rooster.CrossCutting
             var value = input.Substring(index + key.Length + 1);
             value = value.Remove(value.IndexOf(splitter));
 
-            return value.ToLowerInvariant();
+            return value.Trim().ToLowerInvariant();
         };
 
         public (string inbound, string outbound) ExtractPorts(string line)
