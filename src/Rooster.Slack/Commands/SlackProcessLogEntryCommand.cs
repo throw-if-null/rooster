@@ -25,7 +25,7 @@ namespace Rooster.Slack.Commands
                 new { title = "Date", value = $"`{request.ExportedLogEntry.EventDate}`" },
                 new { title = "Container name", value = $"`{request.ExportedLogEntry.ContainerName}`"},
                 new { title = "Ports", value = $"`{request.ExportedLogEntry.InboundPort}` : `{request.ExportedLogEntry.OutboundPort}`"},
-                new { title = "Image", value = $"`{request.ExportedLogEntry.ImageName}`" }
+                new { title = "Image", value = $"`{request.ExportedLogEntry.ImageName}`: `{request.ExportedLogEntry.ImageTag}`" }
             };
 
             var content =

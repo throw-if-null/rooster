@@ -36,7 +36,7 @@ namespace Rooster.CrossCutting.Docker
 
         public (string name, string tag) ExtractImageName(string line)
         {
-            var imageWithTag = ExtractValue(line, "DOCKER_CUSTOM_IMAGE_NAME", "-e");
+            var imageWithTag = ExtractValue(line, "DOCKER_CUSTOM_IMAGE_NAME", " -e");
             var parts = imageWithTag.Split(":");
 
             return (parts[0], parts[1]);
@@ -44,12 +44,12 @@ namespace Rooster.CrossCutting.Docker
 
         public string ExtractServiceName(string line)
         {
-            return ExtractValue(line, "WEBSITE_SITE_NAME", "-e");
+            return ExtractValue(line, "WEBSITE_SITE_NAME", " -e");
         }
 
         public string ExtractContainerName(string line)
         {
-            return ExtractValue(line, "--name", "-e");
+            return ExtractValue(line, "--name", " -e");
         }
 
         public DateTimeOffset ExtractDate(string line)
