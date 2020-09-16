@@ -17,9 +17,9 @@ namespace Rooster.QoS.Resilency
 
     public class RetryProvider : IRetryProvider
     {
-        private static readonly Func<double> GetJitter = delegate ()
+        private static readonly Func<int, double> CalculateJitter = delegate (int jitterMaximum)
         {
-            var jitter = TimeSpan.FromMilliseconds(new Random().Next(0, 100)).TotalMilliseconds;
+            var jitter = TimeSpan.FromMilliseconds(new Random().Next(0, jitterMaximum)).TotalMilliseconds;
 
             return jitter;
         };
@@ -49,7 +49,7 @@ namespace Rooster.QoS.Resilency
                             {
                                 _logger.LogInformation($"Retry attempt: {i}", Array.Empty<object>());
 
-                                return TimeSpan.FromMilliseconds(_options.Delays[i - 1] + GetJitter());
+                                return TimeSpan.FromMilliseconds(_options.Delays[i - 1] + CalculateJitter(_options.JitterMaximum));
                             })
                     .ExecuteAsync(execute);
         }

@@ -1,4 +1,12 @@
 ﻿{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Debug",
+      "Microsoft": "Warning",
+      "System": "Warning"
+    }
+  },
+
   "Serilog": {
     "MinimumLevel": "Debug",
     "WriteTo": [
@@ -20,6 +28,7 @@
   },
 
   "RetryProviderOptions": {
+    "JitterMaximum": 100,
     "Delays": [ 50, 100, 200 ]
   }
 }

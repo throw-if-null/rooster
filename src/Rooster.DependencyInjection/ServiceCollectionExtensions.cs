@@ -44,7 +44,7 @@ namespace Rooster.DependencyInjection
         public static IServiceCollection AddRooster(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<Collection<KuduAdapterOptions>>(configuration.GetSection($"Adapters:{nameof(KuduAdapterOptions)}"));
-            services.Configure<AppHostOptions>(configuration.GetSection($"Hosts:{nameof(AppHostOptions)}"));
+            services.Configure<AppHostOptions>(configuration.GetSection($"{nameof(AppHostOptions)}"));
             services.Configure<RetryProviderOptions>(configuration.GetSection($"{nameof(RetryProviderOptions)}"));
 
             services.AddMemoryCache();
@@ -60,6 +60,8 @@ namespace Rooster.DependencyInjection
             services.AddLogging(builder =>
             {
                 using var provider = services.BuildServiceProvider();
+
+                builder.ClearProviders();
 
                 builder.AddProvider(new SerilogLoggerProvider(
                     new LoggerConfiguration()
@@ -82,14 +84,14 @@ namespace Rooster.DependencyInjection
                     .AddHttpMessageHandler<RequestsInterceptor>();
             }
 
-            var databaseEngine = configuration.GetSection($"Hosts:{nameof(AppHostOptions)}").GetValue<string>("DatabaseEngine");
+            var databaseEngine = configuration.GetSection($"{nameof(AppHostOptions)}").GetValue<string>(nameof(Engine));
 
-            services = databaseEngine switch
+            services = databaseEngine.Trim().ToUpperInvariant() switch
             {
-                "MongoDb" => services.AddMongoDb(configuration),
-                "SqlServer" => services.AddSqlServer(configuration),
-                "Slack" => services.AddSlack(configuration),
-                "AppInsights" => services.AddAppInsights(configuration),
+                Engine.MongoDb => services.AddMongoDb(configuration),
+                Engine.SqlServer => services.AddSqlServer(configuration),
+                Engine.Slack => services.AddSlack(configuration),
+                Engine.AppInsights => services.AddAppInsights(configuration),
                 _ => throw new NotSupportedDataStoreException(databaseEngine),
             };
 
