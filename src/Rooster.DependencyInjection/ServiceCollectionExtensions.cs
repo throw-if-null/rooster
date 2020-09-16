@@ -74,7 +74,7 @@ namespace Rooster.DependencyInjection
             foreach (var option in options)
             {
                 services
-                    .AddHttpClient<IKuduApiAdapter, KuduApiAdapter>(x =>
+                    .AddHttpClient<IKuduApiAdapter, KuduApiAdapter>($"Kudu-{Guid.NewGuid().ToString("N")}", x =>
                     {
                         x.DefaultRequestHeaders.Authorization = BuildBasicAuthHeader(option.User, option.Password);
                         x.BaseAddress = option.BaseUri;
