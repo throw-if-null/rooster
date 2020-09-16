@@ -81,13 +81,13 @@ namespace Rooster.Hosting
                 }
 
                 _logger.LogDebug($"Finished extracting docker logs from: {logUri}.", null);
-
-                if (!_options.UseInternalPoller)
-                    break;
-
-                await Task.Delay(TimeSpan.FromSeconds(_options.PoolingIntervalInSeconds));
-                await ProcessKuduLogs(kudu, ct);
             }
+
+            if (!_options.UseInternalPoller)
+                return;
+
+            await Task.Delay(TimeSpan.FromSeconds(_options.PoolingIntervalInSeconds));
+            await ProcessKuduLogs(kudu, ct);
         }
     }
 }
