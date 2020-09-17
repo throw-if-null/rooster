@@ -74,7 +74,7 @@ Note: Database and table called LogEntry must be created, you can check [seed sc
 #### MongoDb
 To have Rooster save extracted logs to MongoDb database you need these settings configured:
 ```
-AppHostOptions__Enginge=MongoDb
+AppHostOptions__Engine=MongoDb
 
 DataStores__MongoDb__ClientFactoryOptions__Url=mongodb://localhost:27017
 ```
@@ -92,27 +92,29 @@ To have Rooster send you extracted logs to Slack or AppInsights you will need to
 #### Slack
 Reporting to slack is achieved via incoming webhooks which is the easist way to send message to Slack in my opinion. Required configuration is:
 ```
-AppHostOptions__Enginge=MongoDb
+AppHostOptions__Engine=Slack
 
-Reporters_Slack__WebHookReporterOptions__Url=services/xxxxxx
+Reporters__Slack__WebHookReporterOptions__Url=services/xxxxxx
 ```
 
 Optionally you can change the timeout value or change User-Agent header, or add additional header:
 ```
-Reporters_Slack__WebHookReporterOptions__TimeoutInMs=3000
-Reporters_Slack__Headers__0_Name=User-Agent
-Reporters_Slack__Headers__0_Value=Rooster
+Reporters__Slack__WebHookReporterOptions__TimeoutInMs=3000
+Reporters__Slack__Headers__0__Name=User-Agent
+Reporters__Slack__Headers__0__Value=Rooster
 ```
 
 In case you need to specify authorization header:
 ```
-Reporters_Slack__Authorization__Scheme=xxx
-Reporters_Slack__Authorization__Parameter=xxx
+Reporters__Slack__Authorization__Scheme=xxx
+Reporters__Slack__Authorization__Parameter=xxx
 ```
 
 #### AppInsights
 To send logs to AppInsights you need to provider an instrumentation key:
 ```
+AppHostOptions__Engine=AppInsights
+
 Reporters__AppInsights__TelemetryReporterOptions__InstrumentationKey=xxx
 ```
 
