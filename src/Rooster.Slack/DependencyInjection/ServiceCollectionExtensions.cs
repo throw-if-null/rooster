@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Rooster.Hosting;
 using Rooster.Mediator.Commands.ProcessLogEntry;
 using Rooster.QoS.Intercepting;
 using Rooster.Slack.Commands;
@@ -21,8 +20,6 @@ namespace Rooster.Slack.DependencyInjection
                 .AddHttpMessageHandler<RequestsInterceptor>();
 
             services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, SlackProcessLogEntryCommand>();
-
-            services.AddHostedService<AppHost<Nop>>();
 
             return services;
         }

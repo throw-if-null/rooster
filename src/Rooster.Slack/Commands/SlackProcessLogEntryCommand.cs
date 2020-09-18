@@ -2,6 +2,7 @@
 using Rooster.Mediator.Commands.ProcessLogEntry;
 using Rooster.Slack.Reporting;
 using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,6 +10,14 @@ namespace Rooster.Slack.Commands
 {
     public class SlackProcessLogEntryCommand : AsyncRequestHandler<ProcessLogEntryRequest>
     {
+        private const string message = "New container deployment.";
+        private const string DateTitle = "Date";
+        private const string ContainerNameTitle = "Container name";
+        private const string PortsTitle = "Ports";
+        private const string ImageTitle = "Image";
+        private const string MarkdownInOption = "text";
+        private const string ColorValue = "warning";
+
         private readonly IReporter _reporter;
 
         public SlackProcessLogEntryCommand(IReporter reporter)
@@ -18,14 +27,12 @@ namespace Rooster.Slack.Commands
 
         protected override Task Handle(ProcessLogEntryRequest request, CancellationToken cancellationToken)
         {
-            var message = $"Container restarted.";
-
             var fields = new object[4]
             {
-                new { title = "Date", value = $"`{request.ExportedLogEntry.EventDate}`" },
-                new { title = "Container name", value = $"`{request.ExportedLogEntry.ContainerName}`"},
-                new { title = "Ports", value = $"`{request.ExportedLogEntry.InboundPort}` : `{request.ExportedLogEntry.OutboundPort}`"},
-                new { title = "Image", value = $"`{request.ExportedLogEntry.ImageName}`: `{request.ExportedLogEntry.ImageTag}`" }
+                new { title = DateTitle, value = $"`{request.ExportedLogEntry.EventDate}`" },
+                new { title = ContainerNameTitle, value = $"`{request.ExportedLogEntry.ContainerName}`"},
+                new { title = PortsTitle, value = $"`{request.ExportedLogEntry.InboundPort}` : `{request.ExportedLogEntry.OutboundPort}`"},
+                new { title = ImageTitle, value = $"`{request.ExportedLogEntry.ImageName}`: `{request.ExportedLogEntry.ImageTag}`" }
             };
 
             var content =
@@ -35,8 +42,8 @@ namespace Rooster.Slack.Commands
                     {
                         new
                         {
-                            mrkdwn_in = new object[1] { "text" },
-                            color = "warning",
+                            mrkdwn_in = new object[1] { MarkdownInOption },
+                            color = ColorValue,
                             pretext = $"*Service:* {request.ExportedLogEntry.ServiceName}",
                             text = $"_{message}_",
                             fields = fields

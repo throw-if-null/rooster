@@ -9,6 +9,8 @@ namespace Rooster.QoS.Intercepting
 {
     internal static class Extensions
     {
+        private const string JsonMediatType = "application/json";
+
         private static readonly Dictionary<HttpStatusCode, Func<HttpInterceptorOptions, HttpResponseMessage>> _handlers = new Dictionary<HttpStatusCode, Func<HttpInterceptorOptions, HttpResponseMessage>>
         {
             [HttpStatusCode.BadRequest] = x => x.CreateMessage(HttpStatusCode.BadRequest),
@@ -40,7 +42,7 @@ namespace Rooster.QoS.Intercepting
             if (string.IsNullOrWhiteSpace(options.ReturnJsonContent))
                 return message.AddResponseHeaders(options.Headers);
 
-            message.Content = new StringContent(options.ReturnJsonContent, Encoding.UTF8, "application/json");
+            message.Content = new StringContent(options.ReturnJsonContent, Encoding.UTF8, JsonMediatType);
 
             return message.AddResponseHeaders(options.Headers);
         }

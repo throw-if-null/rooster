@@ -10,6 +10,7 @@ using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
 using Rooster.Mediator.Commands.ExportLogEntry;
+using Rooster.Mediator.Commands.ProcessDockerLogs;
 using Rooster.Mediator.Commands.ProcessLogEntry;
 using Rooster.MongoDb.DependencyInjection;
 using Rooster.QoS.Intercepting;
@@ -98,10 +99,14 @@ namespace Rooster.DependencyInjection
             services.AddMediatR(new[]
             {
                 typeof(ProcessLogEntryRequest),
-                typeof(ExportLogEntryRequest)
+                typeof(ExportLogEntryRequest),
+                typeof(ProcessDockerLogsRequest)
             });
 
             services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryCommand>();
+            services.AddTransient<IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>, ProcessDockerLogsCommand>();
+
+            services.AddHostedService<AppHost>();
 
             return services;
         }

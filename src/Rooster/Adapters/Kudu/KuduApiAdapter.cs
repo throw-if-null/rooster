@@ -19,6 +19,13 @@ namespace Rooster.Adapters.Kudu
 
     public class KuduApiAdapter : IKuduApiAdapter
     {
+        private const string InitStringValue = "init";
+        private const string Docker = "docker";
+        private const string DefaultSuffix = "_default";
+        private const string MsiSuffix = "_msi";
+        private const string KuduLogPath = "api/logs/docker";
+        private const string LogUrlLogMessage = "Log URL: {0}{1}";
+
         private readonly HttpClient _client;
         private readonly ILogger _logger;
 
@@ -30,9 +37,9 @@ namespace Rooster.Adapters.Kudu
 
         public async Task<IEnumerable<(DateTimeOffset LastUpdated, Uri LogUri, string MachineName)>> GetDockerLogs(CancellationToken cancellation)
         {
-            _logger.LogDebug($"Log url: {_client.BaseAddress}api/logs/docker");
+            _logger.LogDebug(LogUrlLogMessage, new object[2] { _client.BaseAddress, KuduLogPath });
 
-            using var response = await _client.GetAsync("api/logs/docker", cancellation);
+            using var response = await _client.GetAsync(KuduLogPath, cancellation);
 
             response.EnsureSuccessStatusCode();
 
@@ -53,8 +60,8 @@ namespace Rooster.Adapters.Kudu
 
             return values.Where(
                     x =>
-                        !x.machineName.EndsWith("_default", StringComparison.InvariantCultureIgnoreCase) &&
-                        !x.machineName.EndsWith("_msi", StringComparison.InvariantCultureIgnoreCase))
+                        !x.machineName.EndsWith(DefaultSuffix, StringComparison.InvariantCultureIgnoreCase) &&
+                        !x.machineName.EndsWith(MsiSuffix, StringComparison.InvariantCultureIgnoreCase))
                     .ToArray();
         }
 
@@ -69,7 +76,7 @@ namespace Rooster.Adapters.Kudu
                 using var logReader = new StreamReader(stream);
                 stream = null;
 
-                var line = "init";
+                var line = InitStringValue;
 
                 while (line != null)
                 {
@@ -78,7 +85,7 @@ namespace Rooster.Adapters.Kudu
                     if (string.IsNullOrWhiteSpace(line))
                         continue;
 
-                    if (!line.Contains("docker", StringComparison.InvariantCultureIgnoreCase))
+                    if (!line.Contains(Docker, StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
                     yield return line;

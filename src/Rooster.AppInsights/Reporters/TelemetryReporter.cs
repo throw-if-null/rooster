@@ -11,6 +11,8 @@ namespace Rooster.AppInsights.Reporters
 
     public class TelemetryReporter : ITelemetryReporter
     {
+        private const string ContainerDeploymentEvent = "ContainerDeployment";
+
         private readonly TelemetryClient _client;
 
         public TelemetryReporter(TelemetryClient client)
@@ -20,7 +22,7 @@ namespace Rooster.AppInsights.Reporters
 
         public void Report(IDictionary<string, string> properties)
         {
-            _client.TrackEvent("ContainerRestart", properties);
+            _client.TrackEvent(ContainerDeploymentEvent, properties);
 
             _client.Flush();
         }

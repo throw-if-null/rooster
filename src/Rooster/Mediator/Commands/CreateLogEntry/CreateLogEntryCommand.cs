@@ -7,6 +7,9 @@ namespace Rooster.Mediator.Commands.CreateLogEntry
 {
     public abstract class CreateLogEntryCommand : IRequestHandler<CreateLogEntryRequest>
     {
+        private const string Null = "NULL";
+        private const string Empty = "EMPTY";
+
         private static readonly Action<string, string> ThrowArgumentException = delegate (string name, string value)
         {
             throw new ArgumentException($"{name} has invalid value: [{value}].");
@@ -42,7 +45,7 @@ namespace Rooster.Mediator.Commands.CreateLogEntry
                     return;
                 }
 
-                ThrowArgumentException(name, value == null ? "NULL" : "EMPTY");
+                ThrowArgumentException(name, value == null ? Null : Empty);
             }
 
             static void CheckInt(string name, string value)

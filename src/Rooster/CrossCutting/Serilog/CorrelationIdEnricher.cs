@@ -6,6 +6,8 @@ namespace Rooster.CrossCutting.Serilog
 {
     public sealed class CorrelationIdEnricher : ILogEventEnricher
     {
+        private const string CorrelationId = "CorrelationId";
+
         private readonly IInstrumentationContext _context;
 
         public CorrelationIdEnricher(IInstrumentationContext context)
@@ -15,7 +17,7 @@ namespace Rooster.CrossCutting.Serilog
 
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
-            logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty("CorrelationId", _context.CorrelationValue));
+            logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(CorrelationId, _context.CorrelationValue));
         }
     }
 }

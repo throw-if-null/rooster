@@ -17,6 +17,15 @@ namespace Rooster.CrossCutting.Docker
 
     public class LogExtractor : ILogExtractor
     {
+        private const string Dash = "-";
+        private const char Column = ':';
+        private const string PortsPrefix = "-p";
+        private const string EnvironmentVariablePrefix = " -e";
+        private const string ImageKey = "DOCKER_CUSTOM_IMAGE_NAME";
+        private const string ServiceNameKey = "WEBSITE_SITE_NAME";
+        private const string ContainerNameKey = "--name";
+        private const string DateKey = "INFO";
+
         private static readonly Func<string, string, string, string> ExtractValue = delegate (string input, string key, string splitter)
         {
             var index = input.IndexOf(key);
@@ -28,33 +37,33 @@ namespace Rooster.CrossCutting.Docker
 
         public (string inbound, string outbound) ExtractPorts(string line)
         {
-            var portsValue = ExtractValue(line, "-p", "-");
-            var ports = portsValue.Split(":");
+            var portsValue = ExtractValue(line, PortsPrefix, Dash);
+            var ports = portsValue.Split(Column);
 
             return (ports[0], ports[1]);
         }
 
         public (string name, string tag) ExtractImageName(string line)
         {
-            var imageWithTag = ExtractValue(line, "DOCKER_CUSTOM_IMAGE_NAME", " -e");
-            var parts = imageWithTag.Split(":");
+            var imageWithTag = ExtractValue(line, ImageKey, EnvironmentVariablePrefix);
+            var parts = imageWithTag.Split(Column);
 
             return (parts[0], parts[1]);
         }
 
         public string ExtractServiceName(string line)
         {
-            return ExtractValue(line, "WEBSITE_SITE_NAME", " -e");
+            return ExtractValue(line, ServiceNameKey, EnvironmentVariablePrefix);
         }
 
         public string ExtractContainerName(string line)
         {
-            return ExtractValue(line, "--name", " -e");
+            return ExtractValue(line, ContainerNameKey, EnvironmentVariablePrefix);
         }
 
         public DateTimeOffset ExtractDate(string line)
         {
-            var date = line.Remove(line.IndexOf("INFO") - 1);
+            var date = line.Remove(line.IndexOf(DateKey) - 1);
             DateTimeOffset.TryParse(date, out var convertedDate);
 
             return convertedDate;

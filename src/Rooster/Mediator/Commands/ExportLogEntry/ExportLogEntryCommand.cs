@@ -9,6 +9,8 @@ namespace Rooster.Mediator.Commands.ExportLogEntry
 {
     public class ExportLogEntryCommand : IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>
     {
+        private const string LogDockerLogLineReceived = "Received docker log line: {DockerLogLine}";
+
         private readonly ILogExtractor _extractor;
         private readonly ILogger _logger;
 
@@ -20,7 +22,7 @@ namespace Rooster.Mediator.Commands.ExportLogEntry
 
         public Task<ExportLogEntryResponse> Handle(ExportLogEntryRequest request, CancellationToken cancellationToken)
         {
-            _logger.LogDebug("Received docker log line: {DockerLogLjne}", request.LogLine);
+            _logger.LogDebug(LogDockerLogLineReceived, new object[1] { request.LogLine });
 
             var (inboundPort, outboundPort) = _extractor.ExtractPorts(request.LogLine);
             var (imageName, imageTag) = _extractor.ExtractImageName(request.LogLine);

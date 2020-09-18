@@ -16,15 +16,16 @@ namespace Rooster.CrossCutting
 
     public sealed class InstrumentationContext : IInstrumentationContext
     {
+        private const string X = "x";
+
         private readonly AsyncLocal<string> _correlationId = new AsyncLocal<string>();
 
-        public string CorrelationHeaderName => "correlationid";
         public string CorrelationValue
         {
             get
             {
                 if (string.IsNullOrWhiteSpace(_correlationId.Value))
-                    _correlationId.Value = Random().ToString("x");
+                    _correlationId.Value = Random().ToString(X);
 
                 return _correlationId.Value;
             }

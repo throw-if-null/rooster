@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rooster.AppInsights.Handlers;
 using Rooster.AppInsights.Reporters;
-using Rooster.Hosting;
 using Rooster.Mediator.Commands.ProcessLogEntry;
 
 namespace Rooster.AppInsights.DependencyInjection
@@ -23,9 +22,6 @@ namespace Rooster.AppInsights.DependencyInjection
 
             services.AddTransient<ITelemetryReporter, TelemetryReporter>();
             services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, AppInsightsProcessLogEntryCommand>();
-
-
-            services.AddHostedService<AppHost<Nop>>();
 
             return services;
         }
