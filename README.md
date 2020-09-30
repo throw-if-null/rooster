@@ -7,7 +7,7 @@ It extracts docker logs about new container deployments (`docker run`) using Kud
 * Sql Database
 * MongoDb  
 
-and/or reports them to:  
+or reports them to:  
 * Slack
 * AppInsights
 
@@ -124,7 +124,7 @@ Rooster uses [Serilog](https://serilog.net/) as a logging provider of choice the
 Serilog__MinimumLevel=Warning
 ```  
 
-other log level options are: `Verbose`, `Debug`, `Information`, `Warning`, `Error` and `Fatal` and you can also check the [offical documentation](https://github.com/serilog/serilog/wiki/Configuration-Basics#minimum-level). Keep in mind that loggin abstraction used in code is still Microsoft.Logging.Extension.ILogger and as you might already know its logging levels are slightly different, so `Trace` is `Verbose and `Critical` is `Fatal`.
+other log level options are: `Verbose`, `Debug`, `Information`, `Warning`, `Error` and `Fatal` and you can also check the [offical documentation](https://github.com/serilog/serilog/wiki/Configuration-Basics#minimum-level). Keep in mind that loggin abstraction used in code is still Microsoft.Logging.Extension.ILogger and as you might already know its logging levels are slightly different, so `Trace` is `Verbose` and `Critical` is `Fatal`.
 
 You can check out [systemSettings.json](src/Rooster.DependencyInjection/systemSettings.json) for more details on Serilog configuration if you are interested.
 
