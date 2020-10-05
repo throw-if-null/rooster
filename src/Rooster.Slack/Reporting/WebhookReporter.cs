@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Rooster.QoS.Resilency;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -18,9 +19,10 @@ namespace Rooster.Slack.Reporting
 
     public class WebHookReporter : IReporter
     {
-        private static readonly object[] EmptyParams = Array.Empty<object>();
+        private const string ReportSentToUrlLog = "Report sent to URL: {0} with received status: {1}";
 
-        private static readonly Func<HttpResponseMessage, bool> TransientHttpStatusCodePredicate = delegate (HttpResponseMessage response)
+        private static readonly Func<HttpResponseMessage, bool> TransientHttpStatusCodePredicate =
+            delegate (HttpResponseMessage response)
         {
             if (response.StatusCode < HttpStatusCode.InternalServerError)
                 return response.StatusCode == HttpStatusCode.RequestTimeout;
@@ -28,12 +30,21 @@ namespace Rooster.Slack.Reporting
             return true;
         };
 
+        private static readonly Action<HttpResponseMessage> ThrowHttpRequestException = delegate (HttpResponseMessage response)
+        {
+            throw new HttpRequestException(response.ReasonPhrase) { Data = { [nameof(HttpStatusCode)] = response.StatusCode } };
+        };
+
         private readonly WebHookReporterOptions _options;
         private readonly HttpClient _client;
         private readonly IRetryProvider _retryProvider;
         private readonly ILogger _logger;
 
-        public WebHookReporter(IOptionsMonitor<WebHookReporterOptions> options, HttpClient client, IRetryProvider retryProvider, ILogger<WebHookReporter> logger)
+        public WebHookReporter(
+            IOptionsMonitor<WebHookReporterOptions> options,
+            HttpClient client,
+            IRetryProvider retryProvider,
+            ILogger<WebHookReporter> logger)
         {
             _options = options.CurrentValue;
             _client = client;
@@ -49,6 +60,7 @@ namespace Rooster.Slack.Reporting
             try
             {
                 var serializedContent = JsonConvert.SerializeObject(payload, Formatting.Indented);
+
                 await
                     _retryProvider.RetryOn<HttpRequestException, HttpResponseMessage>(
                         CheckError,
@@ -57,7 +69,7 @@ namespace Rooster.Slack.Reporting
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Report sending failed", EmptyParams);
+                _logger.LogError(ex, "Report sending failed", Array.Empty<object>());
             }
         }
 
@@ -75,35 +87,42 @@ namespace Rooster.Slack.Reporting
         }
 
         private static async Task<HttpResponseMessage> Send(
-            HttpClient client, WebHookReporterOptions options,
+            HttpClient client,
+            WebHookReporterOptions options,
             string payload,
             ILogger logger,
             CancellationToken cancellation)
         {
-
-            var request = new HttpRequestMessage
-            {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(client.BaseAddress + options.Url),
-                Content = new StringContent(payload)
-            };
+            var request = CreatePostMessage(new Uri(client.BaseAddress + options.Url), payload);
 
             if (options.Authorization != null)
-                request.Headers.Authorization = new AuthenticationHeaderValue(options.Authorization.Scheme, options.Authorization.Parameter);
+                request.Headers.Authorization = BuildAuthHeader(options.Authorization);
 
-            foreach (var header in options.Headers)
-            {
-                request.Headers.Add(header.Name, header.Value);
-            }
+            options.Headers.ToList().ForEach(header => request.Headers.Add(header.Name, header.Value));
 
             var response = await client.SendAsync(request, cancellation);
 
-            logger.LogDebug($"Report send  to URL: {client.BaseAddress + options.Url} with received status: {response.StatusCode}", EmptyParams);
+            logger.LogDebug(ReportSentToUrlLog, request.RequestUri.ToString(), response.StatusCode);
 
             if (!response.IsSuccessStatusCode)
-                throw new HttpRequestException(response.ReasonPhrase) { Data = { [nameof(HttpStatusCode)] = response.StatusCode } };
+                ThrowHttpRequestException(response);
 
             return response;
+        }
+
+        private static HttpRequestMessage CreatePostMessage(Uri uri, string jsonPayload)
+        {
+            return new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = uri,
+                Content = new StringContent(jsonPayload)
+            };
+        }
+
+        private static AuthenticationHeaderValue BuildAuthHeader(Authorization authorizationOptions)
+        {
+            return new AuthenticationHeaderValue(authorizationOptions.Scheme, authorizationOptions.Parameter);
         }
     }
 }

@@ -38,14 +38,10 @@ namespace Rooster.Mediator.Commands.CreateLogEntry
 
             static void CheckString(string name, string value)
             {
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    name = name.Trim().ToLowerInvariant();
+                if (string.IsNullOrWhiteSpace(value))
+                    ThrowArgumentException(name, value == null ? Null : Empty);
 
-                    return;
-                }
-
-                ThrowArgumentException(name, value == null ? Null : Empty);
+                name = name.Trim().ToLowerInvariant();
             }
 
             static void CheckInt(string name, string value)

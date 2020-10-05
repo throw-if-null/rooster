@@ -51,7 +51,9 @@ namespace Rooster.QoS.Resilency
                             {
                                 _logger.LogInformation(RetryAttemptLogMessage, new object[1] { i });
 
-                                return TimeSpan.FromMilliseconds(_options.Delays[i - 1] + CalculateJitter(_options.JitterMaximum));
+                                var delay = _options.Delays[i - 1] + CalculateJitter(_options.JitterMaximum);
+
+                                return TimeSpan.FromMilliseconds(delay);
                             })
                     .ExecuteAsync(execute);
         }

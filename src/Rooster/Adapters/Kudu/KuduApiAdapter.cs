@@ -35,7 +35,8 @@ namespace Rooster.Adapters.Kudu
             _logger = logger;
         }
 
-        public async Task<IEnumerable<(DateTimeOffset LastUpdated, Uri LogUri, string MachineName)>> GetDockerLogs(CancellationToken cancellation)
+        public async Task<IEnumerable<(DateTimeOffset LastUpdated, Uri LogUri, string MachineName)>>
+            GetDockerLogs(CancellationToken cancellation)
         {
             _logger.LogDebug(LogUrlLogMessage, new object[2] { _client.BaseAddress, KuduLogPath });
 
@@ -82,10 +83,7 @@ namespace Rooster.Adapters.Kudu
                 {
                     line = await logReader.ReadLineAsync();
 
-                    if (string.IsNullOrWhiteSpace(line))
-                        continue;
-
-                    if (!line.Contains(Docker, StringComparison.InvariantCultureIgnoreCase))
+                    if (!CheckIfDockerRunLine(line))
                         continue;
 
                     yield return line;
@@ -95,6 +93,17 @@ namespace Rooster.Adapters.Kudu
             {
                 stream?.Dispose();
             }
+        }
+
+        private static bool CheckIfDockerRunLine(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+                return false;
+
+            if (!line.Contains(Docker, StringComparison.InvariantCultureIgnoreCase))
+                return false;
+
+            return true;
         }
     }
 }

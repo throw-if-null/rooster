@@ -22,7 +22,7 @@ namespace Rooster.Mediator.Commands.ExportLogEntry
 
         public Task<ExportLogEntryResponse> Handle(ExportLogEntryRequest request, CancellationToken cancellationToken)
         {
-            _logger.LogDebug(LogDockerLogLineReceived, new object[1] { request.LogLine });
+            _logger.LogDebug(LogDockerLogLineReceived, request.LogLine);
 
             var (inboundPort, outboundPort) = _extractor.ExtractPorts(request.LogLine);
             var (imageName, imageTag) = _extractor.ExtractImageName(request.LogLine);

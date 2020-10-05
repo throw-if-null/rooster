@@ -33,7 +33,9 @@ namespace Rooster.MongoDb.DependencyInjection
             services.AddSingleton<ILogEntryCollectionFactory, LogEntryCollectionFactory>();
 
             services.AddTransient<IRequestHandler<CreateLogEntryRequest, Unit>, MongoDbCreateLogEntryCommand>();
-            services.AddTransient<IRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>, MongoDbGetLatestByServiceAndContainerNamesQuery>();
+            services.AddTransient<
+                IRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>,
+                MongoDbGetLatestByServiceAndContainerNamesQuery>();
             services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, ProcessLogEntryCommand>();
 
             return services;

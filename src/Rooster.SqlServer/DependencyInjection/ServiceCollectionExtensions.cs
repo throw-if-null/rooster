@@ -22,7 +22,9 @@ namespace Rooster.SqlServer.DependencyInjection
             services.AddSingleton<IConnectionFactory, ConnectionFactory>();
 
             services.AddTransient<IRequestHandler<CreateLogEntryRequest, Unit>, SqlCreateLogEntryCommand>();
-            services.AddTransient<IRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>, SqlGetLatestByServiceAndContainerNamesQuery>();
+            services.AddTransient<IRequestHandler<
+                GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>,
+                SqlGetLatestByServiceAndContainerNamesQuery>();
             services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, ProcessLogEntryCommand>();
 
             return services;

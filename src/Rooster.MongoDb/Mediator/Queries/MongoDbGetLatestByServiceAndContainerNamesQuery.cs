@@ -10,6 +10,26 @@ namespace Rooster.MongoDb.Mediator.Queries
 {
     public sealed class MongoDbGetLatestByServiceAndContainerNamesQuery : GetLatestByServiceAndContainerNamesQuery
     {
+        private static readonly Func<GetLatestByServiceAndContainerNamesRequest, FilterDefinition<LogEntry>> GetFilter =
+            delegate (GetLatestByServiceAndContainerNamesRequest request)
+            {
+                return
+                    Builders<LogEntry>.Filter.Where(x =>
+                        x.ServiceName == request.ServiceName &&
+                        x.ContainerName == request.ContainerName);
+            };
+
+        private readonly Func<FindOptions<LogEntry, LogEntry>> GetFindOptions = delegate ()
+        {
+            return
+                new FindOptions<LogEntry, LogEntry>
+                {
+                    Limit = 1,
+                    Sort = Builders<LogEntry>.Sort.Descending(x => x.Created),
+                    Projection = Builders<LogEntry>.Projection.Include(x => x.EventDate)
+                };
+        };
+
         private readonly ILogEntryCollectionFactory _collectionFactory;
 
         public MongoDbGetLatestByServiceAndContainerNamesQuery(ILogEntryCollectionFactory collectionFactory)
@@ -23,15 +43,7 @@ namespace Rooster.MongoDb.Mediator.Queries
         {
             var collection = await _collectionFactory.Get<LogEntry>(cancellation);
 
-            var filter = Builders<LogEntry>.Filter.Where(x => x.ServiceName == request.ServiceName && x.ContainerName == request.ContainerName);
-            var sort = Builders<LogEntry>.Sort.Descending(x => x.Created);
-
-            var cursor = await collection.FindAsync(filter, new FindOptions<LogEntry, LogEntry>
-            {
-                Sort = sort,
-                Limit = 1,
-                Projection = Builders<LogEntry>.Projection.Include(x => x.EventDate)
-            });
+            var cursor = await collection.FindAsync(GetFilter(request), GetFindOptions());
 
             var entry = await cursor.FirstOrDefaultAsync();
 

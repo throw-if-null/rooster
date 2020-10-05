@@ -8,9 +8,13 @@ namespace Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames
     public abstract class GetLatestByServiceAndContainerNamesQuery
         : IRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>
     {
-        protected abstract Task<DateTimeOffset> GetLatestByServiceAndContainerNamesImplementation(GetLatestByServiceAndContainerNamesRequest request, CancellationToken cancellation);
+        protected abstract Task<DateTimeOffset> GetLatestByServiceAndContainerNamesImplementation(
+            GetLatestByServiceAndContainerNamesRequest request,
+            CancellationToken cancellation);
 
-        public Task<DateTimeOffset> Handle(GetLatestByServiceAndContainerNamesRequest request, CancellationToken cancellationToken)
+        public Task<DateTimeOffset> Handle(
+            GetLatestByServiceAndContainerNamesRequest request,
+            CancellationToken cancellationToken)
         {
             return GetLatestByServiceAndContainerNamesImplementation(request, cancellationToken);
         }

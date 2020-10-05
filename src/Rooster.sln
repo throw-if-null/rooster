@@ -28,7 +28,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0F406185
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rooster.Slack", "Rooster.Slack\Rooster.Slack.csproj", "{EA8E56B4-E8EA-4997-9F21-521FC7922712}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rooster.AppInsights", "Rooster.AppInsights\Rooster.AppInsights.csproj", "{74CBE36A-EEF1-43B6-A6EE-6CF03BE59593}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rooster.AppInsights", "Rooster.AppInsights\Rooster.AppInsights.csproj", "{74CBE36A-EEF1-43B6-A6EE-6CF03BE59593}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rooster.Mock", "Rooster.Mock\Rooster.Mock.csproj", "{7DEE181F-E934-4FE9-9A78-0E4761584819}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,6 +70,10 @@ Global
 		{74CBE36A-EEF1-43B6-A6EE-6CF03BE59593}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74CBE36A-EEF1-43B6-A6EE-6CF03BE59593}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74CBE36A-EEF1-43B6-A6EE-6CF03BE59593}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DEE181F-E934-4FE9-9A78-0E4761584819}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DEE181F-E934-4FE9-9A78-0E4761584819}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DEE181F-E934-4FE9-9A78-0E4761584819}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DEE181F-E934-4FE9-9A78-0E4761584819}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -81,6 +87,7 @@ Global
 		{E6F50C18-71E9-4948-98DC-780A393A7BD5} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
 		{EA8E56B4-E8EA-4997-9F21-521FC7922712} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
 		{74CBE36A-EEF1-43B6-A6EE-6CF03BE59593} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
+		{7DEE181F-E934-4FE9-9A78-0E4761584819} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {657E0A32-900A-4651-AAC2-E21776973FAC}

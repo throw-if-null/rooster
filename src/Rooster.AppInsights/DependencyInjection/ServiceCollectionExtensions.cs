@@ -11,13 +11,17 @@ namespace Rooster.AppInsights.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        private const string AppInsightsRootPath = "Reporters:AppInsights";
+        private static readonly string TelemetryOptionsPath = $"Reporters:AppInsights:{nameof(TelemetryReporterOptions)}";
 
         public static IServiceCollection AddAppInsights(this IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<TelemetryReporterOptions>(configuration.GetSection($"{AppInsightsRootPath}:{nameof(TelemetryReporterOptions)}"));
+            services.Configure<TelemetryReporterOptions>(configuration.GetSection(TelemetryOptionsPath));
 
-            var instrumentationKey = configuration.GetSection($"{AppInsightsRootPath}:{nameof(TelemetryReporterOptions)}").GetValue<string>(nameof(TelemetryReporterOptions.InstrumentationKey));
+            var instrumentationKey =
+                configuration
+                    .GetSection(TelemetryOptionsPath)
+                    .GetValue<string>(nameof(TelemetryReporterOptions.InstrumentationKey));
+
             services.AddSingleton(new TelemetryClient(new TelemetryConfiguration(instrumentationKey)));
 
             services.AddTransient<ITelemetryReporter, TelemetryReporter>();

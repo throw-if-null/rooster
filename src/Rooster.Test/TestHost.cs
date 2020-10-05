@@ -15,23 +15,23 @@ namespace Rooster.Test
             Func<IServiceCollection, IConfiguration, IServiceCollection> register = null)
         {
             var host = Host.CreateDefaultBuilder()
-            .ConfigureHostConfiguration(configurator =>
-            {
-                configurator.SetBasePath(Directory.GetCurrentDirectory());
-                configurator.AddJsonFile($"{appSettingsName}", optional: true);
-            })
-            .ConfigureLogging((ctx, builder) =>
-            {
-                builder.AddConsole();
-            })
-            .ConfigureServices((context, services) =>
-            {
-                services.AddLogging(x => x.SetMinimumLevel(LogLevel.Trace));
+                .ConfigureHostConfiguration(configurator =>
+                {
+                    configurator.SetBasePath(Directory.GetCurrentDirectory());
+                    configurator.AddJsonFile($"{appSettingsName}", optional: true);
+                })
+                .ConfigureLogging((ctx, builder) =>
+                {
+                    builder.AddConsole();
+                })
+                .ConfigureServices((context, services) =>
+                {
+                    services.AddLogging(x => x.SetMinimumLevel(LogLevel.Trace));
 
-                services.AddRooster(context.Configuration);
+                    services.AddRooster(context.Configuration);
 
-                services = register?.Invoke(services, context.Configuration) ?? services;
-            });
+                    services = register?.Invoke(services, context.Configuration) ?? services;
+                });
 
             return host;
         }

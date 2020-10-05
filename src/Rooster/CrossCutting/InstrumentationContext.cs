@@ -5,7 +5,6 @@ namespace Rooster.CrossCutting
 {
     public interface IInstrumentationContext
     {
-
         /// <summary>
         /// Returns the correlation id values stored in <see cref="AsyncLocal{T}"/> store.
         /// Note: Value can be null.
@@ -34,8 +33,7 @@ namespace Rooster.CrossCutting
 
         private static ulong Random()
         {
-            var guid = Guid.Parse(Guid.NewGuid().ToString());
-            var bytes = guid.ToByteArray();
+            var bytes = Guid.NewGuid().ToByteArray();
 
             return BitConverter.ToUInt64(bytes, 0);
         }

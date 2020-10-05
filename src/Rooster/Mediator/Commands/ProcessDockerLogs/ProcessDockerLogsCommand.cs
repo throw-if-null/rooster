@@ -14,8 +14,6 @@ namespace Rooster.Mediator.Commands.ProcessDockerLogs
         private const string ContinerProxySufix = "_msiproxy";
         private const string LogIsOldMessage = "Log: {0} is old. Last updated: {1}. Machine: {2}";
         private const string LogExtractionFinished = "Finished extracting docker logs from: {0}.";
-        private readonly object[] _logIsOldMessageParameters = new object[3];
-        private readonly object[] _logExtractionFinishedParameters = new object[1];
 
         private readonly ILogger _logger;
         private readonly IMediator _mediator;
@@ -36,11 +34,7 @@ namespace Rooster.Mediator.Commands.ProcessDockerLogs
 
                 if (extendedLastUpdated < DateTimeOffset.UtcNow)
                 {
-                    _logIsOldMessageParameters[0] = logUri;
-                    _logIsOldMessageParameters[1] = lastUpdated;
-                    _logIsOldMessageParameters[2] = machineName;
-
-                    _logger.LogDebug(LogIsOldMessage, _logIsOldMessageParameters);
+                    _logger.LogDebug(LogIsOldMessage, logUri, lastUpdated, machineName);
 
                     continue;
                 }
@@ -63,8 +57,7 @@ namespace Rooster.Mediator.Commands.ProcessDockerLogs
                     request.Containers[exportedLogEntry.ContainerName] = exportedLogEntry.EventDate.Ticks;
                 }
 
-                _logExtractionFinishedParameters[0] = logUri;
-                _logger.LogDebug(LogExtractionFinished, _logExtractionFinishedParameters);
+                _logger.LogDebug(LogExtractionFinished, logUri);
             }
 
             return new ProcessDockerLogsResponse { Containers = request.Containers };

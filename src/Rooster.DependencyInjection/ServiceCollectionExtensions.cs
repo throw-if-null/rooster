@@ -12,8 +12,8 @@ using Rooster.Hosting;
 using Rooster.Mediator.Commands.ExportLogEntry;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
 using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.Mock.DependencyInjection;
 using Rooster.MongoDb.DependencyInjection;
-using Rooster.QoS.Intercepting;
 using Rooster.QoS.Resilency;
 using Rooster.Slack.DependencyInjection;
 using Rooster.SqlServer.DependencyInjection;
@@ -23,6 +23,7 @@ using Serilog.Exceptions;
 using Serilog.Extensions.Logging;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -39,7 +40,9 @@ namespace Rooster.DependencyInjection
                 if (string.IsNullOrWhiteSpace(password))
                     throw new ArgumentNullException(nameof(password));
 
-                return new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{user}:{password}")));
+                var base64 = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{user}:{password}"));
+
+                return new AuthenticationHeaderValue("Basic", base64);
             };
 
         public static IServiceCollection AddRooster(this IServiceCollection services, IConfiguration configuration)
@@ -55,8 +58,6 @@ namespace Rooster.DependencyInjection
             services.AddSingleton<IInstrumentationContext, InstrumentationContext>();
             services.AddSingleton<IRetryProvider, RetryProvider>();
             services.AddSingleton<CorrelationIdEnricher>();
-
-            services.AddTransient<RequestsInterceptor>();
 
             services.AddLogging(builder =>
             {
@@ -74,27 +75,15 @@ namespace Rooster.DependencyInjection
 
             var options = configuration.GetSection($"Adapters:{nameof(KuduAdapterOptions)}").Get<Collection<KuduAdapterOptions>>();
 
-            foreach (var option in options)
+            foreach (var option in options ?? Enumerable.Empty<KuduAdapterOptions>())
             {
                 services
-                    .AddHttpClient<IKuduApiAdapter, KuduApiAdapter>($"Kudu-{Guid.NewGuid().ToString("N")}", x =>
+                    .AddHttpClient<IKuduApiAdapter, KuduApiAdapter>($"Kudu-{Guid.NewGuid():N}", x =>
                     {
                         x.DefaultRequestHeaders.Authorization = BuildBasicAuthHeader(option.User, option.Password);
                         x.BaseAddress = option.BaseUri;
-                    })
-                    .AddHttpMessageHandler<RequestsInterceptor>();
+                    });
             }
-
-            var databaseEngine = configuration.GetSection($"{nameof(AppHostOptions)}").GetValue<string>(nameof(Engine));
-
-            services = databaseEngine.Trim().ToUpperInvariant() switch
-            {
-                Engine.MongoDb => services.AddMongoDb(configuration),
-                Engine.SqlServer => services.AddSqlServer(configuration),
-                Engine.Slack => services.AddSlack(configuration),
-                Engine.AppInsights => services.AddAppInsights(configuration),
-                _ => throw new NotSupportedDataStoreException(databaseEngine),
-            };
 
             services.AddMediatR(new[]
             {
@@ -105,6 +94,18 @@ namespace Rooster.DependencyInjection
 
             services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryCommand>();
             services.AddTransient<IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>, ProcessDockerLogsCommand>();
+
+            var engines = configuration.GetSection($"{nameof(AppHostOptions)}").GetValue<string>(nameof(Engines));
+
+            services = engines.Trim().ToUpperInvariant() switch
+            {
+                Engines.MongoDb => services.AddMongoDb(configuration),
+                Engines.SqlServer => services.AddSqlServer(configuration),
+                Engines.Slack => services.AddSlack(configuration),
+                Engines.AppInsights => services.AddAppInsights(configuration),
+                Engines.Mock => services.AddMock(configuration),
+                _ => throw new NotSupportedEngineException(engines),
+            };
 
             services.AddHostedService<AppHost>();
 

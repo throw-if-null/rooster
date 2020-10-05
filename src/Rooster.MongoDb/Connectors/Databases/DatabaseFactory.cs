@@ -37,7 +37,7 @@ namespace Rooster.MongoDb.Connectors.Databases
             if (_cache.ContainsKey(_options.Name))
                 return _cache[_options.Name];
 
-            var names = await (await _client.ListDatabaseNamesAsync(cancellationToken).ConfigureAwait(false)).ToListAsync(cancellationToken).ConfigureAwait(false);
+            var names = await (await _client.ListDatabaseNamesAsync(cancellationToken)).ToListAsync(cancellationToken);
 
             if (!names.Any(x => x.Equals(_options.Name.Trim(), StringComparison.InvariantCultureIgnoreCase)))
                 throw new ArgumentOutOfRangeException($"Database: {_options.Name} doesn't exist.");
