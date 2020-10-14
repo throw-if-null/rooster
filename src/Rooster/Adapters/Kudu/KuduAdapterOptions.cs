@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 
 namespace Rooster.Adapters.Kudu
 {
@@ -9,5 +10,7 @@ namespace Rooster.Adapters.Kudu
         public string Password { get; set; }
 
         public Uri BaseUri { get; set; }
+
+        public Collection<string> Tags { get; set; }
     }
 }

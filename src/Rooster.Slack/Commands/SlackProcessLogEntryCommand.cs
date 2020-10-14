@@ -2,7 +2,6 @@
 using Rooster.Mediator.Commands.ProcessLogEntry;
 using Rooster.Slack.Reporting;
 using System;
-using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 

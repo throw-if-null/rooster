@@ -95,19 +95,20 @@ namespace Rooster.DependencyInjection
             services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryCommand>();
             services.AddTransient<IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>, ProcessDockerLogsCommand>();
 
-            var engines = configuration.GetSection($"{nameof(AppHostOptions)}").GetValue<string>(nameof(Engines));
+            var engines = configuration.GetSection($"{nameof(AppHostOptions)}:{nameof(Engines)}").Get<Collection<string>>();
 
-            services = engines.Trim().ToUpperInvariant() switch
+            foreach (var engine in engines)
             {
-                Engines.MongoDb => services.AddMongoDb(configuration),
-                Engines.SqlServer => services.AddSqlServer(configuration),
-                Engines.Slack => services.AddSlack(configuration),
-                Engines.AppInsights => services.AddAppInsights(configuration),
-                Engines.Mock => services.AddMock(configuration),
-                _ => throw new NotSupportedEngineException(engines),
-            };
-
-            services.AddHostedService<AppHost>();
+                services = engine.Trim().ToUpperInvariant() switch
+                {
+                    Engines.MongoDb => services.AddMongoDb(configuration),
+                    Engines.SqlServer => services.AddSqlServer(configuration),
+                    Engines.Slack => services.AddSlack(configuration),
+                    Engines.AppInsights => services.AddAppInsights(configuration),
+                    Engines.Mock => services.AddMock(configuration),
+                    _ => throw new NotSupportedEngineException(engine),
+                };
+            }
 
             return services;
         }
