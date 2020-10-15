@@ -11,6 +11,6 @@ namespace Rooster.Adapters.Kudu
 
         public Uri BaseUri { get; set; }
 
-        public Collection<string> Tags { get; set; }
+        public Collection<string> Tags { get; set; } = new Collection<string>();
     }
 }

@@ -19,10 +19,4 @@
     <ProjectReference Include="..\Rooster\Rooster.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="systemSettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

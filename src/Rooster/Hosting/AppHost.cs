@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Rooster.Adapters.Kudu;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
@@ -12,24 +13,33 @@ using System.Threading.Tasks;
 
 namespace Rooster.Hosting
 {
-    public class AppHost : IHostedService
+    public abstract class AppHost : IHostedService
     {
         private readonly AppHostOptions _options;
         private readonly IEnumerable<IKuduApiAdapter> _kudus;
         private readonly IMediator _mediator;
+        private readonly ILogger _logger;
 
         public AppHost(
             IOptionsMonitor<AppHostOptions> options,
             IEnumerable<IKuduApiAdapter> kudus,
-            IMediator mediator)
+            IMediator mediator,
+            ILogger<AppHost> logger)
         {
             _options = options.CurrentValue ?? throw new ArgumentNullException(nameof(options));
-            _kudus = kudus ?? throw new ArgumentNullException(nameof(kudus));
-            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            _kudus = kudus;
+            _mediator = mediator;
+            _logger = logger;
         }
+
+        protected abstract string StartLogMessage { get; }
+
+        protected abstract string StopLogMessage { get; }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            _logger.LogInformation(StartLogMessage, Array.Empty<object>());
+
             var kudus = _kudus.ToArray();
             var tasks = new Task[_kudus.Count()];
 
@@ -43,6 +53,8 @@ namespace Rooster.Hosting
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            _logger.LogInformation(StopLogMessage, Array.Empty<object>());
+
             return Task.CompletedTask;
         }
 
@@ -55,7 +67,22 @@ namespace Rooster.Hosting
                 Containers = containers
             };
 
-            var response = await _mediator.Send(request, ct);
+            ProcessDockerLogsResponse response;
+
+            try
+            {
+                response = await _mediator.Send(request, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "{MethodName} failed.", nameof(ProcessDockerLogsCommand));
+
+                response = new ProcessDockerLogsResponse
+                {
+                    Containers = containers
+                };
+            }
+
 
             if (!_options.UseInternalPoller)
                 return;

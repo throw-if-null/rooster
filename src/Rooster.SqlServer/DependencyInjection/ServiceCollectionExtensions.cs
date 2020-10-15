@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rooster.Adapters.Kudu;
+using Rooster.CrossCutting.Serilog;
 using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.Mediator.Commands.ExportLogEntry;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
@@ -40,13 +41,14 @@ namespace Rooster.SqlServer.DependencyInjection
         {
             services.Configure<ConnectionFactoryOptions>(configuration.GetSection($"{SqlConfigPath}:{nameof(ConnectionFactoryOptions)}"));
 
+            services.AddSingleton(new HostNameEnricher(nameof(SqlServerHost)));
             services.AddSingleton<IConnectionFactory, ConnectionFactory>();
 
             var options = configuration.GetSection($"Adapters:{nameof(KuduAdapterOptions)}").Get<Collection<KuduAdapterOptions>>();
 
             foreach (var option in options ?? Enumerable.Empty<KuduAdapterOptions>())
             {
-                if (option.Tags.Any(x => x.Equals("SLACK", StringComparison.InvariantCultureIgnoreCase)))
+                if (option.Tags.Any(x => x.Equals("SQLSERVER", StringComparison.InvariantCultureIgnoreCase)))
                     services
                         .AddHttpClient<IKuduApiAdapter, KuduApiAdapter>($"Kudu-{Guid.NewGuid():N}", x =>
                         {
@@ -72,6 +74,8 @@ namespace Rooster.SqlServer.DependencyInjection
             services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, ProcessLogEntryCommand>();
             services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryCommand>();
             services.AddTransient<IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>, ProcessDockerLogsCommand>();
+
+            services.AddHostedService<SqlServerHost>();
 
             return services;
         }

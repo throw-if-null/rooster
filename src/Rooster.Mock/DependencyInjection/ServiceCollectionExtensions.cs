@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rooster.Adapters.Kudu;
+using Rooster.CrossCutting.Serilog;
 using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.Mediator.Commands.ExportLogEntry;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
@@ -35,6 +36,7 @@ namespace Rooster.Mock.DependencyInjection
 
         public static IServiceCollection AddMock(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddSingleton(new HostNameEnricher(nameof(MockHost)));
             services.AddSingleton(new ConcurrentBag<ProcessLogEntryRequest>());
 
             services.AddTransient<IMockReporter, MockReporter>();

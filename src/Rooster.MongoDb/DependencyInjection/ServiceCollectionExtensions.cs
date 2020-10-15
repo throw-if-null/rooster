@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rooster.Adapters.Kudu;
+using Rooster.CrossCutting.Serilog;
 using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.Mediator.Commands.ExportLogEntry;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
@@ -49,6 +50,7 @@ namespace Rooster.MongoDb.DependencyInjection
             services.ConfigureDatabaseFactoryOptions(configuration);
             services.ConfigureLogEntryCollectionFactoryOptions(configuration);
 
+            services.AddSingleton(new HostNameEnricher(nameof(MongoDbHost)));
             services.AddSingleton<IClientFactory, ClientFactory>();
             services.AddSingleton<IDatabaseFactory, DatabaseFactory>();
             services.AddSingleton<ILogEntryCollectionFactory, LogEntryCollectionFactory>();
@@ -84,8 +86,9 @@ namespace Rooster.MongoDb.DependencyInjection
             services.AddTransient<IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>, ProcessDockerLogsCommand>();
             services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, ProcessLogEntryCommand>();
 
-            return services;
+            services.AddHostedService<MongoDbHost>();
 
+            return services;
         }
 
         private static IServiceCollection ConfigureClientFactoryOptions(

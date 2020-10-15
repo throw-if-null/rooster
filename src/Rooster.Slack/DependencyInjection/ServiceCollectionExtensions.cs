@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rooster.Adapters.Kudu;
+using Rooster.CrossCutting.Serilog;
 using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.Mediator.Commands.ExportLogEntry;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
@@ -37,6 +38,8 @@ namespace Rooster.Slack.DependencyInjection
         public static IServiceCollection AddSlack(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<WebHookReporterOptions>(configuration.GetSection($"Reporters:Slack:{nameof(WebHookReporterOptions)}"));
+
+            services.AddSingleton(new HostNameEnricher(nameof(SlackHost)));
 
             services.AddHttpClient<IReporter, WebHookReporter>(x => x.BaseAddress = new Uri(SlackBaseUrl));
 

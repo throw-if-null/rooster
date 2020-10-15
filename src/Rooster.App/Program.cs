@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -12,6 +15,7 @@ using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
 using Rooster.Mock.DependencyInjection;
 using Rooster.MongoDb.DependencyInjection;
+using Rooster.QoS.HealthChecks;
 using Rooster.QoS.Resilency;
 using Rooster.Slack.DependencyInjection;
 using Rooster.SqlServer.DependencyInjection;
@@ -25,6 +29,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,10 +47,38 @@ namespace Rooster.App
 
         public static async Task Main(string[] args)
         {
+            var webHost =
+                Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder.UseSetting(WebHostDefaults.DetailedErrorsKey, "true");
+
+                    builder.ConfigureKestrel(x =>
+                    {
+                        x.ListenAnyIP(4242);
+                    });
+
+                    builder.Configure(app =>
+                    {
+                        app.UseRouting();
+
+                        app.UseEndpoints(e =>
+                        {
+                            e.MapHealthChecks("/health", new HealthCheckOptions
+                            {
+                                AllowCachingResponses = false
+                            });
+                        });
+                    });
+                })
+                .ConfigureServices((ctx, services) =>
+                {
+                    services.AddHealthChecks().AddCheck<RoosterHealthCheck>("rooster-healthcheck");
+                });
+
             IConfiguration configuration =
                 new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("systemSettings.json", false)
                     .AddJsonFile("appsettings.json", optional: false)
                     .Build();
 
@@ -70,7 +103,7 @@ namespace Rooster.App
 
             var cancellation = BuildCancellationToken();
 
-            var tasks = new List<Task>();
+            var tasks = new List<Task> { webHost.StartAsync(cancellation) };
 
             foreach (var host in hosts)
             {
@@ -82,72 +115,46 @@ namespace Rooster.App
 
         private static IHost AddMongo(string[] args)
         {
-            var builder = ConfigureCommon(args);
-
-            builder.ConfigureServices((context, services) =>
-            {
-                services.AddMongoDb(context.Configuration);
-            });
+            var builder = ConfigureCommon(args, (ctx, services) => services.AddMongoDb(ctx.Configuration));
 
             return builder.Build();
         }
 
         private static IHost AddSqlServer(string[] args)
         {
-            var builder = ConfigureCommon(args);
-
-            builder.ConfigureServices((context, services) =>
-            {
-                services.AddSqlServer(context.Configuration);
-            });
+            var builder = ConfigureCommon(args, (ctx, services) => services.AddSqlServer(ctx.Configuration));
 
             return builder.Build();
         }
 
         private static IHost AddSlack(string[] args)
         {
-            var builder = ConfigureCommon(args);
-
-            builder.ConfigureServices((context, services) =>
-            {
-                services.AddSlack(context.Configuration);
-            });
+            var builder = ConfigureCommon(args, (ctx, services) => services.AddSlack(ctx.Configuration));
 
             return builder.Build();
         }
 
         private static IHost AddAppInsights(string[] args)
         {
-            var builder = ConfigureCommon(args);
-
-            builder.ConfigureServices((context, services) =>
-            {
-                services.AddAppInsights(context.Configuration);
-            });
+            var builder = ConfigureCommon(args, (ctx, services) => services.AddAppInsights(ctx.Configuration));
 
             return builder.Build();
         }
 
         private static IHost AddMock(string[] args)
         {
-            var builder = ConfigureCommon(args);
-
-            builder.ConfigureServices((context, services) =>
-            {
-                services.AddMock(context.Configuration);
-            });
+            var builder = ConfigureCommon(args, (ctx, services) => services.AddMock(ctx.Configuration));
 
             return builder.Build();
         }
 
-        private static IHostBuilder ConfigureCommon(string[] args)
+        private static IHostBuilder ConfigureCommon(string[] args, Action<HostBuilderContext, IServiceCollection> configurator)
         {
             var builder =
                 Host.CreateDefaultBuilder()
                 .ConfigureHostConfiguration(configurator =>
                 configurator
                     .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("systemSettings.json", false)
                     .AddJsonFile("appsettings.json", optional: false)
                     .AddCommandLine(args))
                 .ConfigureServices((context, services) =>
@@ -166,20 +173,6 @@ namespace Rooster.App
                     services.AddSingleton<IRetryProvider, RetryProvider>();
                     services.AddSingleton<CorrelationIdEnricher>();
 
-                    services.AddLogging(builder =>
-                    {
-                        using var provider = services.BuildServiceProvider();
-
-                        builder.ClearProviders();
-
-                        builder.AddProvider(new SerilogLoggerProvider(
-                            new LoggerConfiguration()
-                            .ReadFrom.Configuration(configuration)
-                            .Enrich.WithExceptionDetails()
-                            .Enrich.With(new ILogEventEnricher[] { provider.GetRequiredService<CorrelationIdEnricher>() })
-                            .CreateLogger(), true));
-                    });
-
                     var options = configuration.GetSection($"Adapters:{nameof(KuduAdapterOptions)}").Get<Collection<KuduAdapterOptions>>();
 
                     foreach (var option in options ?? Enumerable.Empty<KuduAdapterOptions>())
@@ -194,6 +187,27 @@ namespace Rooster.App
                                 x.BaseAddress = option.BaseUri;
                             });
                     }
+                })
+                .ConfigureServices(configurator)
+                .ConfigureServices((ctx, services) =>
+                {
+                    services.AddLogging(builder =>
+                    {
+                        using var provider = services.BuildServiceProvider();
+
+                        builder.ClearProviders();
+
+                        builder.AddProvider(new SerilogLoggerProvider(
+                            new LoggerConfiguration()
+                            .ReadFrom.Configuration(ctx.Configuration)
+                            .Enrich.WithExceptionDetails()
+                            .Enrich.With(new ILogEventEnricher[]
+                            {
+                                provider.GetRequiredService<CorrelationIdEnricher>(),
+                                provider.GetRequiredService<HostNameEnricher>()
+                            })
+                            .CreateLogger(), true));
+                    });
                 });
 
             return builder;
