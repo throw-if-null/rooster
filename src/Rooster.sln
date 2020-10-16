@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rooster.AppInsights", "Roos
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rooster.Mock", "Rooster.Mock\Rooster.Mock.csproj", "{7DEE181F-E934-4FE9-9A78-0E4761584819}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rooster.HealthCheck", "Rooster.HealthCheck\Rooster.HealthCheck.csproj", "{C2009A94-77F3-42F8-9C38-0FE8A0136810}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,6 +74,10 @@ Global
 		{7DEE181F-E934-4FE9-9A78-0E4761584819}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DEE181F-E934-4FE9-9A78-0E4761584819}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DEE181F-E934-4FE9-9A78-0E4761584819}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2009A94-77F3-42F8-9C38-0FE8A0136810}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2009A94-77F3-42F8-9C38-0FE8A0136810}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2009A94-77F3-42F8-9C38-0FE8A0136810}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2009A94-77F3-42F8-9C38-0FE8A0136810}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

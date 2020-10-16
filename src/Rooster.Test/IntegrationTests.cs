@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Moq;
 using Rooster.Adapters.Kudu;
 using Rooster.DependencyInjection;
@@ -17,9 +18,10 @@ namespace Rooster.Test
     public class IntegrationTests
     {
         [Fact]
-        public void ShouldThrowUnsupportedDatastoreEngineException()
+        public async Task ShouldThrowUnsupportedDatastoreEngineException()
         {
-            var excpetion = Assert.Throws<NotSupportedEngineException>(() => TestHost.Setup("appsettings.invalid.json").Build());
+
+            var excpetion = await Assert.ThrowsAsync<NotSupportedEngineException>(() => TestRunner.Run("appsettings.invalid.json", (_, __) => { }));
 
             Assert.Equal($"Engine: MySql is not supported. Supported values are: {Engines.Values}.", excpetion.Message);
         }
@@ -37,20 +39,16 @@ namespace Rooster.Test
                 .Returns(GetValue());
 
             var requestsBag = new ConcurrentBag<ProcessLogEntryRequest>();
-            var host =
-                TestHost.Setup(
+
+            await
+                TestRunner.Run(
                     "appsettings.test.json",
-                    (services, ctx) =>
+                    (ctx, services) =>
                         {
                             services.AddSingleton<ConcurrentBag<ProcessLogEntryRequest>>(requestsBag);
 
                             services.AddTransient<IKuduApiAdapter>(x => kuduMock.Object);
-
-                            return services;
-                        })
-                .Build();
-
-            await host.StartAsync();
+                        });
 
             Assert.Single(requestsBag);
 
@@ -82,20 +80,16 @@ namespace Rooster.Test
                 });
 
             var requestsBag = new ConcurrentBag<ProcessLogEntryRequest>();
-            var host =
-                TestHost.Setup(
+
+            await
+                TestRunner.Run(
                     "appsettings.test.json",
-                    (services, ctx) =>
+                    (ctx, services) =>
                     {
                         services.AddSingleton<ConcurrentBag<ProcessLogEntryRequest>>(requestsBag);
 
                         services.AddTransient<IKuduApiAdapter>(x => kuduMock.Object);
-
-                        return services;
-                    })
-                .Build();
-
-            await host.StartAsync();
+                    });
 
             Assert.Empty(requestsBag);
         }
@@ -113,27 +107,20 @@ namespace Rooster.Test
                 .Returns(GetValue());
 
             var requestsBag = new ConcurrentBag<ProcessLogEntryRequest>();
-            var host =
-                TestHost.Setup(
+
+            await
+                TestRunner.Run(
                     "appsettings.test-2.json",
-                    (services, ctx) =>
+                    (ctx, services) =>
                     {
                         services.AddSingleton<ConcurrentBag<ProcessLogEntryRequest>>(requestsBag);
 
                         services.AddTransient<IKuduApiAdapter>(x => kuduMock.Object);
-
-                        return services;
-                    })
-                .Build();
-
-
-            _ = host.StartAsync();
+                    });
 
             await Task.Delay(4000);
 
             Assert.Single(requestsBag);
-
-            await host.StopAsync();
 
             static async IAsyncEnumerable<string> GetValue()
             {

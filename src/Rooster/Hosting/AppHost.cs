@@ -16,20 +16,27 @@ namespace Rooster.Hosting
     public abstract class AppHost : IHostedService
     {
         private readonly AppHostOptions _options;
+        private readonly IHostApplicationLifetime _lifetime;
         private readonly IEnumerable<IKuduApiAdapter> _kudus;
         private readonly IMediator _mediator;
         private readonly ILogger _logger;
 
         public AppHost(
             IOptionsMonitor<AppHostOptions> options,
+            IHostApplicationLifetime lifetime,
             IEnumerable<IKuduApiAdapter> kudus,
             IMediator mediator,
             ILogger<AppHost> logger)
         {
             _options = options.CurrentValue ?? throw new ArgumentNullException(nameof(options));
+            _lifetime = lifetime;
             _kudus = kudus;
             _mediator = mediator;
             _logger = logger;
+
+            _lifetime.ApplicationStarted.Register(() => { });
+            _lifetime.ApplicationStopping.Register(() => { });
+            _lifetime.ApplicationStopped.Register(() => { });
         }
 
         protected abstract string StartLogMessage { get; }
