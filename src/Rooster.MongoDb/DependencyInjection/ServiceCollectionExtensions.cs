@@ -5,14 +5,17 @@ using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.Mediator.Commands.ExportLogEntry;
+using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
 using Rooster.Mediator.Commands.ProcessLogEntry;
 using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;
 using Rooster.MongoDb.Connectors.Clients;
 using Rooster.MongoDb.Connectors.Colections;
 using Rooster.MongoDb.Connectors.Databases;
-using Rooster.MongoDb.Mediator.Commands;
+using Rooster.MongoDb.Mediator.Commands.CreateLogEntry;
+using Rooster.MongoDb.Mediator.Commands.HealthCheck;
 using Rooster.MongoDb.Mediator.Queries;
+using Rooster.QoS.Resilency;
 using System;
 
 namespace Rooster.MongoDb.DependencyInjection
@@ -33,7 +36,7 @@ namespace Rooster.MongoDb.DependencyInjection
             services.ConfigureLogEntryCollectionFactoryOptions(configuration);
 
             services.AddSingleton(new HostNameEnricher(nameof(MongoDbHost)));
-            services.AddSingleton<IClientFactory, ClientFactory>();
+            services.AddSingleton<IMongoDbClientFactory, MongoDbClientFactory>();
             services.AddSingleton<IDatabaseFactory, DatabaseFactory>();
             services.AddSingleton<ILogEntryCollectionFactory, LogEntryCollectionFactory>();
             services.AddKuduClient(configuration, "MONGODB");
@@ -57,6 +60,21 @@ namespace Rooster.MongoDb.DependencyInjection
             services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, ProcessLogEntryCommand>();
 
             services.AddHostedService<MongoDbHost>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddMongoDbHealthCheck(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.ConfigureClientFactoryOptions(configuration);
+            services.ConfigureDatabaseFactoryOptions(configuration);
+            services.ConfigureLogEntryCollectionFactoryOptions(configuration);
+
+            services.AddSingleton<IMongoDbClientFactory, MongoDbClientFactory>();
+            services.AddSingleton<IDatabaseFactory, DatabaseFactory>();
+            services.AddSingleton<ILogEntryCollectionFactory, LogEntryCollectionFactory>();
+
+            services.AddTransient<IRequestHandler<MongoDbHealthCheckRequest, HealthCheckResponse>, MongoDbHealthCheckCommand>();
 
             return services;
         }

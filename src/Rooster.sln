@@ -30,7 +30,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rooster.AppInsights", "Roos
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rooster.Mock", "Rooster.Mock\Rooster.Mock.csproj", "{7DEE181F-E934-4FE9-9A78-0E4761584819}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rooster.HealthCheck", "Rooster.HealthCheck\Rooster.HealthCheck.csproj", "{C2009A94-77F3-42F8-9C38-0FE8A0136810}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rooster.HealthCheck", "Rooster.HealthCheck\Rooster.HealthCheck.csproj", "{C2009A94-77F3-42F8-9C38-0FE8A0136810}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -92,6 +92,7 @@ Global
 		{EA8E56B4-E8EA-4997-9F21-521FC7922712} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
 		{74CBE36A-EEF1-43B6-A6EE-6CF03BE59593} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
 		{7DEE181F-E934-4FE9-9A78-0E4761584819} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
+		{C2009A94-77F3-42F8-9C38-0FE8A0136810} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {657E0A32-900A-4651-AAC2-E21776973FAC}

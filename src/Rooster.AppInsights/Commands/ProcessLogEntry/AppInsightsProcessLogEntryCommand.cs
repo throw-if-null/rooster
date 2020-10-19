@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.AppInsights.Handlers
+namespace Rooster.AppInsights.Handlers.ProcessLogEntry
 {
     public class AppInsightsProcessLogEntryCommand : AsyncRequestHandler<ProcessLogEntryRequest>
     {

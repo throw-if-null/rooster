@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.SqlServer.Mediator.Commands
+namespace Rooster.SqlServer.Mediator.Commands.CreateLogEntry
 {
     public sealed class SqlCreateLogEntryCommand : CreateLogEntryCommand
     {

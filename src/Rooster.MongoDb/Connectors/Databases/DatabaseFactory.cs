@@ -23,7 +23,7 @@ namespace Rooster.MongoDb.Connectors.Databases
         private readonly IMongoClient _client;
         private readonly ILogger _logger;
 
-        public DatabaseFactory(IOptions<DatabaseFactoryOptions> options, IClientFactory clientFactory, ILogger<DatabaseFactory> logger)
+        public DatabaseFactory(IOptions<DatabaseFactoryOptions> options, IMongoDbClientFactory clientFactory, ILogger<DatabaseFactory> logger)
         {
             _options = options.Value ?? throw new ArgumentNullException(nameof(options));
             _ = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));

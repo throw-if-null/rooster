@@ -3,14 +3,18 @@ using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Rooster.AppInsights.Handlers;
+using Rooster.AppInsights.Commands.HealthCheck;
+using Rooster.AppInsights.Handlers.HealthCheck;
+using Rooster.AppInsights.Handlers.ProcessLogEntry;
 using Rooster.AppInsights.Reporters;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.Mediator.Commands.ExportLogEntry;
+using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
 using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.QoS.Resilency;
 
 namespace Rooster.AppInsights.DependencyInjection
 {
@@ -47,6 +51,15 @@ namespace Rooster.AppInsights.DependencyInjection
             services.AddTransient<IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>, ProcessDockerLogsCommand>();
 
             services.AddHostedService<AppInsightsHost>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddAppInsightsHealthCheck(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddTransient<IRequestHandler<AppInsightsHealthCheckRequest, HealthCheckResponse>, AppInsightsHealthCheckCommand>();
+
+            services.AddSingleton<IRetryProvider, RetryProvider>();
 
             return services;
         }

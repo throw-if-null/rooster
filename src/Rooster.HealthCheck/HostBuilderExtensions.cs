@@ -1,9 +1,23 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using MediatR;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Rooster.QoS.HealthChecks;
+using Rooster.AppInsights.Commands.HealthCheck;
+using Rooster.AppInsights.DependencyInjection;
+using Rooster.Hosting;
+using Rooster.MongoDb.DependencyInjection;
+using Rooster.MongoDb.Mediator.Commands.HealthCheck;
+using Rooster.QoS.Resilency;
+using Rooster.Slack.Commands.HealthCheck;
+using Rooster.Slack.DependencyInjection;
+using Rooster.SqlServer.DependencyInjection;
+using Rooster.SqlServer.Mediator.Commands.HealthCheck;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Rooster.HealthCheck
 {
@@ -38,6 +52,21 @@ namespace Rooster.HealthCheck
                     .ConfigureServices((ctx, services) =>
                     {
                         services.AddHealthChecks().AddCheck<RoosterHealthCheck>("rooster-healthcheck");
+
+                        services.AddSingleton<IRetryProvider, RetryProvider>();
+
+                        services.AddMediatR(new Type[]
+                        {
+                            typeof(AppInsightsHealthCheckRequest),
+                            typeof(MongoDbHealthCheckRequest),
+                            typeof(SlackHealthCheckRequest),
+                            typeof(SqlServerHealthCheckRequest)
+                        });
+
+                        services.AddAppInsightsHealthCheck(ctx.Configuration);
+                        services.AddMongoDbHealthCheck(ctx.Configuration);
+                        services.AddSlackHealthCheck(ctx.Configuration);
+                        services.AddSqlServerHealthCheck(ctx.Configuration);
                     })
                     .Build();
 

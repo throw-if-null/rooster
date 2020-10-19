@@ -6,19 +6,19 @@ using System.Collections.Concurrent;
 
 namespace Rooster.MongoDb.Connectors.Clients
 {
-    public interface IClientFactory
+    public interface IMongoDbClientFactory
     {
         IMongoClient Create();
     }
 
-    public sealed class ClientFactory : IClientFactory
+    public sealed class MongoDbClientFactory : IMongoDbClientFactory
     {
         private readonly ConcurrentDictionary<string, IMongoClient> _cache = new ConcurrentDictionary<string, IMongoClient>();
 
         private readonly ClientFactoryOptions _options;
         private readonly ILogger _logger;
 
-        public ClientFactory(IOptions<ClientFactoryOptions> options, ILogger<ClientFactory> logger)
+        public MongoDbClientFactory(IOptions<ClientFactoryOptions> options, ILogger<MongoDbClientFactory> logger)
         {
             _options = options.Value ?? throw new ArgumentNullException(nameof(options));
             _logger = logger;

@@ -1,4 +1,4 @@
-﻿namespace Rooster.DependencyInjection
+﻿namespace Rooster
 {
     public static class Engines
     {

@@ -5,9 +5,12 @@ using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.Mediator.Commands.ExportLogEntry;
+using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
 using Rooster.Mediator.Commands.ProcessLogEntry;
-using Rooster.Slack.Commands;
+using Rooster.QoS.Resilency;
+using Rooster.Slack.Commands.HealthCheck;
+using Rooster.Slack.Commands.LogEntryCommand;
 using Rooster.Slack.Reporting;
 using System;
 
@@ -39,6 +42,17 @@ namespace Rooster.Slack.DependencyInjection
             services.AddTransient<IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>, ProcessDockerLogsCommand>();
 
             services.AddHostedService<SlackHost>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddSlackHealthCheck(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<WebHookReporterOptions>(configuration.GetSection($"Reporters:Slack:{nameof(WebHookReporterOptions)}"));
+
+            services.AddHttpClient();
+
+            services.AddTransient<IRequestHandler<SlackHealthCheckRequest, HealthCheckResponse>, SlackHealthCheckCommand>();
 
             return services;
         }

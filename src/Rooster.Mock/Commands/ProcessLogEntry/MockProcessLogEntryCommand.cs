@@ -6,7 +6,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Mock.Commands
+namespace Rooster.Mock.Commands.ProcessLogEntry
 {
     public class MockProcessLogEntryCommand : AsyncRequestHandler<ProcessLogEntryRequest>
     {

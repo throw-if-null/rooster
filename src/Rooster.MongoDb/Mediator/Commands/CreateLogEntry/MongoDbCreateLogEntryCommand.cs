@@ -6,7 +6,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.MongoDb.Mediator.Commands
+namespace Rooster.MongoDb.Mediator.Commands.CreateLogEntry
 {
     public sealed class MongoDbCreateLogEntryCommand : CreateLogEntryCommand
     {

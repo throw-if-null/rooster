@@ -7,7 +7,7 @@ using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.Mediator.Commands.ExportLogEntry;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
 using Rooster.Mediator.Commands.ProcessLogEntry;
-using Rooster.Mock.Commands;
+using Rooster.Mock.Commands.ProcessLogEntry;
 using Rooster.Mock.Reporters;
 using System.Collections.Concurrent;
 

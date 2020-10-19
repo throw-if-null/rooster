@@ -2,8 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Protocols;
 using Rooster.Adapters.Kudu;
 using Rooster.AppInsights.DependencyInjection;
 using Rooster.CrossCutting;
@@ -17,7 +15,7 @@ using Rooster.Mediator.Commands.ExportLogEntry;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
 using Rooster.Mediator.Commands.ProcessLogEntry;
 using Rooster.Mock;
-using Rooster.Mock.Commands;
+using Rooster.Mock.Commands.ProcessLogEntry;
 using Rooster.Mock.Reporters;
 using Rooster.MongoDb.DependencyInjection;
 using Rooster.QoS.Resilency;

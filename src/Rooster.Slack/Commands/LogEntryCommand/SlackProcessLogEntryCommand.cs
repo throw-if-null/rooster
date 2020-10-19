@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Slack.Commands
+namespace Rooster.Slack.Commands.LogEntryCommand
 {
     public class SlackProcessLogEntryCommand : AsyncRequestHandler<ProcessLogEntryRequest>
     {
