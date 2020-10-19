@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/runtime:3.1.7-alpine AS base
+FROM mcr.microsoft.com/dotnet/core/runtime:3.1-alpine AS base
 ADD ./Rooster.App/VERSION .
 WORKDIR /app
 
@@ -9,7 +9,10 @@ COPY ["Rooster.DependencyInjection/Rooster.DependencyInjection.csproj", "Rooster
 COPY ["Rooster.SqlServer/Rooster.SqlServer.csproj", "Rooster.SqlServer/"]
 COPY ["Rooster/Rooster.csproj", "Rooster/"]
 COPY ["Rooster.MongoDb/Rooster.MongoDb.csproj", "Rooster.MongoDb/"]
+COPY ["Rooster.Mock/Rooster.Mock.csproj", "Rooster.Mock/"]
+COPY ["Rooster.AppInsights/Rooster.AppInsights.csproj", "Rooster.AppInsights/"]
 COPY ["Rooster.Slack/Rooster.Slack.csproj", "Rooster.Slack/"]
+COPY ["Rooster.HealthCheck/Rooster.HealthCheck.csproj", "Rooster.HealthCheck/"]
 RUN dotnet restore "Rooster.App/Rooster.App.csproj"
 COPY . .
 WORKDIR "/src/Rooster.App"
