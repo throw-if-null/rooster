@@ -7,8 +7,8 @@ using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.Mediator.Commands.ExportLogEntry;
 using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
+using Rooster.Mediator.Commands.ProcessKuduLogs;
 using Rooster.Mediator.Commands.ProcessLogEntry;
-using Rooster.QoS.Resilency;
 using Rooster.Slack.Commands.HealthCheck;
 using Rooster.Slack.Commands.LogEntryCommand;
 using Rooster.Slack.Reporting;
@@ -27,6 +27,7 @@ namespace Rooster.Slack.DependencyInjection
             services.AddSingleton(new HostNameEnricher(nameof(SlackHost)));
 
             services.AddHttpClient<IReporter, WebHookReporter>(x => x.BaseAddress = new Uri(SlackBaseUrl));
+
             services.AddKuduClient(configuration, "SLACK");
 
             services.AddMediatR(new[]
@@ -34,12 +35,14 @@ namespace Rooster.Slack.DependencyInjection
                 typeof(ProcessLogEntryRequest),
                 typeof(ExportLogEntryRequest),
                 typeof(ProcessDockerLogsRequest),
-                typeof(CreateLogEntryRequest)
+                typeof(CreateLogEntryRequest),
+                typeof(ProcessKuduLogsRequest)
             });
 
             services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, SlackProcessLogEntryCommand>();
             services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryCommand>();
             services.AddTransient<IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>, ProcessDockerLogsCommand>();
+            services.AddTransient<IRequestHandler<ProcessKuduLogsRequest, Unit>, ProcessKuduLogsCommand>();
 
             services.AddHostedService<SlackHost>();
 

@@ -6,6 +6,7 @@ using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.Mediator.Commands.ExportLogEntry;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
+using Rooster.Mediator.Commands.ProcessKuduLogs;
 using Rooster.Mediator.Commands.ProcessLogEntry;
 using Rooster.Mock.Commands.ProcessLogEntry;
 using Rooster.Mock.Reporters;
@@ -29,12 +30,14 @@ namespace Rooster.Mock.DependencyInjection
                 typeof(ProcessLogEntryRequest),
                 typeof(ExportLogEntryRequest),
                 typeof(ProcessDockerLogsRequest),
-                typeof(CreateLogEntryRequest)
+                typeof(CreateLogEntryRequest),
+                typeof(ProcessKuduLogsRequest)
             });
 
             services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, MockProcessLogEntryCommand>();
             services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryCommand>();
             services.AddTransient<IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>, ProcessDockerLogsCommand>();
+            services.AddTransient<IRequestHandler<ProcessKuduLogsRequest, Unit>, ProcessKuduLogsCommand>();
 
             services.AddHostedService<MockHost>();
 

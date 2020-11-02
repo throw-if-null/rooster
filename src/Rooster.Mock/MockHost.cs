@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Rooster.Adapters.Kudu;
@@ -12,11 +11,10 @@ namespace Rooster.Mock
     {
         public MockHost(
             IOptionsMonitor<AppHostOptions> options,
-            IHostApplicationLifetime lifetime,
             IEnumerable<IKuduApiAdapter> kudus,
             IMediator mediator,
             ILogger<MockHost> logger)
-            : base(options, lifetime, kudus, mediator, logger)
+            : base(options, kudus, mediator, logger)
         {
         }
 

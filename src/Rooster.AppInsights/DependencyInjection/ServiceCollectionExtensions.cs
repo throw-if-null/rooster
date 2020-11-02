@@ -13,8 +13,8 @@ using Rooster.Mediator.Commands.CreateLogEntry;
 using Rooster.Mediator.Commands.ExportLogEntry;
 using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.Mediator.Commands.ProcessDockerLogs;
+using Rooster.Mediator.Commands.ProcessKuduLogs;
 using Rooster.Mediator.Commands.ProcessLogEntry;
-using Rooster.QoS.Resilency;
 
 namespace Rooster.AppInsights.DependencyInjection
 {
@@ -43,12 +43,14 @@ namespace Rooster.AppInsights.DependencyInjection
                 typeof(ProcessLogEntryRequest),
                 typeof(ExportLogEntryRequest),
                 typeof(ProcessDockerLogsRequest),
-                typeof(CreateLogEntryRequest)
+                typeof(CreateLogEntryRequest),
+                typeof(ProcessKuduLogsRequest)
             });
 
             services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, AppInsightsProcessLogEntryCommand>();
             services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryCommand>();
             services.AddTransient<IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>, ProcessDockerLogsCommand>();
+            services.AddTransient<IRequestHandler<ProcessKuduLogsRequest, Unit>, ProcessKuduLogsCommand>();
 
             services.AddHostedService<AppInsightsHost>();
 
@@ -58,8 +60,6 @@ namespace Rooster.AppInsights.DependencyInjection
         public static IServiceCollection AddAppInsightsHealthCheck(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddTransient<IRequestHandler<AppInsightsHealthCheckRequest, HealthCheckResponse>, AppInsightsHealthCheckCommand>();
-
-            services.AddSingleton<IRetryProvider, RetryProvider>();
 
             return services;
         }

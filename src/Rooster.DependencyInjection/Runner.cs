@@ -69,13 +69,13 @@ namespace Rooster.DependencyInjection
             {
                 var childSource = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
 
-                tasks.Add(host.StartAsync(childSource.Token));
+                tasks.Add(RunHost(host, childSource.Token));
             }
 
             await Task.WhenAll(tasks);
         }
 
-        public static IHost BuildHost(Action<HostBuilderContext, IServiceCollection> configureHost)
+        private static IHost BuildHost(Action<HostBuilderContext, IServiceCollection> configureHost)
         {
             var builder =
                 Host.CreateDefaultBuilder()
@@ -83,7 +83,20 @@ namespace Rooster.DependencyInjection
                 configurator
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddJsonFile("appsettings.json", optional: false))
-                .ConfigureServices((context, services) => services.AddRooster(context.Configuration))
+                .ConfigureServices((context, services) =>
+                {
+                    services.Configure<Collection<KuduAdapterOptions>>(context.Configuration.GetSection($"Adapters:{nameof(KuduAdapterOptions)}"));
+                    services.Configure<AppHostOptions>(context.Configuration.GetSection($"{nameof(AppHostOptions)}"));
+                    services.Configure<RetryProviderOptions>(context.Configuration.GetSection($"{nameof(RetryProviderOptions)}"));
+
+                    services.AddMemoryCache();
+
+                    services.AddTransient<ILogExtractor, LogExtractor>();
+
+                    services.AddSingleton<IInstrumentationContext, InstrumentationContext>();
+                    services.AddSingleton<IRetryProvider, RetryProvider>();
+                    services.AddSingleton<CorrelationIdEnricher>();
+                })
                 .ConfigureServices(configureHost)
                 .ConfigureServices((ctx, services) =>
                 {
@@ -93,8 +106,7 @@ namespace Rooster.DependencyInjection
 
                         builder.ClearProviders();
 
-                        builder.AddProvider(new SerilogLoggerProvider(
-                            new LoggerConfiguration()
+                        var logger = new LoggerConfiguration()
                             .ReadFrom.Configuration(ctx.Configuration)
                             .Enrich.WithExceptionDetails()
                             .Enrich.With(new ILogEventEnricher[]
@@ -102,7 +114,12 @@ namespace Rooster.DependencyInjection
                                 provider.GetRequiredService<CorrelationIdEnricher>(),
                                 provider.GetRequiredService<HostNameEnricher>()
                             })
-                            .CreateLogger(), true));
+                            .CreateLogger();
+
+                        builder.AddProvider(new SerilogLoggerProvider(
+                            logger, true));
+
+                        Log.Logger = logger;
                     });
                 })
                 .UseConsoleLifetime();
@@ -110,23 +127,16 @@ namespace Rooster.DependencyInjection
             return builder.Build();
         }
 
-        private static IServiceCollection AddRooster(this IServiceCollection services, IConfiguration configuration)
+        private static async Task RunHost(IHost host, CancellationToken cancellation)
         {
-            services.Configure<Collection<KuduAdapterOptions>>(configuration.GetSection($"Adapters:{nameof(KuduAdapterOptions)}"));
-            services.Configure<AppHostOptions>(configuration.GetSection($"{nameof(AppHostOptions)}"));
-            services.Configure<RetryProviderOptions>(configuration.GetSection($"{nameof(RetryProviderOptions)}"));
-
-            services.AddMemoryCache();
-
-            services.AddTransient<ILogExtractor, LogExtractor>();
-
-            services.AddSingleton<IInstrumentationContext, InstrumentationContext>();
-            services.AddSingleton<IRetryProvider, RetryProvider>();
-            services.AddSingleton<CorrelationIdEnricher>();
-
-            services.AddKuduClient(configuration, string.Empty);
-
-            return services;
+            try
+            {
+                await host.RunAsync(cancellation);
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error("Host failed.", ex);
+            }
         }
     }
 }
