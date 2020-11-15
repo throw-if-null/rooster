@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Rooster.Adapters.Kudu;
 using Rooster.AppInsights.DependencyInjection;
 using Rooster.CrossCutting;
-using Rooster.CrossCutting.Docker;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.HealthCheck;
@@ -90,8 +89,6 @@ namespace Rooster.DependencyInjection
                     services.Configure<RetryProviderOptions>(context.Configuration.GetSection($"{nameof(RetryProviderOptions)}"));
 
                     services.AddMemoryCache();
-
-                    services.AddTransient<ILogExtractor, LogExtractor>();
 
                     services.AddSingleton<IInstrumentationContext, InstrumentationContext>();
                     services.AddSingleton<IRetryProvider, RetryProvider>();

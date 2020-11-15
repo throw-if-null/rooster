@@ -32,6 +32,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rooster.Mock", "Rooster.Moc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rooster.HealthCheck", "Rooster.HealthCheck\Rooster.HealthCheck.csproj", "{C2009A94-77F3-42F8-9C38-0FE8A0136810}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{9757EA18-9D67-40C7-8FE5-EE6C556F225A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +80,10 @@ Global
 		{C2009A94-77F3-42F8-9C38-0FE8A0136810}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2009A94-77F3-42F8-9C38-0FE8A0136810}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2009A94-77F3-42F8-9C38-0FE8A0136810}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9757EA18-9D67-40C7-8FE5-EE6C556F225A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9757EA18-9D67-40C7-8FE5-EE6C556F225A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9757EA18-9D67-40C7-8FE5-EE6C556F225A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9757EA18-9D67-40C7-8FE5-EE6C556F225A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,6 +99,7 @@ Global
 		{74CBE36A-EEF1-43B6-A6EE-6CF03BE59593} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
 		{7DEE181F-E934-4FE9-9A78-0E4761584819} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
 		{C2009A94-77F3-42F8-9C38-0FE8A0136810} = {9EA62D44-59DE-4BF9-A011-9FD45BE29F2D}
+		{9757EA18-9D67-40C7-8FE5-EE6C556F225A} = {0F406185-4A3A-4DD6-8C32-938DF3AECC17}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {657E0A32-900A-4651-AAC2-E21776973FAC}

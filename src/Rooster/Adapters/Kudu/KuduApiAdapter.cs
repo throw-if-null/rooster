@@ -1,10 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,6 +20,11 @@ namespace Rooster.Adapters.Kudu
 
     public class KuduApiAdapter : IKuduApiAdapter
     {
+        private static Func<JsonSerializerOptions> GetJsonSerializerOptions = delegate ()
+        {
+            return new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        };
+
         private const string InitStringValue = "init";
         private const string Docker = "docker";
         private const string DefaultSuffix = "_default";
@@ -44,26 +50,20 @@ namespace Rooster.Adapters.Kudu
 
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
-            var kuduLog = new[]
-            {
-                new
-                {
-                    lastUpdated = DateTimeOffset.UtcNow,
-                    href = _client.BaseAddress,
-                    machineName = string.Empty
-                }
-            };
+            using var stream = await response.Content.ReadAsStreamAsync();
 
-            var logs = JsonConvert.DeserializeAnonymousType(content, kuduLog);
+            var logs = await JsonSerializer.DeserializeAsync<KuduLog[]>(
+                stream,
+                GetJsonSerializerOptions(),
+                cancellation);
 
-            var values = logs.Select(x => (x.lastUpdated, x.href, x.machineName));
+            var values = logs.Where(
+                x =>
+                    !x.MachineName.EndsWith(DefaultSuffix, StringComparison.InvariantCultureIgnoreCase) &&
+                    !x.MachineName.EndsWith(MsiSuffix, StringComparison.InvariantCultureIgnoreCase))
+                .Select(x => (x.LastUpdated, x.Href, x.MachineName));
 
-            return values.Where(
-                    x =>
-                        !x.machineName.EndsWith(DefaultSuffix, StringComparison.InvariantCultureIgnoreCase) &&
-                        !x.machineName.EndsWith(MsiSuffix, StringComparison.InvariantCultureIgnoreCase))
-                    .ToArray();
+            return values;
         }
 
         public async IAsyncEnumerable<string> ExtractLogsFromStream(Uri logUri)

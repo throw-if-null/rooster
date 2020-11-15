@@ -11,12 +11,10 @@ namespace Rooster.Mediator.Commands.ExportLogEntry
     {
         private const string LogDockerLogLineReceived = "Received docker log line: {DockerLogLine}";
 
-        private readonly ILogExtractor _extractor;
         private readonly ILogger _logger;
 
-        public ExportLogEntryCommand(ILogExtractor extractor, ILogger<ExportLogEntryCommand> logger)
+        public ExportLogEntryCommand(ILogger<ExportLogEntryCommand> logger)
         {
-            _extractor = extractor ?? throw new ArgumentNullException(nameof(extractor));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -24,18 +22,17 @@ namespace Rooster.Mediator.Commands.ExportLogEntry
         {
             _logger.LogDebug(LogDockerLogLineReceived, request.LogLine);
 
-            var (inboundPort, outboundPort) = _extractor.ExtractPorts(request.LogLine);
-            var (imageName, imageTag) = _extractor.ExtractImageName(request.LogLine);
+            var metadata = LogExtractor.Extract(request.LogLine);
 
             var logEntry = new ExportLogEntryResponse
             {
-                ServiceName = _extractor.ExtractServiceName(request.LogLine),
-                ContainerName = _extractor.ExtractContainerName(request.LogLine),
-                ImageName = imageName,
-                ImageTag = imageTag,
-                InboundPort = inboundPort,
-                OutboundPort = outboundPort,
-                EventDate = _extractor.ExtractDate(request.LogLine)
+                ServiceName = metadata.ServiceName.ToString(),
+                ContainerName = metadata.ContainerName.ToString(),
+                ImageName = metadata.ImageName.ToString(),
+                ImageTag = metadata.ImageTag.ToString(),
+                InboundPort = metadata.InboundPort.ToString(),
+                OutboundPort = metadata.OutboundPort.ToString(),
+                EventDate = metadata.Date
             };
 
             return Task.FromResult(logEntry);

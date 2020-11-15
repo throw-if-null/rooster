@@ -2,71 +2,98 @@
 
 namespace Rooster.CrossCutting.Docker
 {
-    public interface ILogExtractor
+    public static class LogExtractor
     {
-        (string inbound, string outbound) ExtractPorts(string line);
-
-        (string name, string tag) ExtractImageName(string line);
-
-        string ExtractServiceName(string line);
-
-        string ExtractContainerName(string line);
-
-        DateTimeOffset ExtractDate(string line);
-    }
-
-    public class LogExtractor : ILogExtractor
-    {
-        private const string Dash = "-";
-        private const char Column = ':';
-        private const string PortsPrefix = "-p";
-        private const string EnvironmentVariablePrefix = " -e";
-        private const string ImageKey = "DOCKER_CUSTOM_IMAGE_NAME";
-        private const string ServiceNameKey = "WEBSITE_SITE_NAME";
-        private const string ContainerNameKey = "--name";
-        private const string DateKey = "INFO";
-
-        private static readonly Func<string, string, string, string> ExtractValue = delegate (string input, string key, string splitter)
+        public static DockerCommandMetadata Extract(ReadOnlySpan<char> dockerCommandSpan)
         {
-            var index = input.IndexOf(key);
-            var value = input.Substring(index + key.Length + 1);
-            value = value.Remove(value.IndexOf(splitter));
+            var imageSpan = ExtractFullImageName(dockerCommandSpan);
+            var (inbound, outbound) = ExtractPorts(dockerCommandSpan);
 
-            return value.Trim().ToLowerInvariant();
-        };
-
-        public (string inbound, string outbound) ExtractPorts(string line)
-        {
-            var portsValue = ExtractValue(line, PortsPrefix, Dash);
-            var ports = portsValue.Split(Column);
-
-            return (ports[0], ports[1]);
+            return new DockerCommandMetadata
+            {
+                Date = ExtractDate(dockerCommandSpan),
+                ServiceName = ExtractServiceName(dockerCommandSpan),
+                ContainerName = ExtractContainerName(dockerCommandSpan),
+                ImageName = ExtractImageName(imageSpan),
+                ImageTag = ExtractImageTag(imageSpan),
+                InboundPort = inbound,
+                OutboundPort = outbound
+            };
         }
 
-        public (string name, string tag) ExtractImageName(string line)
+        private static ReadOnlySpan<char> ExtractContainerName(ReadOnlySpan<char> span)
         {
-            var imageWithTag = ExtractValue(line, ImageKey, EnvironmentVariablePrefix);
-            var parts = imageWithTag.Split(Column);
+            var nameSpan = "--name ".AsSpan();
+            var nameIndex = span.IndexOf(nameSpan) + nameSpan.Length;
+            var eIndex = span.IndexOf(" -e".AsSpan());
 
-            return (parts[0], parts[1]);
+            var containerName = span.Slice(nameIndex, eIndex - nameIndex);
+
+            return containerName;
         }
 
-        public string ExtractServiceName(string line)
+        private static DateTimeOffset ExtractDate(ReadOnlySpan<char> span)
         {
-            return ExtractValue(line, ServiceNameKey, EnvironmentVariablePrefix);
+            var infoSpan = "INFO".AsSpan();
+            var infoIndex = span.IndexOf(infoSpan);
+
+            var date = span.Slice(0, infoIndex);
+
+            return DateTimeOffset.Parse(date);
         }
 
-        public string ExtractContainerName(string line)
+        private static ReadOnlySpan<char> ExtractFullImageName(ReadOnlySpan<char> span)
         {
-            return ExtractValue(line, ContainerNameKey, EnvironmentVariablePrefix);
+            var imageNameSpan = "DOCKER_CUSTOM_IMAGE_NAME=".AsSpan();
+            var imageNameIndex = span.IndexOf(imageNameSpan) + imageNameSpan.Length;
+            var eIndex = span.Slice(imageNameIndex).IndexOf(" -e".AsSpan()) + imageNameIndex;
+
+            var fullImageName = span.Slice(imageNameIndex, eIndex - imageNameIndex);
+
+            return fullImageName;
         }
 
-        public DateTimeOffset ExtractDate(string line)
+        private static ReadOnlySpan<char> ExtractImageName(ReadOnlySpan<char> fullImageName)
         {
-            var date = line.Remove(line.IndexOf(DateKey) - 1);
-            DateTimeOffset.TryParse(date, out var convertedDate);
+            var columnIndex = fullImageName.IndexOf(':');
+            var name = fullImageName.Slice(0, columnIndex);
 
-            return convertedDate;
+            return name;
+        }
+
+        private static ReadOnlySpan<char> ExtractImageTag(ReadOnlySpan<char> fullImageName)
+        {
+            var columnIndex = fullImageName.IndexOf(':');
+            var tag = fullImageName.Slice(columnIndex + 1);
+
+            return tag;
+        }
+
+        private static (int inbound, int outbound) ExtractPorts(ReadOnlySpan<char> span)
+        {
+            var portsSpan = "-p".AsSpan();
+            var dashSpan = "-".AsSpan();
+
+            var portsIndex = span.IndexOf(portsSpan) + portsSpan.Length;
+            var dashIndex = span.Slice(portsIndex).IndexOf(dashSpan) + portsIndex;
+
+            var ports = span.Slice(portsIndex, dashIndex - portsIndex);
+            var columnIndex = ports.IndexOf(':');
+            var inbound = int.Parse(ports.Slice(0, columnIndex));
+            var outbound = int.Parse(ports.Slice(columnIndex + 1));
+
+            return (inbound, outbound);
+        }
+
+        private static ReadOnlySpan<char> ExtractServiceName(ReadOnlySpan<char> span)
+        {
+            var serviceNameSpan = "WEBSITE_SITE_NAME=".AsSpan();
+            var serviceNameIndex = span.IndexOf(serviceNameSpan) + serviceNameSpan.Length;
+            var eIndex = span.Slice(serviceNameIndex).IndexOf(" -e".AsSpan()) + serviceNameIndex;
+
+            var serviceName = span.Slice(serviceNameIndex, eIndex - serviceNameIndex);
+
+            return serviceName;
         }
     }
 }

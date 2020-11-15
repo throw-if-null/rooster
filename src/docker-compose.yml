@@ -99,7 +99,7 @@ services:
       context: .
       dockerfile: Rooster.App/Dockerfile
     environment:
-      - Hosts__AppHostOptions__DatabaseEngine=Slack
+      - Hosts__AppHostOptions__Engines__0=Mock
       - Hosts__AppHostOptions__UseInternalPoller=true
       - Hosts__AppHostOptions__PoolingIntervalInSeconds=60
       - Hosts__AppHostOptions__CurrentDateVarianceInMinutes=5
@@ -112,6 +112,8 @@ services:
       - Adapters__KuduAdapterOptions__0__User=$$bf-studioapi-sandbox
       - Adapters__KuduAdapterOptions__0__Password=vuicJaYWb9lzK1snu0mD1my8SJ6mkAofemR4LwtCcwmMqYqTG6Cplwkd28qH
       - Adapters__KuduAdapterOptions__0__BaseUri=https://bf-studioapi-sandbox.scm.azurewebsites.net/
+      - Adapters__KuduAdapterOptions__0__Tags__0=Mock
+
 networks:
   local:
     name: local
