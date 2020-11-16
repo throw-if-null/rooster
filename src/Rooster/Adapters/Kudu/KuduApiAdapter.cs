@@ -22,17 +22,15 @@ namespace Rooster.Adapters.Kudu
 
     public class KuduApiAdapter : IKuduApiAdapter
     {
-        private static Func<JsonSerializerOptions> GetJsonSerializerOptions = delegate ()
-        {
-            return new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        };
-
-        private const string InitStringValue = "init";
-        private const string Docker = "docker";
         private const string DefaultSuffix = "_default";
         private const string MsiSuffix = "_msi";
         private const string KuduLogPath = "api/logs/docker";
         private const string LogUrlLogMessage = "Log URL: {0}{1}";
+
+        private static readonly Func<JsonSerializerOptions> GetJsonSerializerOptions = delegate ()
+        {
+            return new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        };
 
         private readonly HttpClient _client;
         private readonly ILogger _logger;
@@ -82,21 +80,26 @@ namespace Rooster.Adapters.Kudu
                 {
                     var read = await logReader.ReadAsync();
                     ReadOnlySequence<byte> buffer = read.Buffer;
+                    ReadOnlySequence<byte> line = default;
 
-                    while (TryReadLine(ref buffer, out ReadOnlySequence<byte> sequence))
+                    do
                     {
-                        var dockerLine = ProcessSequence(sequence);
+                        line = ReadLogLine(ref buffer);
+                        var dockerLine = ProcessLogLine(line);
 
-                        if (dockerLine.Length == 0)
+                        if (string.IsNullOrWhiteSpace(dockerLine))
                             continue;
 
                         yield return dockerLine;
                     }
+                    while (line.Length > 0);
 
                     logReader.AdvanceTo(buffer.Start, buffer.End);
 
                     if (read.IsCompleted)
+                    {
                         break;
+                    }
                 }
             }
             finally
@@ -105,83 +108,28 @@ namespace Rooster.Adapters.Kudu
             }
         }
 
-        private static bool TryReadLine(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> line)
+        private static ReadOnlySequence<byte> ReadLogLine(ref ReadOnlySequence<byte> buffer)
         {
             var position = buffer.PositionOf((byte)'\n');
 
             if (position == null)
-            {
-                line = default;
+                return default;
 
-                return false;
-            }
-
-            line = buffer.Slice(0, position.Value);
+            var line = buffer.Slice(0, position.Value);
             buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
 
-            return true;
+            return line;
         }
 
-        private static string ProcessSequence(ReadOnlySequence<byte> sequence)
+        private static string ProcessLogLine(ReadOnlySequence<byte> sequence)
         {
-            bool isDockerLine = false;
+            Span<char> chars = stackalloc char[(int)sequence.Length];
+            Encoding.UTF8.GetChars(sequence, chars);
 
-            if (sequence.IsSingleSegment)
-            {
-                isDockerLine = CheckIfDockerLine(sequence.FirstSpan);
-
-                if (!isDockerLine)
-                    return string.Empty;
-
-                return GetCharacters(sequence.FirstSpan).ToString();
-            }
-
-            Span<byte> span = stackalloc byte[(int)sequence.Length];
-            sequence.CopyTo(span);
-
-            isDockerLine = CheckIfDockerLine(span);
-
-            if (isDockerLine)
-            {
-                var characters = GetCharacters(span);
-
-                return characters.ToString();
-            }
-
-            return string.Empty;
-        }
-
-        private static Span<char> GetCharacters(ReadOnlySpan<byte> span)
-        {
-            Span<char> chars = stackalloc char[span.Length];
-            Encoding.UTF8.GetChars(span, chars);
-
-            var copy = new Span<char>(chars.ToArray());
-            chars.CopyTo(copy);
-
-            return copy;
-        }
-
-        private static Span<char> GetCharacters(Span<byte> span)
-        {
-            Span<char> chars = stackalloc char[span.Length];
-            Encoding.UTF8.GetChars(span, chars);
-
-            var copy = new Span<char>(chars.ToArray());
-            chars.CopyTo(copy);
-
-            return copy;
-        }
-
-        private static bool CheckIfDockerLine(ReadOnlySpan<byte> bytes)
-        {
-            Span<char> chars = stackalloc char[bytes.Length];
-            Encoding.UTF8.GetChars(bytes, chars);
-
-            if (chars.IndexOf(Docker) >= 0)
-                return true;
-
-            return false;
+            return
+                chars.IndexOf("docker".AsSpan()) == -1
+                ? default
+                : chars.ToString();
         }
     }
 }
