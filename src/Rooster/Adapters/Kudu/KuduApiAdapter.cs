@@ -3,8 +3,10 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Pipelines;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,20 +75,28 @@ namespace Rooster.Adapters.Kudu
             try
             {
                 stream = await _client.GetStreamAsync(logUri);
-
-                using var logReader = new StreamReader(stream);
+                var logReader = PipeReader.Create(stream);
                 stream = null;
 
-                var line = InitStringValue;
-
-                while (line != null)
+                while (true)
                 {
-                    line = await logReader.ReadLineAsync();
+                    var read = await logReader.ReadAsync();
+                    ReadOnlySequence<byte> buffer = read.Buffer;
 
-                    if (!CheckIfDockerRunLine(line))
-                        continue;
+                    while (TryReadLine(ref buffer, out ReadOnlySequence<byte> sequence))
+                    {
+                        var dockerLine = ProcessSequence(sequence);
 
-                    yield return line;
+                        if (dockerLine.Length == 0)
+                            continue;
+
+                        yield return dockerLine;
+                    }
+
+                    logReader.AdvanceTo(buffer.Start, buffer.End);
+
+                    if (read.IsCompleted)
+                        break;
                 }
             }
             finally
@@ -95,15 +105,83 @@ namespace Rooster.Adapters.Kudu
             }
         }
 
-        private static bool CheckIfDockerRunLine(string line)
+        private static bool TryReadLine(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> line)
         {
-            if (string.IsNullOrWhiteSpace(line))
-                return false;
+            var position = buffer.PositionOf((byte)'\n');
 
-            if (!line.Contains(Docker, StringComparison.InvariantCultureIgnoreCase))
+            if (position == null)
+            {
+                line = default;
+
                 return false;
+            }
+
+            line = buffer.Slice(0, position.Value);
+            buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
 
             return true;
+        }
+
+        private static string ProcessSequence(ReadOnlySequence<byte> sequence)
+        {
+            bool isDockerLine = false;
+
+            if (sequence.IsSingleSegment)
+            {
+                isDockerLine = CheckIfDockerLine(sequence.FirstSpan);
+
+                if (!isDockerLine)
+                    return string.Empty;
+
+                return GetCharacters(sequence.FirstSpan).ToString();
+            }
+
+            Span<byte> span = stackalloc byte[(int)sequence.Length];
+            sequence.CopyTo(span);
+
+            isDockerLine = CheckIfDockerLine(span);
+
+            if (isDockerLine)
+            {
+                var characters = GetCharacters(span);
+
+                return characters.ToString();
+            }
+
+            return string.Empty;
+        }
+
+        private static Span<char> GetCharacters(ReadOnlySpan<byte> span)
+        {
+            Span<char> chars = stackalloc char[span.Length];
+            Encoding.UTF8.GetChars(span, chars);
+
+            var copy = new Span<char>(chars.ToArray());
+            chars.CopyTo(copy);
+
+            return copy;
+        }
+
+        private static Span<char> GetCharacters(Span<byte> span)
+        {
+            Span<char> chars = stackalloc char[span.Length];
+            Encoding.UTF8.GetChars(span, chars);
+
+            var copy = new Span<char>(chars.ToArray());
+            chars.CopyTo(copy);
+
+            return copy;
+        }
+
+        private static bool CheckIfDockerLine(ReadOnlySpan<byte> bytes)
+        {
+            Span<char> chars = stackalloc char[bytes.Length];
+            Encoding.UTF8.GetChars(bytes, chars);
+
+            if (chars.IndexOf(Docker) >= 0)
+                return true;
+
+            return false;
         }
     }
 }

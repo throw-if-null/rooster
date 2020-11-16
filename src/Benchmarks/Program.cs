@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Running;
-using Rooster.Benchmarkss;
+using Benchmarks.KuduApiAdapter;
+using System.Threading.Tasks;
 
 namespace Benchmarks
 {
@@ -7,7 +8,7 @@ namespace Benchmarks
     {
         private static void Main(string[] args)
         {
-            BenchmarkRunner.Run<LogExtractorBenchmarks>();
+            BenchmarkRunner.Run<KuduApiAdapterBenchmarks>();
         }
     }
 }

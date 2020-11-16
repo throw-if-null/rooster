@@ -1,11 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Moq;
 using Rooster.Adapters.Kudu;
-using Rooster.DependencyInjection;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.Mediator.Commands.ProcessLogEntry;
-using Rooster.Mock.Commands;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

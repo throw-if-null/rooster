@@ -17,7 +17,7 @@ namespace Rooster.Test
         {
             logDate = logDate ?? DateTimeOffset.UtcNow;
 
-            return
+            var logLine =
                 $"{logDate} INFO  - docker run -d " +
                 $"{GeneratePorts(inboundPort, outboundPort)} " +
                 $"{GenerateName(containerName)} " +
@@ -29,6 +29,8 @@ namespace Rooster.Test
                 "-e WEBSITE_INSTANCE_ID=dca0853ea787ff5bc1108ce74f2d26b3804e79ca665909dd8ae6df38a132d941 " +
                 "-e HTTP_LOGGING_ENABLED=1 " +
                 "appsvc/msitokenservice:2007200210";
+
+            return logLine;
         }
 
         private static string GeneratePorts(int inboundPort = 0, int outboundPort = 0)
