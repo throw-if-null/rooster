@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Rooster.Mediator.Commands.ExportLogEntry;
 using System;
 
 namespace Rooster.Mediator.Commands.CreateLogEntry
@@ -20,5 +21,18 @@ namespace Rooster.Mediator.Commands.CreateLogEntry
         public string OutboundPort { get; set; }
 
         public DateTimeOffset EventDate { get; set; }
+
+        public static implicit operator CreateLogEntryRequest(ExportLogEntryResponse response) =>
+            new ExportLogEntryResponse
+            {
+                Created = response.Created,
+                ServiceName = response.ServiceName,
+                ContainerName = response.ContainerName,
+                ImageName = response.ImageName,
+                ImageTag = response.ImageTag,
+                InboundPort = response.InboundPort,
+                OutboundPort = response.OutboundPort,
+                EventDate = response.EventDate
+            };
     }
 }

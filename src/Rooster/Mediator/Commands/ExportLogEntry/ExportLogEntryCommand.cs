@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using Rooster.CrossCutting.Docker;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,7 +14,7 @@ namespace Rooster.Mediator.Commands.ExportLogEntry
 
         public ExportLogEntryCommand(ILogger<ExportLogEntryCommand> logger)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger;
         }
 
         public Task<ExportLogEntryResponse> Handle(ExportLogEntryRequest request, CancellationToken cancellationToken)

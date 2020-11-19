@@ -1,7 +1,8 @@
 ﻿using MediatR;
+using Microsoft.IO;
 using Rooster.Mediator.Commands.ProcessLogEntry;
 using Rooster.Slack.Reporting;
-using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,13 +19,15 @@ namespace Rooster.Slack.Commands.LogEntryCommand
         private const string ColorValue = "warning";
 
         private readonly IReporter _reporter;
+        private readonly RecyclableMemoryStreamManager _streamManager;
 
-        public SlackProcessLogEntryCommand(IReporter reporter)
+        public SlackProcessLogEntryCommand(IReporter reporter, RecyclableMemoryStreamManager streamManager)
         {
-            _reporter = reporter ?? throw new ArgumentNullException(nameof(reporter));
+            _reporter = reporter;
+            _streamManager = streamManager;
         }
 
-        protected override Task Handle(ProcessLogEntryRequest request, CancellationToken cancellationToken)
+        protected override async Task Handle(ProcessLogEntryRequest request, CancellationToken cancellationToken)
         {
             var fields = new object[4]
             {
@@ -50,7 +53,11 @@ namespace Rooster.Slack.Commands.LogEntryCommand
                     }
                 };
 
-            return _reporter.Send(content, cancellationToken);
+            using var stream = _streamManager.GetStream();
+
+            await JsonSerializer.SerializeAsync(stream, content, typeof(object), null, cancellationToken);
+
+            await _reporter.Send(stream, cancellationToken);
         }
     }
 }

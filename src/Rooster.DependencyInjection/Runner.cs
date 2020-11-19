@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IO;
 using Rooster.Adapters.Kudu;
 using Rooster.AppInsights.DependencyInjection;
 using Rooster.CrossCutting;
@@ -62,7 +63,7 @@ namespace Rooster.DependencyInjection
                 hosts.Add(host);
             }
 
-            var tasks = new List<Task>();
+            var tasks = new List<Task>(hosts.Count);
 
             foreach (var host in hosts)
             {
@@ -93,6 +94,8 @@ namespace Rooster.DependencyInjection
                     services.AddSingleton<IInstrumentationContext, InstrumentationContext>();
                     services.AddSingleton<IRetryProvider, RetryProvider>();
                     services.AddSingleton<CorrelationIdEnricher>();
+
+                    services.AddSingleton<RecyclableMemoryStreamManager>();
                 })
                 .ConfigureServices(configureHost)
                 .ConfigureServices((ctx, services) =>

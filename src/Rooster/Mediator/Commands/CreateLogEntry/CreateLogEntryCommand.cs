@@ -28,37 +28,37 @@ namespace Rooster.Mediator.Commands.CreateLogEntry
         {
             _ = request ?? throw new ArgumentNullException(nameof(request));
 
-            CheckString(nameof(request.ServiceName), request.ServiceName);
-            CheckString(nameof(request.ContainerName), request.ContainerName);
-            CheckString(nameof(request.ImageName), request.ImageName);
-            CheckString(nameof(request.ImageTag), request.ImageTag);
+            request.ServiceName = CheckStringAndTrim(nameof(request.ServiceName), request.ServiceName);
+            request.ContainerName = CheckStringAndTrim(nameof(request.ContainerName), request.ContainerName);
+            request.ImageName = CheckStringAndTrim(nameof(request.ImageName), request.ImageName);
+            request.ImageTag = CheckStringAndTrim(nameof(request.ImageTag), request.ImageTag);
             CheckInt(nameof(request.InboundPort), request.InboundPort);
             CheckInt(nameof(request.OutboundPort), request.OutboundPort);
             CheckDate(nameof(request.EventDate), request.EventDate);
+        }
 
-            static void CheckString(string name, string value)
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                    ThrowArgumentException(name, value == null ? Null : Empty);
+        static string CheckStringAndTrim(string name, string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                ThrowArgumentException(name, value == null ? Null : Empty);
 
-                name = name.Trim().ToLowerInvariant();
-            }
+            return value.Trim().ToLowerInvariant();
+        }
 
-            static void CheckInt(string name, string value)
-            {
-                if (int.TryParse(value, out var integer) && integer != default)
-                    return;
+        static void CheckInt(string name, string value)
+        {
+            if (int.TryParse(value, out var integer) && integer != default)
+                return;
 
-                ThrowArgumentException(name, value);
-            }
+            ThrowArgumentException(name, value);
+        }
 
-            static void CheckDate(string name, DateTimeOffset date)
-            {
-                if (date != default && date != DateTimeOffset.MaxValue)
-                    return;
+        static void CheckDate(string name, DateTimeOffset date)
+        {
+            if (date != default && date != DateTimeOffset.MaxValue)
+                return;
 
-                ThrowArgumentException(name, date.ToString());
-            }
+            ThrowArgumentException(name, date.ToString());
         }
     }
 }

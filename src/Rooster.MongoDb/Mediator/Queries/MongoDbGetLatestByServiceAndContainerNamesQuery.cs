@@ -10,15 +10,6 @@ namespace Rooster.MongoDb.Mediator.Queries
 {
     public sealed class MongoDbGetLatestByServiceAndContainerNamesQuery : GetLatestByServiceAndContainerNamesQuery
     {
-        private static readonly Func<GetLatestByServiceAndContainerNamesRequest, FilterDefinition<LogEntry>> GetFilter =
-            delegate (GetLatestByServiceAndContainerNamesRequest request)
-            {
-                return
-                    Builders<LogEntry>.Filter.Where(x =>
-                        x.ServiceName == request.ServiceName &&
-                        x.ContainerName == request.ContainerName);
-            };
-
         private readonly Func<FindOptions<LogEntry, LogEntry>> GetFindOptions = delegate ()
         {
             return
@@ -43,7 +34,12 @@ namespace Rooster.MongoDb.Mediator.Queries
         {
             var collection = await _collectionFactory.Get<LogEntry>(cancellation);
 
-            var cursor = await collection.FindAsync(GetFilter(request), GetFindOptions());
+            var filter =
+                Builders<LogEntry>.Filter.Where(x =>
+                    x.ServiceName == request.ServiceName &&
+                    x.ContainerName == request.ContainerName);
+
+            var cursor = await collection.FindAsync(filter, GetFindOptions());
 
             var entry = await cursor.FirstOrDefaultAsync();
 

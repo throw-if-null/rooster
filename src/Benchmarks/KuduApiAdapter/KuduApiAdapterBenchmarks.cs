@@ -1,6 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Microsoft.Extensions.Logging;
+using BenchmarkDotNet.Diagnostics.Windows.Configs;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.IO;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -9,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace Benchmarks.KuduApiAdapter
 {
-    [MemoryDiagnoser]
+    [MemoryDiagnoser, NativeMemoryProfiler, ThreadingDiagnoser]
     public class KuduApiAdapterBenchmarks
     {
         static readonly Func<AuthenticationHeaderValue> BuildBasicAuthHeader =
             delegate ()
             {
-                var user = "$bf-studioapi-sandbox";
-                var password = "vuicJaYWb9lzK1snu0mD1my8SJ6mkAofemR4LwtCcwmMqYqTG6Cplwkd28qH";
+                var user = "$bf-xxx";
+                var password = "xxx";
 
                 var base64 = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{user}:{password}"));
 
@@ -25,13 +26,13 @@ namespace Benchmarks.KuduApiAdapter
 
         static readonly HttpClient _client = new HttpClient()
         {
-            BaseAddress = new Uri("https://bf-studioapi-sandbox.scm.azurewebsites.net/")
+            BaseAddress = new Uri("https://xxx.scm.azurewebsites.net/")
         };
 
-        static readonly Uri uri1 = new Uri("https://bf-studioapi-sandbox.scm.azurewebsites.net/api/vfs/LogFiles/2020_11_16_RD0003FFDB5B85_docker.log");
-        static readonly Uri uri2 = new Uri("https://bf-studioapi-sandbox.scm.azurewebsites.net/api/vfs/LogFiles/2020_11_09_RD0003FFDB676A_docker.log");
-        static readonly Uri uri3 = new Uri("https://bf-studioapi-sandbox.scm.azurewebsites.net/api/vfs/LogFiles/2020_11_16_RD0003FFDBD625_docker.log");
-        static readonly Uri uri4 = new Uri("https://bf-studioapi-sandbox.scm.azurewebsites.net/api/vfs/LogFiles/2020_11_09_RD0003FFDBDE23_docker.log");
+        static readonly Uri uri1 = new Uri("");
+        static readonly Uri uri2 = new Uri("");
+
+        static readonly RecyclableMemoryStreamManager _streamManager = new RecyclableMemoryStreamManager();
 
         [Benchmark]
         public async Task ExtractLogsFromStream()
@@ -46,10 +47,10 @@ namespace Benchmarks.KuduApiAdapter
             await foreach (var log in adapter.ExtractLogsFromStream(uri2))
                 _ = log;
 
-            await foreach (var log in adapter.ExtractLogsFromStream(uri3))
+            await foreach (var log in adapter.ExtractLogsFromStream(uri1))
                 _ = log;
 
-            await foreach (var log in adapter.ExtractLogsFromStream(uri4))
+            await foreach (var log in adapter.ExtractLogsFromStream(uri2))
                 _ = log;
         }
 
@@ -58,7 +59,7 @@ namespace Benchmarks.KuduApiAdapter
         {
             _client.DefaultRequestHeaders.Authorization = BuildBasicAuthHeader();
 
-            var adapter = new Rooster.Adapters.Kudu.KuduApiAdapter(_client, NullLogger<Rooster.Adapters.Kudu.KuduApiAdapter>.Instance);
+            var adapter = new Rooster.Adapters.Kudu.KuduApiAdapter(_client, _streamManager, NullLogger<Rooster.Adapters.Kudu.KuduApiAdapter>.Instance);
 
             await foreach (var log in adapter.ExtractLogsFromStream(uri1))
                 _ = log;
@@ -66,10 +67,10 @@ namespace Benchmarks.KuduApiAdapter
             await foreach (var log in adapter.ExtractLogsFromStream(uri2))
                 _ = log;
 
-            await foreach (var log in adapter.ExtractLogsFromStream(uri3))
+            await foreach (var log in adapter.ExtractLogsFromStream(uri1))
                 _ = log;
 
-            await foreach (var log in adapter.ExtractLogsFromStream(uri4))
+            await foreach (var log in adapter.ExtractLogsFromStream(uri2))
                 _ = log;
         }
     }

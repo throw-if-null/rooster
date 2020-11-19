@@ -1,5 +1,5 @@
 ﻿using BenchmarkDotNet.Running;
-using Benchmarks.KuduApiAdapter;
+using Benchmarks.WebHookReporter;
 using System.Threading.Tasks;
 
 namespace Benchmarks
@@ -8,7 +8,7 @@ namespace Benchmarks
     {
         private static void Main(string[] args)
         {
-            BenchmarkRunner.Run<KuduApiAdapterBenchmarks>();
+            BenchmarkRunner.Run<KuduApiAdapter.KuduApiAdapterBenchmarks>();
         }
     }
 }

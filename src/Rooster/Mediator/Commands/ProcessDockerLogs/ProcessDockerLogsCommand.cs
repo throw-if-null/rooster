@@ -27,12 +27,13 @@ namespace Rooster.Mediator.Commands.ProcessDockerLogs
         public async Task<ProcessDockerLogsResponse> Handle(ProcessDockerLogsRequest request, CancellationToken cancellationToken)
         {
             var kuduLogs = await request.Kudu.GetDockerLogs(cancellationToken);
+            var logs = kuduLogs.Where(x => x.LastUpdated.Date == DateTimeOffset.UtcNow.Date);
 
-            foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in kuduLogs.Where(x => x.LastUpdated.Date == DateTimeOffset.UtcNow.Date))
+            foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in logs)
             {
-                var extendedLastUpdated = lastUpdated.AddMinutes(request.CurrentDateVarianceInMinutes);
+                var lastUpdatedEx = lastUpdated.AddMinutes(request.CurrentDateVarianceInMinutes);
 
-                if (extendedLastUpdated < DateTimeOffset.UtcNow)
+                if (lastUpdatedEx < DateTimeOffset.UtcNow)
                 {
                     _logger.LogDebug(LogIsOldMessage, logUri, lastUpdated, machineName);
 

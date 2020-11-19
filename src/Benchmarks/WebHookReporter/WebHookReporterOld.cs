@@ -1,34 +1,30 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Rooster.QoS.Resilency;
+using Rooster.Slack.Reporting;
 using System;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Slack.Reporting
+namespace Benchmarks.WebHookReporter
 {
-    public interface IReporter
-    {
-        Task Send(MemoryStream jsonStream, CancellationToken cancellation);
-    }
-
-    public class WebHookReporter : IReporter
+    public class WebHookReporterOld
     {
         private const string ReportSentToUrlLog = "Report sent to URL: {0} with received status: {1}";
 
         private static readonly Func<HttpResponseMessage, bool> TransientHttpStatusCodePredicate =
             delegate (HttpResponseMessage response)
-        {
-            if (response.StatusCode < HttpStatusCode.InternalServerError)
-                return response.StatusCode == HttpStatusCode.RequestTimeout;
+            {
+                if (response.StatusCode < HttpStatusCode.InternalServerError)
+                    return response.StatusCode == HttpStatusCode.RequestTimeout;
 
-            return true;
-        };
+                return true;
+            };
 
         private static readonly Action<HttpResponseMessage> ThrowHttpRequestException = delegate (HttpResponseMessage response)
         {
@@ -40,11 +36,11 @@ namespace Rooster.Slack.Reporting
         private readonly IRetryProvider _retryProvider;
         private readonly ILogger _logger;
 
-        public WebHookReporter(
+        public WebHookReporterOld(
             IOptionsMonitor<WebHookReporterOptions> options,
             HttpClient client,
             IRetryProvider retryProvider,
-            ILogger<WebHookReporter> logger)
+            ILogger<WebHookReporterOld> logger)
         {
             _options = options.CurrentValue;
             _client = client;
@@ -52,25 +48,26 @@ namespace Rooster.Slack.Reporting
             _logger = logger;
         }
 
-        public async Task Send(MemoryStream jsonStream, CancellationToken cancellation)
+        public async Task Send<T>(T payload, CancellationToken cancellation)
         {
             using var timeoutSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutSource.Token, cancellation);
 
             try
             {
+                var serializedContent = JsonSerializer.Serialize(payload);
+
                 await
                     _retryProvider.RetryOn<HttpRequestException, HttpResponseMessage>(
                         CheckError,
                         TransientHttpStatusCodePredicate,
-                        () => SendRequest(_client, _options, jsonStream, _logger, linkedSource.Token));
+                        () => Send(_client, _options, serializedContent, _logger, linkedSource.Token));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Report sending failed", Array.Empty<object>());
             }
         }
-
 
         private static bool CheckError(HttpRequestException x)
         {
@@ -85,14 +82,14 @@ namespace Rooster.Slack.Reporting
             return false;
         }
 
-        private static async Task<HttpResponseMessage> SendRequest(
+        private static async Task<HttpResponseMessage> Send(
             HttpClient client,
             WebHookReporterOptions options,
-            MemoryStream jsonStream,
+            string payload,
             ILogger logger,
             CancellationToken cancellation)
         {
-            var request = CreatePostMessage(new Uri(client.BaseAddress + options.Url), jsonStream);
+            var request = CreatePostMessage(new Uri(client.BaseAddress + options.Url), payload);
 
             if (options.Authorization != null)
                 request.Headers.Authorization = BuildAuthHeader(options.Authorization);
@@ -109,17 +106,17 @@ namespace Rooster.Slack.Reporting
             return response;
         }
 
-        private static HttpRequestMessage CreatePostMessage(Uri uri, MemoryStream jsonStream)
+        private static HttpRequestMessage CreatePostMessage(Uri uri, string jsonPayload)
         {
             return new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
                 RequestUri = uri,
-                Content = new ReadOnlyMemoryContent(jsonStream.ToArray())
+                Content = new StringContent(jsonPayload)
             };
         }
 
-        private static AuthenticationHeaderValue BuildAuthHeader(Authorization authorizationOptions)
+        private static AuthenticationHeaderValue BuildAuthHeader(Rooster.Slack.Reporting.Authorization authorizationOptions)
         {
             return new AuthenticationHeaderValue(authorizationOptions.Scheme, authorizationOptions.Parameter);
         }

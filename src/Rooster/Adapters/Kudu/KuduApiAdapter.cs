@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.IO;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -27,17 +28,19 @@ namespace Rooster.Adapters.Kudu
         private const string KuduLogPath = "api/logs/docker";
         private const string LogUrlLogMessage = "Log URL: {0}{1}";
 
-        private static readonly Func<JsonSerializerOptions> GetJsonSerializerOptions = delegate ()
-        {
-            return new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        };
+        private static Lazy<JsonSerializerOptions> JsonSerializerOptionInstance =
+            new Lazy<JsonSerializerOptions>(
+                () => new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
+                true);
 
         private readonly HttpClient _client;
+        private readonly RecyclableMemoryStreamManager _streamManager;
         private readonly ILogger _logger;
 
-        public KuduApiAdapter(HttpClient client, ILogger<KuduApiAdapter> logger)
+        public KuduApiAdapter(HttpClient client, RecyclableMemoryStreamManager streamManager, ILogger<KuduApiAdapter> logger)
         {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _client = client;
+            _streamManager = streamManager;
             _logger = logger;
         }
 
@@ -54,7 +57,7 @@ namespace Rooster.Adapters.Kudu
 
             var logs = await JsonSerializer.DeserializeAsync<KuduLog[]>(
                 stream,
-                GetJsonSerializerOptions(),
+                JsonSerializerOptionInstance.Value,
                 cancellation);
 
             var values = logs.Where(
@@ -68,43 +71,39 @@ namespace Rooster.Adapters.Kudu
 
         public async IAsyncEnumerable<string> ExtractLogsFromStream(Uri logUri)
         {
-            Stream stream = null;
+            using MemoryStream managedStream = _streamManager.GetStream();
 
-            try
+            using (var stream = await _client.GetStreamAsync(logUri))
             {
-                stream = await _client.GetStreamAsync(logUri);
-                var logReader = PipeReader.Create(stream);
-                stream = null;
-
-                while (true)
-                {
-                    var read = await logReader.ReadAsync();
-                    ReadOnlySequence<byte> buffer = read.Buffer;
-                    ReadOnlySequence<byte> line = default;
-
-                    do
-                    {
-                        line = ReadLogLine(ref buffer);
-                        var dockerLine = ProcessLogLine(line);
-
-                        if (string.IsNullOrWhiteSpace(dockerLine))
-                            continue;
-
-                        yield return dockerLine;
-                    }
-                    while (line.Length > 0);
-
-                    logReader.AdvanceTo(buffer.Start, buffer.End);
-
-                    if (read.IsCompleted)
-                    {
-                        break;
-                    }
-                }
+                await stream.CopyToAsync(managedStream);
             }
-            finally
+
+            var logReader = PipeReader.Create(managedStream);
+
+            while (true)
             {
-                stream?.Dispose();
+                var read = await logReader.ReadAsync();
+                ReadOnlySequence<byte> buffer = read.Buffer;
+                ReadOnlySequence<byte> line = default;
+
+                do
+                {
+                    line = ReadLogLine(ref buffer);
+                    var dockerLine = ProcessLogLine(line);
+
+                    if (string.IsNullOrWhiteSpace(dockerLine))
+                        continue;
+
+                    yield return dockerLine;
+                }
+                while (line.Length > 0);
+
+                logReader.AdvanceTo(buffer.Start, buffer.End);
+
+                if (read.IsCompleted)
+                {
+                    break;
+                }
             }
         }
 
