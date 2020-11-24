@@ -20,7 +20,7 @@ Now if you try getting the logs from Kudu API, you will see that in your logs yo
 
 In a nutshell it feteches Docker log list from endpoint provided by Kudu `https://{appservice-name}.scm.azurewebsites.net/api/logs/docker` and sends them to a configurable location.
 
-![Rooster processing workflow](src/docs/Rooster.svg)
+![Rooster processing workflow](https://raw.githubusercontent.com/MirzaMerdovic/rooster/master/src/docs/Rooster.svg)
 ## Configuration
 Rooster is a .net core console app that uses appsettings.json to store the configuration as most of us .net developers already now you can override appsettings.json values with environment variables. If you don't want to use environment variables you can use exteranal appsettings.json that would contain values specific to your use case and just mount that file to your container.
 
