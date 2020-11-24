@@ -9,10 +9,10 @@ using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
-using Rooster.Mediator.Commands.CreateLogEntry;
-using Rooster.Mediator.Commands.ExportLogEntry;
-using Rooster.Mediator.Commands.ProcessDockerLogs;
+using Rooster.Mediator.Commands.ExtractDockerRunParams;
+using Rooster.Mediator.Commands.ProcessAppLogSource;
 using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.Mediator.Commands.ValidateDockerRunParams;
 using Rooster.Mock;
 using Rooster.Mock.Commands.ProcessLogEntry;
 using Rooster.Mock.Reporters;
@@ -80,7 +80,7 @@ namespace Rooster.Test
                 .ConfigureServices((context, services) =>
                 {
                     services.AddSingleton(new HostNameEnricher(nameof(MockHost)));
-                    services.AddSingleton(new ConcurrentBag<ProcessLogEntryRequest>());
+                    services.AddSingleton(new ConcurrentBag<ShouldProcessDockerLogRequest>());
 
                     services.AddTransient<IMockReporter, MockReporter>();
 
@@ -88,15 +88,15 @@ namespace Rooster.Test
 
                     services.AddMediatR(new[]
                     {
-                            typeof(ProcessLogEntryRequest),
-                            typeof(ExportLogEntryRequest),
-                            typeof(ProcessDockerLogsRequest),
-                            typeof(CreateLogEntryRequest)
+                            typeof(ShouldProcessDockerLogRequest),
+                            typeof(ExtractDockerRunParamsRequest),
+                            typeof(ProcessAppLogSourceRequest),
+                            typeof(ValidateDockerRunParamsRequest)
                         });
 
-                    services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, MockProcessLogEntryCommand>();
-                    services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryCommand>();
-                    services.AddTransient<IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>, ProcessDockerLogsCommand>();
+                    services.AddTransient<IRequestHandler<ShouldProcessDockerLogRequest, Unit>, MockProcessLogEntryCommand>();
+                    services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
+                    services.AddTransient<IRequestHandler<ProcessAppLogSourceRequest, ProcessAppLogSourceResponse>, ProcessAppLogSourceCommand>();
 
                     services.AddHostedService<MockHost>();
                 })

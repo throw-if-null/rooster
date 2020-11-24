@@ -35,14 +35,14 @@ namespace Rooster.Test
                 .Setup(x => x.ExtractLogsFromStream(It.IsAny<Uri>()))
                 .Returns(GetValue());
 
-            var requestsBag = new ConcurrentBag<ProcessLogEntryRequest>();
+            var requestsBag = new ConcurrentBag<ShouldProcessDockerLogRequest>();
 
             await
                 TestRunner.Run(
                     "appsettings.test.json",
                     (ctx, services) =>
                         {
-                            services.AddSingleton<ConcurrentBag<ProcessLogEntryRequest>>(requestsBag);
+                            services.AddSingleton<ConcurrentBag<ShouldProcessDockerLogRequest>>(requestsBag);
 
                             services.AddTransient<IKuduApiAdapter>(x => kuduMock.Object);
                         });
@@ -76,14 +76,14 @@ namespace Rooster.Test
                     (DateTimeOffset.UtcNow.AddMinutes(-10), new Uri("http://localhost:34"), "localhost")
                 });
 
-            var requestsBag = new ConcurrentBag<ProcessLogEntryRequest>();
+            var requestsBag = new ConcurrentBag<ShouldProcessDockerLogRequest>();
 
             await
                 TestRunner.Run(
                     "appsettings.test.json",
                     (ctx, services) =>
                     {
-                        services.AddSingleton<ConcurrentBag<ProcessLogEntryRequest>>(requestsBag);
+                        services.AddSingleton<ConcurrentBag<ShouldProcessDockerLogRequest>>(requestsBag);
 
                         services.AddTransient<IKuduApiAdapter>(x => kuduMock.Object);
                     });
@@ -103,14 +103,14 @@ namespace Rooster.Test
                 .Setup(x => x.ExtractLogsFromStream(It.IsAny<Uri>()))
                 .Returns(GetValue());
 
-            var requestsBag = new ConcurrentBag<ProcessLogEntryRequest>();
+            var requestsBag = new ConcurrentBag<ShouldProcessDockerLogRequest>();
 
             await
                 TestRunner.Run(
                     "appsettings.test-2.json",
                     (ctx, services) =>
                     {
-                        services.AddSingleton<ConcurrentBag<ProcessLogEntryRequest>>(requestsBag);
+                        services.AddSingleton<ConcurrentBag<ShouldProcessDockerLogRequest>>(requestsBag);
 
                         services.AddTransient<IKuduApiAdapter>(x => kuduMock.Object);
                     });

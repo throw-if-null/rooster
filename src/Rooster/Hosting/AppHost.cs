@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Rooster.Adapters.Kudu;
-using Rooster.Mediator.Commands.ProcessKuduLogs;
+using Rooster.Mediator.Commands.StartKuduPoller;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -45,7 +45,7 @@ namespace Rooster.Hosting
 
             for (var i = 0; i < kudus.Length; i++)
             {
-                tasks[i] = _mediator.Send(new ProcessKuduLogsRequest
+                tasks[i] = _mediator.Send(new StartKuduPollerRequest
                 {
                     KuduAdapter = kudus[i],
                     Containers = new ConcurrentDictionary<string, long>(),

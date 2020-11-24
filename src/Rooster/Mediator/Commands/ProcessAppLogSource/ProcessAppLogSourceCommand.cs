@@ -1,15 +1,15 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
-using Rooster.Mediator.Commands.ExportLogEntry;
+using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.ProcessLogEntry;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Mediator.Commands.ProcessDockerLogs
+namespace Rooster.Mediator.Commands.ProcessAppLogSource
 {
-    public class ProcessDockerLogsCommand : IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>
+    public class ProcessAppLogSourceCommand : IRequestHandler<ProcessAppLogSourceRequest, ProcessAppLogSourceResponse>
     {
         private const string ContinerProxySufix = "_msiproxy";
         private const string LogIsOldMessage = "Log: {0} is old. Last updated: {1}. Machine: {2}";
@@ -18,17 +18,18 @@ namespace Rooster.Mediator.Commands.ProcessDockerLogs
         private readonly ILogger _logger;
         private readonly IMediator _mediator;
 
-        public ProcessDockerLogsCommand(ILogger<ProcessDockerLogsCommand> logger, IMediator mediator)
+        public ProcessAppLogSourceCommand(ILogger<ProcessAppLogSourceCommand> logger, IMediator mediator)
         {
             _logger = logger;
             _mediator = mediator;
         }
 
-        public async Task<ProcessDockerLogsResponse> Handle(ProcessDockerLogsRequest request, CancellationToken cancellationToken)
+        public async Task<ProcessAppLogSourceResponse> Handle(ProcessAppLogSourceRequest request, CancellationToken cancellationToken)
         {
             var kuduLogs = await request.Kudu.GetDockerLogs(cancellationToken);
-            var logs = kuduLogs.Where(x => x.LastUpdated.Date == DateTimeOffset.UtcNow.Date);
+            var logs = kuduLogs.Where(x => x.LastUpdated.Date == DateTimeOffset.UtcNow.Date).OrderByDescending(x => x.LastUpdated);
 
+            // TODO: Group logs by MachineName, take first and process them in parallel
             foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in logs)
             {
                 var lastUpdatedEx = lastUpdated.AddMinutes(request.CurrentDateVarianceInMinutes);
@@ -44,7 +45,7 @@ namespace Rooster.Mediator.Commands.ProcessDockerLogs
 
                 await foreach (var line in lines)
                 {
-                    var exportedLogEntry = await _mediator.Send(new ExportLogEntryRequest { LogLine = line }, cancellationToken);
+                    var exportedLogEntry = await _mediator.Send(new ExtractDockerRunParamsRequest { LogLine = line }, cancellationToken);
 
                     if (exportedLogEntry.ContainerName.EndsWith(ContinerProxySufix, StringComparison.InvariantCultureIgnoreCase))
                         continue;
@@ -53,7 +54,7 @@ namespace Rooster.Mediator.Commands.ProcessDockerLogs
                         request.Containers[exportedLogEntry.ContainerName] <= exportedLogEntry.EventDate.Ticks)
                         continue;
 
-                    await _mediator.Send(new ProcessLogEntryRequest { ExportedLogEntry = exportedLogEntry }, cancellationToken);
+                    await _mediator.Send(new ShouldProcessDockerLogRequest { ExportedLogEntry = exportedLogEntry }, cancellationToken);
 
                     request.Containers[exportedLogEntry.ContainerName] = exportedLogEntry.EventDate.Ticks;
                 }
@@ -61,7 +62,7 @@ namespace Rooster.Mediator.Commands.ProcessDockerLogs
                 _logger.LogDebug(LogExtractionFinished, logUri);
             }
 
-            return new ProcessDockerLogsResponse { Containers = request.Containers };
+            return new ProcessAppLogSourceResponse { Containers = request.Containers };
         }
     }
 }

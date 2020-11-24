@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.Slack.Commands.LogEntryCommand
 {
-    public class SlackProcessLogEntryCommand : AsyncRequestHandler<ProcessLogEntryRequest>
+    public class SlackProcessLogEntryCommand : AsyncRequestHandler<ShouldProcessDockerLogRequest>
     {
         private const string message = "New container deployment.";
         private const string DateTitle = "Date";
@@ -27,7 +27,7 @@ namespace Rooster.Slack.Commands.LogEntryCommand
             _streamManager = streamManager;
         }
 
-        protected override async Task Handle(ProcessLogEntryRequest request, CancellationToken cancellationToken)
+        protected override async Task Handle(ShouldProcessDockerLogRequest request, CancellationToken cancellationToken)
         {
             var fields = new object[4]
             {

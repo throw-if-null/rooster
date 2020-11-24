@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.AppInsights.Handlers.ProcessLogEntry
 {
-    public class AppInsightsProcessLogEntryCommand : AsyncRequestHandler<ProcessLogEntryRequest>
+    public class AppInsightsProcessLogEntryCommand : AsyncRequestHandler<ShouldProcessDockerLogRequest>
     {
         private readonly ITelemetryReporter _reporter;
 
@@ -17,7 +17,7 @@ namespace Rooster.AppInsights.Handlers.ProcessLogEntry
             _reporter = reporter ?? throw new ArgumentNullException(nameof(reporter));
         }
 
-        protected override Task Handle(ProcessLogEntryRequest request, CancellationToken cancellationToken)
+        protected override Task Handle(ShouldProcessDockerLogRequest request, CancellationToken cancellationToken)
         {
             var properties = new Dictionary<string, string>
             {

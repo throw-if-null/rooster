@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Rooster.Mediator.Commands.ExportLogEntry
+namespace Rooster.Mediator.Commands.ExtractDockerRunParams
 {
-    public class ExportLogEntryResponse
+    public class ExtractDockerRunParamsResponse
     {
         public string ServiceName { get; set; }
 

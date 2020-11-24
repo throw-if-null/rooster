@@ -9,12 +9,12 @@ using Rooster.AppInsights.Handlers.ProcessLogEntry;
 using Rooster.AppInsights.Reporters;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
-using Rooster.Mediator.Commands.CreateLogEntry;
-using Rooster.Mediator.Commands.ExportLogEntry;
+using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
-using Rooster.Mediator.Commands.ProcessDockerLogs;
-using Rooster.Mediator.Commands.ProcessKuduLogs;
+using Rooster.Mediator.Commands.ProcessAppLogSource;
 using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.Mediator.Commands.StartKuduPoller;
+using Rooster.Mediator.Commands.ValidateDockerRunParams;
 
 namespace Rooster.AppInsights.DependencyInjection
 {
@@ -40,17 +40,17 @@ namespace Rooster.AppInsights.DependencyInjection
 
             services.AddMediatR(new[]
             {
-                typeof(ProcessLogEntryRequest),
-                typeof(ExportLogEntryRequest),
-                typeof(ProcessDockerLogsRequest),
-                typeof(CreateLogEntryRequest),
-                typeof(ProcessKuduLogsRequest)
+                typeof(ShouldProcessDockerLogRequest),
+                typeof(ExtractDockerRunParamsRequest),
+                typeof(ProcessAppLogSourceRequest),
+                typeof(ValidateDockerRunParamsRequest),
+                typeof(StartKuduPollerRequest)
             });
 
-            services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, AppInsightsProcessLogEntryCommand>();
-            services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryCommand>();
-            services.AddTransient<IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>, ProcessDockerLogsCommand>();
-            services.AddTransient<IRequestHandler<ProcessKuduLogsRequest, Unit>, ProcessKuduLogsCommand>();
+            services.AddTransient<IRequestHandler<ShouldProcessDockerLogRequest, Unit>, AppInsightsProcessLogEntryCommand>();
+            services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
+            services.AddTransient<IRequestHandler<ProcessAppLogSourceRequest, ProcessAppLogSourceResponse>, ProcessAppLogSourceCommand>();
+            services.AddTransient<IRequestHandler<StartKuduPollerRequest, Unit>, StartKuduPollerCommand>();
 
             services.AddHostedService<AppInsightsHost>();
 

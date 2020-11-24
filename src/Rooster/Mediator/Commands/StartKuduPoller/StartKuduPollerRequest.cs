@@ -2,9 +2,9 @@
 using Rooster.Adapters.Kudu;
 using System.Collections.Concurrent;
 
-namespace Rooster.Mediator.Commands.ProcessKuduLogs
+namespace Rooster.Mediator.Commands.StartKuduPoller
 {
-    public class ProcessKuduLogsRequest : IRequest
+    public class StartKuduPollerRequest : IRequest
     {
         public IKuduApiAdapter KuduAdapter { get; set; }
 

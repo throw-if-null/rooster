@@ -3,9 +3,9 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Mediator.Commands.CreateLogEntry
+namespace Rooster.Mediator.Commands.ValidateDockerRunParams
 {
-    public abstract class CreateLogEntryCommand : IRequestHandler<CreateLogEntryRequest>
+    public abstract class ValidateDockerRunParamsCommand : IRequestHandler<ValidateDockerRunParamsRequest>
     {
         private const string Null = "NULL";
         private const string Empty = "EMPTY";
@@ -15,16 +15,16 @@ namespace Rooster.Mediator.Commands.CreateLogEntry
             throw new ArgumentException($"{name} has invalid value: [{value}].");
         };
 
-        protected abstract Task<Unit> CreateImplementation(CreateLogEntryRequest request, CancellationToken cancellation);
+        protected abstract Task<Unit> CreateImplementation(ValidateDockerRunParamsRequest request, CancellationToken cancellation);
 
-        public Task<Unit> Handle(CreateLogEntryRequest request, CancellationToken cancellationToken)
+        public Task<Unit> Handle(ValidateDockerRunParamsRequest request, CancellationToken cancellationToken)
         {
             Validate(request);
 
             return CreateImplementation(request, cancellationToken);
         }
 
-        private static void Validate(CreateLogEntryRequest request)
+        private static void Validate(ValidateDockerRunParamsRequest request)
         {
             _ = request ?? throw new ArgumentNullException(nameof(request));
 

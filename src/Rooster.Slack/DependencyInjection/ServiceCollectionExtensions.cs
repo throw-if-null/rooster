@@ -3,12 +3,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
-using Rooster.Mediator.Commands.CreateLogEntry;
-using Rooster.Mediator.Commands.ExportLogEntry;
+using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
-using Rooster.Mediator.Commands.ProcessDockerLogs;
-using Rooster.Mediator.Commands.ProcessKuduLogs;
+using Rooster.Mediator.Commands.ProcessAppLogSource;
 using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.Mediator.Commands.StartKuduPoller;
+using Rooster.Mediator.Commands.ValidateDockerRunParams;
 using Rooster.Slack.Commands.HealthCheck;
 using Rooster.Slack.Commands.LogEntryCommand;
 using Rooster.Slack.Reporting;
@@ -32,17 +32,17 @@ namespace Rooster.Slack.DependencyInjection
 
             services.AddMediatR(new[]
             {
-                typeof(ProcessLogEntryRequest),
-                typeof(ExportLogEntryRequest),
-                typeof(ProcessDockerLogsRequest),
-                typeof(CreateLogEntryRequest),
-                typeof(ProcessKuduLogsRequest)
+                typeof(ShouldProcessDockerLogRequest),
+                typeof(ExtractDockerRunParamsRequest),
+                typeof(ProcessAppLogSourceRequest),
+                typeof(ValidateDockerRunParamsRequest),
+                typeof(StartKuduPollerRequest)
             });
 
-            services.AddTransient<IRequestHandler<ProcessLogEntryRequest, Unit>, SlackProcessLogEntryCommand>();
-            services.AddTransient<IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>, ExportLogEntryCommand>();
-            services.AddTransient<IRequestHandler<ProcessDockerLogsRequest, ProcessDockerLogsResponse>, ProcessDockerLogsCommand>();
-            services.AddTransient<IRequestHandler<ProcessKuduLogsRequest, Unit>, ProcessKuduLogsCommand>();
+            services.AddTransient<IRequestHandler<ShouldProcessDockerLogRequest, Unit>, SlackProcessLogEntryCommand>();
+            services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
+            services.AddTransient<IRequestHandler<ProcessAppLogSourceRequest, ProcessAppLogSourceResponse>, ProcessAppLogSourceCommand>();
+            services.AddTransient<IRequestHandler<StartKuduPollerRequest, Unit>, StartKuduPollerCommand>();
 
             services.AddHostedService<SlackHost>();
 

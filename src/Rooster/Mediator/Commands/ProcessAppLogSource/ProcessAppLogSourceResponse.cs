@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Rooster.Mediator.Commands.ProcessDockerLogs
+namespace Rooster.Mediator.Commands.ProcessAppLogSource
 {
-    public class ProcessDockerLogsResponse
+    public class ProcessAppLogSourceResponse
     {
         public ConcurrentDictionary<string, long> Containers { get; set; }
     }

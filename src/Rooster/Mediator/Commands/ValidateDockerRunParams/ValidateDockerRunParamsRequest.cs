@@ -1,10 +1,10 @@
 ﻿using MediatR;
-using Rooster.Mediator.Commands.ExportLogEntry;
+using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using System;
 
-namespace Rooster.Mediator.Commands.CreateLogEntry
+namespace Rooster.Mediator.Commands.ValidateDockerRunParams
 {
-    public class CreateLogEntryRequest : IRequest
+    public class ValidateDockerRunParamsRequest : IRequest
     {
         public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 
@@ -22,8 +22,8 @@ namespace Rooster.Mediator.Commands.CreateLogEntry
 
         public DateTimeOffset EventDate { get; set; }
 
-        public static implicit operator CreateLogEntryRequest(ExportLogEntryResponse response) =>
-            new ExportLogEntryResponse
+        public static implicit operator ValidateDockerRunParamsRequest(ExtractDockerRunParamsResponse response) =>
+            new ExtractDockerRunParamsResponse
             {
                 Created = response.Created,
                 ServiceName = response.ServiceName,

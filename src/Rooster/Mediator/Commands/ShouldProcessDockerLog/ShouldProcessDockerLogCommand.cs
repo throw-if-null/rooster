@@ -1,22 +1,26 @@
 ﻿using MediatR;
-using Rooster.Mediator.Commands.CreateLogEntry;
+using Rooster.Mediator.Commands.ValidateDockerRunParams;
 using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rooster.Mediator.Commands.ProcessLogEntry
 {
-    public class ProcessLogEntryCommand : AsyncRequestHandler<ProcessLogEntryRequest>
+    // TODO: This needs to return a response
+    public class ShouldProcessDockerLogCommand : AsyncRequestHandler<ShouldProcessDockerLogRequest>
     {
         private readonly IMediator _mediator;
 
-        public ProcessLogEntryCommand(IMediator mediator)
+        public ShouldProcessDockerLogCommand(IMediator mediator)
         {
             _mediator = mediator;
         }
 
-        protected override async Task Handle(ProcessLogEntryRequest request, CancellationToken cancellationToken)
+        protected override async Task Handle(ShouldProcessDockerLogRequest request, CancellationToken cancellationToken)
         {
+            ValidateDockerRunParamsRequest validateDockerRunParamsRequest = request.ExportedLogEntry;
+            await _mediator.Send(validateDockerRunParamsRequest, cancellationToken);
+
             var latestLogEntry =
                 await
                     _mediator.Send(
@@ -29,10 +33,6 @@ namespace Rooster.Mediator.Commands.ProcessLogEntry
 
             if (request.ExportedLogEntry.EventDate <= latestLogEntry)
                 return;
-
-            CreateLogEntryRequest createLogEntry = request.ExportedLogEntry;
-
-            await _mediator.Send(createLogEntry, cancellationToken);
         }
     }
 }

@@ -6,19 +6,19 @@ namespace Rooster.Mock.Reporters
 {
     public interface IMockReporter
     {
-        void RegisterRequest(ProcessLogEntryRequest request);
+        void RegisterRequest(ShouldProcessDockerLogRequest request);
     }
 
     public class MockReporter : IMockReporter
     {
-        private readonly ConcurrentBag<ProcessLogEntryRequest> _requests;
+        private readonly ConcurrentBag<ShouldProcessDockerLogRequest> _requests;
 
-        public MockReporter(ConcurrentBag<ProcessLogEntryRequest> requests)
+        public MockReporter(ConcurrentBag<ShouldProcessDockerLogRequest> requests)
         {
             _requests = requests ?? throw new ArgumentNullException(nameof(requests));
         }
 
-        public void RegisterRequest(ProcessLogEntryRequest request)
+        public void RegisterRequest(ShouldProcessDockerLogRequest request)
         {
             _requests.Add(request);
         }

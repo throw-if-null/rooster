@@ -2,9 +2,9 @@
 using Rooster.Adapters.Kudu;
 using System.Collections.Concurrent;
 
-namespace Rooster.Mediator.Commands.ProcessDockerLogs
+namespace Rooster.Mediator.Commands.ProcessAppLogSource
 {
-    public class ProcessDockerLogsRequest : IRequest<ProcessDockerLogsResponse>
+    public class ProcessAppLogSourceRequest : IRequest<ProcessAppLogSourceResponse>
     {
         public IKuduApiAdapter Kudu { get; set; }
 

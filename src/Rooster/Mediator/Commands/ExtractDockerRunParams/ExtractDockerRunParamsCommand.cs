@@ -4,26 +4,26 @@ using Rooster.CrossCutting.Docker;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Mediator.Commands.ExportLogEntry
+namespace Rooster.Mediator.Commands.ExtractDockerRunParams
 {
-    public class ExportLogEntryCommand : IRequestHandler<ExportLogEntryRequest, ExportLogEntryResponse>
+    public class ExtractDockerRunParamsCommand : IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>
     {
         private const string LogDockerLogLineReceived = "Received docker log line: {DockerLogLine}";
 
         private readonly ILogger _logger;
 
-        public ExportLogEntryCommand(ILogger<ExportLogEntryCommand> logger)
+        public ExtractDockerRunParamsCommand(ILogger<ExtractDockerRunParamsCommand> logger)
         {
             _logger = logger;
         }
 
-        public Task<ExportLogEntryResponse> Handle(ExportLogEntryRequest request, CancellationToken cancellationToken)
+        public Task<ExtractDockerRunParamsResponse> Handle(ExtractDockerRunParamsRequest request, CancellationToken cancellationToken)
         {
             _logger.LogDebug(LogDockerLogLineReceived, request.LogLine);
 
             var metadata = LogExtractor.Extract(request.LogLine);
 
-            var logEntry = new ExportLogEntryResponse
+            var logEntry = new ExtractDockerRunParamsResponse
             {
                 ServiceName = metadata.ServiceName.ToString(),
                 ContainerName = metadata.ContainerName.ToString(),

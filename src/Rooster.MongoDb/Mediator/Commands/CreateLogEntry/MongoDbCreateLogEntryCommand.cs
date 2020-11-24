@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using MongoDB.Driver;
-using Rooster.Mediator.Commands.CreateLogEntry;
+using Rooster.Mediator.Commands.ValidateDockerRunParams;
 using Rooster.MongoDb.Connectors.Colections;
 using System;
 using System.Threading;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.MongoDb.Mediator.Commands.CreateLogEntry
 {
-    public sealed class MongoDbCreateLogEntryCommand : CreateLogEntryCommand
+    public sealed class MongoDbCreateLogEntryCommand : ValidateDockerRunParamsCommand
     {
         private static readonly Func<InsertOneOptions> GetInsertOneOptions = delegate
         {
@@ -22,9 +22,9 @@ namespace Rooster.MongoDb.Mediator.Commands.CreateLogEntry
             _collectionFactory = collectionFactory ?? throw new ArgumentNullException(nameof(collectionFactory));
         }
 
-        protected override async Task<Unit> CreateImplementation(CreateLogEntryRequest request, CancellationToken cancellation)
+        protected override async Task<Unit> CreateImplementation(ValidateDockerRunParamsRequest request, CancellationToken cancellation)
         {
-            var collection = await _collectionFactory.Get<CreateLogEntryRequest>(cancellation);
+            var collection = await _collectionFactory.Get<ValidateDockerRunParamsRequest>(cancellation);
 
             await collection.InsertOneAsync(request, GetInsertOneOptions(), cancellation);
 

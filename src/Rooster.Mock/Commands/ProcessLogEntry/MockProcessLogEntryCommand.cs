@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.Mock.Commands.ProcessLogEntry
 {
-    public class MockProcessLogEntryCommand : AsyncRequestHandler<ProcessLogEntryRequest>
+    public class MockProcessLogEntryCommand : AsyncRequestHandler<ShouldProcessDockerLogRequest>
     {
         private readonly IMockReporter _reporter;
         private readonly ILogger _logger;
@@ -19,7 +19,7 @@ namespace Rooster.Mock.Commands.ProcessLogEntry
             _logger = logger;
         }
 
-        protected override Task Handle(ProcessLogEntryRequest request, CancellationToken cancellationToken)
+        protected override Task Handle(ShouldProcessDockerLogRequest request, CancellationToken cancellationToken)
         {
             _logger.LogDebug("ProcessLogEntryRequest registered", Array.Empty<object>());
 
