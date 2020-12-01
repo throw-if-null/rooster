@@ -2,7 +2,7 @@
 
 namespace Rooster.AppInsights.Commands.HealthCheck
 {
-    public class AppInsightsHealthCheckRequest : HealthCheckRequest
+    public sealed record AppInsightsHealthCheckRequest : HealthCheckRequest
     {
     }
 }

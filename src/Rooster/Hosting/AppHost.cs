@@ -52,7 +52,8 @@ namespace Rooster.Hosting
                     CurrentDateVarianceInMinutes = _options.CurrentDateVarianceInMinutes,
                     PoolingIntervalInSeconds = _options.PoolingIntervalInSeconds,
                     UseInternalPoller = _options.UseInternalPoller
-                });
+                },
+                cancellationToken);
             }
 
             await Task.WhenAll(tasks);

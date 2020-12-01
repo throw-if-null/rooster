@@ -2,7 +2,7 @@
 
 namespace Rooster.MongoDb.Mediator.Commands.HealthCheck
 {
-    public class MongoDbHealthCheckRequest : HealthCheckRequest
+    public sealed record MongoDbHealthCheckRequest : HealthCheckRequest
     {
     }
 }

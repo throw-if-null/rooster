@@ -1,16 +1,16 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Microsoft.IO;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
-using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using System;
 using System.Text.Json;
 
 namespace Benchmarks.WritingJson
 {
     [MemoryDiagnoser, ThreadingDiagnoser]
-    public class WritingJsonBenchmarks
+    public static class WritingJsonBenchmarks
     {
-        private const string message = "New container deployment.";
+        private const string Message = "New container deployment.";
         private const string DateTitle = "Date";
         private const string ContainerNameTitle = "Container name";
         private const string PortsTitle = "Ports";
@@ -18,7 +18,7 @@ namespace Benchmarks.WritingJson
         private const string MarkdownInOption = "text";
         private const string ColorValue = "warning";
 
-        private static ShouldProcessDockerLogRequest request = new ShouldProcessDockerLogRequest
+        private static readonly ShouldProcessDockerLogRequest Request = new ShouldProcessDockerLogRequest
         {
             ExportedLogEntry = new ExtractDockerRunParamsResponse
             {
@@ -34,14 +34,14 @@ namespace Benchmarks.WritingJson
         };
 
         [Benchmark]
-        public string Execute()
+        public static string Execute()
         {
-            var fields = new object[4]
+            var attachmentFields = new object[4]
             {
-                new { title = DateTitle, value = $"`{request.ExportedLogEntry.EventDate}`" },
-                new { title = ContainerNameTitle, value = $"`{request.ExportedLogEntry.ContainerName}`"},
-                new { title = PortsTitle, value = $"`{request.ExportedLogEntry.InboundPort}` : `{request.ExportedLogEntry.OutboundPort}`"},
-                new { title = ImageTitle, value = $"`{request.ExportedLogEntry.ImageName}`: `{request.ExportedLogEntry.ImageTag}`" }
+                new { title = DateTitle, value = $"`{Request.ExportedLogEntry.EventDate}`" },
+                new { title = ContainerNameTitle, value = $"`{Request.ExportedLogEntry.ContainerName}`"},
+                new { title = PortsTitle, value = $"`{Request.ExportedLogEntry.InboundPort}` : `{Request.ExportedLogEntry.OutboundPort}`"},
+                new { title = ImageTitle, value = $"`{Request.ExportedLogEntry.ImageName}`: `{Request.ExportedLogEntry.ImageTag}`" }
             };
 
             var content =
@@ -53,9 +53,9 @@ namespace Benchmarks.WritingJson
                         {
                             mrkdwn_in = new object[1] { MarkdownInOption },
                             color = ColorValue,
-                            pretext = $"*Service:* {request.ExportedLogEntry.ServiceName}",
-                            text = $"_{message}_",
-                            fields = fields
+                            pretext = $"*Service:* {Request.ExportedLogEntry.ServiceName}",
+                            text = $"_{Message}_",
+                            fields = attachmentFields
                         },
                     }
                 };
@@ -81,12 +81,12 @@ namespace Benchmarks.WritingJson
         private static readonly JsonEncodedText imageTitleValue = JsonEncodedText.Encode(ImageTitle);
 
         [Benchmark]
-        public Memory<byte> Execute3()
+        public static Memory<byte> Execute3()
         {
             using var stream = _manager.GetStream();
             using var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { SkipValidation = true });
 
-            WriteJson(writer, request);
+            WriteJson(writer, Request);
 
             return stream.ToArray();
         }
@@ -103,7 +103,7 @@ namespace Benchmarks.WritingJson
 
             writer.WriteString(colorKey, colorValue);
             writer.WriteString(pretextKey, $"*Service:* {request.ExportedLogEntry.ServiceName}");
-            writer.WriteString(textKey, $"_{message}_");
+            writer.WriteString(textKey, $"_{Message}_");
 
             writer.WriteStartArray(fieldsKey); // start fields
 

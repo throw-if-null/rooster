@@ -12,7 +12,7 @@ using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.Mediator.Commands.ProcessAppLogSource;
-using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using Rooster.Mediator.Commands.StartKuduPoller;
 using Rooster.Mediator.Commands.ValidateDockerRunParams;
 
@@ -57,7 +57,7 @@ namespace Rooster.AppInsights.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddAppInsightsHealthCheck(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddAppInsightsHealthCheck(this IServiceCollection services)
         {
             services.AddTransient<IRequestHandler<AppInsightsHealthCheckRequest, HealthCheckResponse>, AppInsightsHealthCheckCommand>();
 

@@ -10,10 +10,7 @@ namespace Rooster.MongoDb.Mediator.Commands.CreateLogEntry
 {
     public sealed class MongoDbCreateLogEntryCommand : ValidateDockerRunParamsCommand
     {
-        private static readonly Func<InsertOneOptions> GetInsertOneOptions = delegate
-        {
-            return new InsertOneOptions();
-        };
+        private static readonly Lazy<InsertOneOptions> GetInsertOneOptions = new Lazy<InsertOneOptions>(() => new InsertOneOptions(), true);
 
         private readonly ILogEntryCollectionFactory _collectionFactory;
 
@@ -26,7 +23,7 @@ namespace Rooster.MongoDb.Mediator.Commands.CreateLogEntry
         {
             var collection = await _collectionFactory.Get<ValidateDockerRunParamsRequest>(cancellation);
 
-            await collection.InsertOneAsync(request, GetInsertOneOptions(), cancellation);
+            await collection.InsertOneAsync(request, GetInsertOneOptions.Value, cancellation);
 
             return Unit.Value;
         }

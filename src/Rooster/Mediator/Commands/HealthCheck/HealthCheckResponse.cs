@@ -1,11 +1,11 @@
 ﻿namespace Rooster.Mediator.Commands.HealthCheck
 {
-    public class HealthCheckResponse
+    public record HealthCheckResponse
     {
-        public string Name { get; set; }
+        public string Name { get; init; }
 
-        public string Message { get; set; }
+        public string Message { get; init; }
 
-        public bool IsHaelthy { get; set; }
+        public bool IsHaelthy { get; init; }
     }
 }

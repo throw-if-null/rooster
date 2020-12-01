@@ -2,7 +2,7 @@
 
 namespace Rooster.Slack.Commands.HealthCheck
 {
-    public class SlackHealthCheckRequest : HealthCheckRequest
+    public sealed record SlackHealthCheckRequest : HealthCheckRequest
     {
     }
 }

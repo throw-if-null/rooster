@@ -19,14 +19,14 @@ namespace Rooster.MongoDb.Connectors.Colections
 
         public CollectionFactory(IOptions<TOptions> options, IDatabaseFactory databaseFactory)
         {
-            _options = options.Value ?? throw new ArgumentNullException(nameof(options));
-            _databaseFactory = databaseFactory ?? throw new ArgumentNullException(nameof(databaseFactory));
+            _options = options.Value;
+            _databaseFactory = databaseFactory;
         }
 
         public async Task<IMongoCollection<T>> Get<T>(CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(_options.Name))
-                throw new ArgumentNullException("CollectionName not configured.");
+                throw new ArgumentException("CollectionName not configured.");
 
             var database = await _databaseFactory.Get(cancellationToken).ConfigureAwait(false);
             IMongoCollection<T> collection = database.GetCollection<T>(_options.Name);

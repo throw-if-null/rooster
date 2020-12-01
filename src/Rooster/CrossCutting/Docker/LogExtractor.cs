@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace Rooster.CrossCutting.Docker
 {
@@ -27,7 +28,7 @@ namespace Rooster.CrossCutting.Docker
             var nameIndex = span.IndexOf(nameSpan) + nameSpan.Length;
             var eIndex = span.IndexOf(" -e".AsSpan());
 
-            var containerName = span.Slice(nameIndex, eIndex - nameIndex);
+            var containerName = span[nameIndex..eIndex];
 
             return containerName;
         }
@@ -39,23 +40,30 @@ namespace Rooster.CrossCutting.Docker
 
             var date = span.Slice(0, infoIndex);
 
-            return DateTimeOffset.Parse(date);
+            return DateTimeOffset.Parse(date, null, DateTimeStyles.AssumeUniversal);
         }
 
         private static ReadOnlySpan<char> ExtractFullImageName(ReadOnlySpan<char> span)
         {
             var imageNameSpan = "DOCKER_CUSTOM_IMAGE_NAME=".AsSpan();
             var imageNameIndex = span.IndexOf(imageNameSpan) + imageNameSpan.Length;
-            var eIndex = span.Slice(imageNameIndex).IndexOf(" -e".AsSpan()) + imageNameIndex;
+            var eIndex = span[imageNameIndex..].IndexOf(" -e".AsSpan()) + imageNameIndex;
 
-            var fullImageName = span.Slice(imageNameIndex, eIndex - imageNameIndex);
+            var fullImageName = span[imageNameIndex..eIndex];
 
             return fullImageName;
         }
 
         private static ReadOnlySpan<char> ExtractImageName(ReadOnlySpan<char> fullImageName)
         {
+            if (fullImageName.IsEmpty)
+                return ReadOnlySpan<char>.Empty;
+
             var columnIndex = fullImageName.IndexOf(':');
+
+            if (columnIndex == -1)
+                return fullImageName;
+
             var name = fullImageName.Slice(0, columnIndex);
 
             return name;
@@ -63,8 +71,15 @@ namespace Rooster.CrossCutting.Docker
 
         private static ReadOnlySpan<char> ExtractImageTag(ReadOnlySpan<char> fullImageName)
         {
+            if (fullImageName.IsEmpty)
+                return ReadOnlySpan<char>.Empty;
+
             var columnIndex = fullImageName.IndexOf(':');
-            var tag = fullImageName.Slice(columnIndex + 1);
+
+            if (columnIndex == -1)
+                return ReadOnlySpan<char>.Empty;
+
+            var tag = fullImageName[(columnIndex + 1)..];
 
             return tag;
         }
@@ -75,12 +90,16 @@ namespace Rooster.CrossCutting.Docker
             var dashSpan = "-".AsSpan();
 
             var portsIndex = span.IndexOf(portsSpan) + portsSpan.Length;
-            var dashIndex = span.Slice(portsIndex).IndexOf(dashSpan) + portsIndex;
+            var dashIndex = span[portsIndex..].IndexOf(dashSpan) + portsIndex;
 
-            var ports = span.Slice(portsIndex, dashIndex - portsIndex);
+            var ports = span[portsIndex..dashIndex];
             var columnIndex = ports.IndexOf(':');
-            var inbound = int.Parse(ports.Slice(0, columnIndex));
-            var outbound = int.Parse(ports.Slice(columnIndex + 1));
+
+            if (!int.TryParse(ports.Slice(0, columnIndex), out var inbound))
+                inbound = -1;
+
+            if (!int.TryParse(ports[(columnIndex + 1)..], out var outbound))
+                outbound = -1;
 
             return (inbound, outbound);
         }
@@ -89,9 +108,9 @@ namespace Rooster.CrossCutting.Docker
         {
             var serviceNameSpan = "WEBSITE_SITE_NAME=".AsSpan();
             var serviceNameIndex = span.IndexOf(serviceNameSpan) + serviceNameSpan.Length;
-            var eIndex = span.Slice(serviceNameIndex).IndexOf(" -e".AsSpan()) + serviceNameIndex;
+            var eIndex = span[serviceNameIndex..].IndexOf(" -e".AsSpan()) + serviceNameIndex;
 
-            var serviceName = span.Slice(serviceNameIndex, eIndex - serviceNameIndex);
+            var serviceName = span[serviceNameIndex..eIndex];
 
             return serviceName;
         }

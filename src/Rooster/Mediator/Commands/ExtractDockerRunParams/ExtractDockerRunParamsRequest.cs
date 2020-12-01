@@ -2,8 +2,8 @@
 
 namespace Rooster.Mediator.Commands.ExtractDockerRunParams
 {
-    public class ExtractDockerRunParamsRequest : IRequest<ExtractDockerRunParamsResponse>
+    public record ExtractDockerRunParamsRequest : IRequest<ExtractDockerRunParamsResponse>
     {
-        public string LogLine { get; set; }
+        public string LogLine { get; init; }
     }
 }

@@ -53,14 +53,14 @@ namespace Rooster.Mediator.Commands.StartKuduPoller
                 };
             }
 
-
             if (!request.UseInternalPoller)
                 return;
 
-            await Task.Delay(TimeSpan.FromSeconds(request.PoolingIntervalInSeconds));
+            await Task.Delay(TimeSpan.FromSeconds(request.PoolingIntervalInSeconds), cancellationToken);
 
-            request.Containers = response.Containers;
-            await _mediator.Send(request, cancellationToken);
+            var newRequest = request with { Containers = response.Containers };
+
+            await _mediator.Send(newRequest, cancellationToken);
         }
     }
 }

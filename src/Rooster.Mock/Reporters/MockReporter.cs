@@ -1,4 +1,4 @@
-﻿using Rooster.Mediator.Commands.ProcessLogEntry;
+﻿using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using System;
 using System.Collections.Concurrent;
 

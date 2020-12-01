@@ -6,7 +6,7 @@ using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.Mediator.Commands.ProcessAppLogSource;
-using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using Rooster.Mediator.Commands.StartKuduPoller;
 using Rooster.Mediator.Commands.ValidateDockerRunParams;
 using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;

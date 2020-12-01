@@ -34,10 +34,10 @@ namespace Rooster.HealthCheck
             {
                 var response = engine.Trim().ToUpperInvariant() switch
                 {
-                    Engines.MongoDb => await _mediator.Send(new MongoDbHealthCheckRequest()),
-                    Engines.SqlServer => await _mediator.Send(new SqlServerHealthCheckRequest()),
-                    Engines.Slack => await _mediator.Send(new SlackHealthCheckRequest()),
-                    Engines.AppInsights => await _mediator.Send(new AppInsightsHealthCheckRequest()),
+                    Engines.MongoDb => await _mediator.Send(new MongoDbHealthCheckRequest(), cancellationToken),
+                    Engines.SqlServer => await _mediator.Send(new SqlServerHealthCheckRequest(), cancellationToken),
+                    Engines.Slack => await _mediator.Send(new SlackHealthCheckRequest(), cancellationToken),
+                    Engines.AppInsights => await _mediator.Send(new AppInsightsHealthCheckRequest(), cancellationToken),
                     Engines.Mock => new HealthCheckResponse { Name = Engines.Mock, IsHaelthy = true },
                     _ => new HealthCheckResponse { Name = "NONE", IsHaelthy = false }
                 };

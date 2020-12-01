@@ -4,16 +4,16 @@ using System.Collections.Concurrent;
 
 namespace Rooster.Mediator.Commands.StartKuduPoller
 {
-    public class StartKuduPollerRequest : IRequest
+    public record StartKuduPollerRequest : IRequest
     {
-        public IKuduApiAdapter KuduAdapter { get; set; }
+        public IKuduApiAdapter KuduAdapter { get; init; }
 
-        public ConcurrentDictionary<string, long> Containers { get; set; }
+        public ConcurrentDictionary<string, long> Containers { get; init; }
 
-        public double CurrentDateVarianceInMinutes { get; set; }
+        public double CurrentDateVarianceInMinutes { get; init; }
 
-        public bool UseInternalPoller { get; internal set; }
+        public bool UseInternalPoller { get; init; }
 
-        public double PoolingIntervalInSeconds { get; internal set; }
+        public double PoolingIntervalInSeconds { get; init; }
     }
 }

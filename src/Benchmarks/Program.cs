@@ -1,12 +1,10 @@
 ﻿using BenchmarkDotNet.Running;
-using Benchmarks.WebHookReporter;
-using System.Threading.Tasks;
 
 namespace Benchmarks
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
             BenchmarkRunner.Run<KuduApiAdapter.KuduApiAdapterBenchmarks>();
         }

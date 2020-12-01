@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
-using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using Rooster.Mock.Reporters;
 using System;
 using System.Threading;

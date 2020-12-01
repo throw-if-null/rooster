@@ -24,25 +24,25 @@ namespace Rooster.Mediator.Commands.ValidateDockerRunParams
             return CreateImplementation(request, cancellationToken);
         }
 
-        private static void Validate(ValidateDockerRunParamsRequest request)
+        private static ValidateDockerRunParamsRequest Validate(ValidateDockerRunParamsRequest request)
         {
             _ = request ?? throw new ArgumentNullException(nameof(request));
 
-            request.ServiceName = CheckStringAndTrim(nameof(request.ServiceName), request.ServiceName);
-            request.ContainerName = CheckStringAndTrim(nameof(request.ContainerName), request.ContainerName);
-            request.ImageName = CheckStringAndTrim(nameof(request.ImageName), request.ImageName);
-            request.ImageTag = CheckStringAndTrim(nameof(request.ImageTag), request.ImageTag);
             CheckInt(nameof(request.InboundPort), request.InboundPort);
             CheckInt(nameof(request.OutboundPort), request.OutboundPort);
             CheckDate(nameof(request.EventDate), request.EventDate);
-        }
+            CheckString(nameof(request.ServiceName), request.ServiceName);
+            CheckString(nameof(request.ContainerName), request.ContainerName);
+            CheckString(nameof(request.ImageName), request.ImageName);
+            CheckString(nameof(request.ImageTag), request.ImageTag);
 
-        static string CheckStringAndTrim(string name, string value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                ThrowArgumentException(name, value == null ? Null : Empty);
-
-            return value.Trim().ToLowerInvariant();
+            return request with
+            {
+                ServiceName = request.ServiceName.Trim().ToLowerInvariant(),
+                ContainerName = request.ContainerName.Trim().ToLowerInvariant(),
+                ImageName = request.ImageName.Trim().ToLowerInvariant(),
+                ImageTag = request.ImageTag.Trim().ToLowerInvariant()
+            };
         }
 
         static void CheckInt(string name, string value)
@@ -59,6 +59,14 @@ namespace Rooster.Mediator.Commands.ValidateDockerRunParams
                 return;
 
             ThrowArgumentException(name, date.ToString());
+        }
+
+        static void CheckString(string name, string value)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+                return;
+
+            ThrowArgumentException(name, value == null ? Null : Empty);
         }
     }
 }

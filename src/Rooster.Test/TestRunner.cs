@@ -11,7 +11,7 @@ using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.ProcessAppLogSource;
-using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using Rooster.Mediator.Commands.ValidateDockerRunParams;
 using Rooster.Mock;
 using Rooster.Mock.Commands.ProcessLogEntry;

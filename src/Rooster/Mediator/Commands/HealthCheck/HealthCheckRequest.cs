@@ -2,7 +2,7 @@
 
 namespace Rooster.Mediator.Commands.HealthCheck
 {
-    public abstract class HealthCheckRequest : IRequest<HealthCheckResponse>
+    public abstract record HealthCheckRequest : IRequest<HealthCheckResponse>
     {
     }
 }

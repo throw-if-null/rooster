@@ -2,7 +2,7 @@
 
 namespace Rooster.SqlServer.Mediator.Commands.HealthCheck
 {
-    public class SqlServerHealthCheckRequest : HealthCheckRequest
+    public sealed record SqlServerHealthCheckRequest : HealthCheckRequest
     {
     }
 }

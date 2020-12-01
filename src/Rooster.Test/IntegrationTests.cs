@@ -2,7 +2,7 @@
 using Moq;
 using Rooster.Adapters.Kudu;
 using Rooster.DependencyInjection.Exceptions;
-using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -55,13 +55,13 @@ namespace Rooster.Test
             static async IAsyncEnumerable<string> GetValue()
             {
                 await Task.CompletedTask;
-                yield return TestValuesBuilder.BuildDockerLogLine("testContainer", "test:develop", "test-service", "test-service.azurewebsites.com");
+                yield return DockerRunParamsBuilder.BuildDockerLogLine("testContainer", "test:develop", "test-service", "test-service.azurewebsites.com", inboundPort: 42.ToString(), outboundPort: 42.ToString());
 
                 await Task.CompletedTask;
-                yield return TestValuesBuilder.BuildDockerLogLine("testContainer_msiProxy", "test:develop", "test-service", "test-service.azurewebsites.com");
+                yield return DockerRunParamsBuilder.BuildDockerLogLine("testContainer_msiProxy", "test:develop", "test-service", "test-service.azurewebsites.com", inboundPort: 42.ToString(), outboundPort: 42.ToString());
 
                 await Task.CompletedTask;
-                yield return TestValuesBuilder.BuildDockerLogLine("testContainer-2_msiProxy", "test-2:develop", "test-2-service", "test-2-service.azurewebsites.com");
+                yield return DockerRunParamsBuilder.BuildDockerLogLine("testContainer-2_msiProxy", "test-2:develop", "test-2-service", "test-2-service.azurewebsites.com", inboundPort: 42.ToString(), outboundPort: 42.ToString());
             }
         }
 
@@ -122,7 +122,7 @@ namespace Rooster.Test
             static async IAsyncEnumerable<string> GetValue()
             {
                 await Task.CompletedTask;
-                yield return TestValuesBuilder.BuildDockerLogLine("testContainer", "test:develop", "test-service", "test-service.azurewebsites.com");
+                yield return DockerRunParamsBuilder.BuildDockerLogLine("testContainer", "test:develop", "test-service", "test-service.azurewebsites.com", inboundPort: 42.ToString(), outboundPort: 42.ToString());
             }
         }
     }

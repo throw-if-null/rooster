@@ -2,22 +2,22 @@
 
 namespace Rooster.Mediator.Commands.ExtractDockerRunParams
 {
-    public class ExtractDockerRunParamsResponse
+    public record ExtractDockerRunParamsResponse
     {
-        public string ServiceName { get; set; }
+        public string ServiceName { get; init; }
 
-        public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset Created { get; init; } = DateTimeOffset.UtcNow;
 
-        public string ImageName { get; set; }
+        public string ImageName { get; init; }
 
-        public string ImageTag { get; set; }
+        public string ImageTag { get; init; }
 
-        public string ContainerName { get; set; }
+        public string ContainerName { get; init; }
 
-        public string InboundPort { get; set; }
+        public string InboundPort { get; init; }
 
-        public string OutboundPort { get; set; }
+        public string OutboundPort { get; init; }
 
-        public DateTimeOffset EventDate { get; set; }
+        public DateTimeOffset EventDate { get; init; }
     }
 }

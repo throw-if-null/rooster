@@ -54,17 +54,13 @@ namespace Rooster.SqlServer.Mediator.Commands.HealthCheck
 
         private static async Task<int> Execute(IConnectionFactory factory, string query, CancellationToken cancellationToken)
         {
-            using (var connection = factory.CreateConnection())
-            {
-                await connection.OpenAsync(cancellationToken);
+            using var connection = factory.CreateConnection();
+            await connection.OpenAsync(cancellationToken);
 
-                using (var command = connection.CreateCommand())
-                {
-                    command.CommandText = query;
+            using var command = connection.CreateCommand();
+            command.CommandText = query;
 
-                    return await command.ExecuteNonQueryAsync(cancellationToken);
-                }
-            }
+            return await command.ExecuteNonQueryAsync(cancellationToken);
         }
     }
 }

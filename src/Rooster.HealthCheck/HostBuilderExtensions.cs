@@ -63,7 +63,7 @@ namespace Rooster.HealthCheck
                             typeof(SqlServerHealthCheckRequest)
                         });
 
-                        services.AddAppInsightsHealthCheck(ctx.Configuration);
+                        services.AddAppInsightsHealthCheck();
                         services.AddMongoDbHealthCheck(ctx.Configuration);
                         services.AddSlackHealthCheck(ctx.Configuration);
                         services.AddSqlServerHealthCheck(ctx.Configuration);

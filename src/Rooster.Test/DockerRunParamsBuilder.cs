@@ -2,7 +2,7 @@
 
 namespace Rooster.Test
 {
-    internal static class TestValuesBuilder
+    internal static class DockerRunParamsBuilder
     {
         private static readonly Random RandomGenerator = new Random();
 
@@ -12,17 +12,17 @@ namespace Rooster.Test
             string serviceName,
             string hostName,
             DateTimeOffset? logDate = null,
-            int inboundPort = 0,
-            int outboundPort = 0)
+            string inboundPort = null,
+            string outboundPort = null)
         {
             logDate = logDate ?? DateTimeOffset.UtcNow;
 
             var logLine =
-                $"{logDate} INFO  - docker run -d " +
+                $"{logDate.Value.ToString("O")} INFO  - docker run -d " +
                 $"{GeneratePorts(inboundPort, outboundPort)} " +
                 $"{GenerateName(containerName)} " +
                 $"{GenerateImageName(imageNameWithTag)} " +
-                $"{GenerateWebSiteName(serviceName)}" +
+                $"{GenerateWebSiteName(serviceName)} " +
                 "-e WEBSITE_AUTH_ENABLED=False " +
                 "-e WEBSITE_ROLE_INSTANCE_ID=0 " +
                 $"{GenerateHostName(hostName)}" +
@@ -33,11 +33,8 @@ namespace Rooster.Test
             return logLine;
         }
 
-        private static string GeneratePorts(int inboundPort = 0, int outboundPort = 0)
+        private static string GeneratePorts(string inboundPort, string outboundPort)
         {
-            inboundPort = inboundPort == 0 ? RandomGenerator.Next() : inboundPort;
-            outboundPort = outboundPort == 0 ? RandomGenerator.Next() : outboundPort;
-
             return $"-p {inboundPort}:{outboundPort}";
         }
 

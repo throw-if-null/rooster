@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.IO;
-using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using Rooster.Slack.Reporting;
 using System.Text.Json;
 using System.Threading;
@@ -10,7 +10,7 @@ namespace Rooster.Slack.Commands.LogEntryCommand
 {
     public class SlackProcessLogEntryCommand : AsyncRequestHandler<ShouldProcessDockerLogRequest>
     {
-        private const string message = "New container deployment.";
+        private const string Message = "New container deployment.";
         private const string DateTitle = "Date";
         private const string ContainerNameTitle = "Container name";
         private const string PortsTitle = "Ports";
@@ -29,7 +29,7 @@ namespace Rooster.Slack.Commands.LogEntryCommand
 
         protected override async Task Handle(ShouldProcessDockerLogRequest request, CancellationToken cancellationToken)
         {
-            var fields = new object[4]
+            var attachmentFields = new object[4]
             {
                 new { title = DateTitle, value = $"`{request.ExportedLogEntry.EventDate}`" },
                 new { title = ContainerNameTitle, value = $"`{request.ExportedLogEntry.ContainerName}`"},
@@ -47,8 +47,8 @@ namespace Rooster.Slack.Commands.LogEntryCommand
                             mrkdwn_in = new object[1] { MarkdownInOption },
                             color = ColorValue,
                             pretext = $"*Service:* {request.ExportedLogEntry.ServiceName}",
-                            text = $"_{message}_",
-                            fields = fields
+                            text = $"_{Message}_",
+                            fields = attachmentFields
                         },
                     }
                 };

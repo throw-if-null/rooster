@@ -46,7 +46,7 @@ namespace Rooster.Slack.Commands.HealthCheck
 
             try
             {
-                await
+                _ = await
                     _retryProvider.RetryOn<HttpRequestException, HttpResponseMessage>(
                         x =>
                         {
@@ -61,7 +61,7 @@ namespace Rooster.Slack.Commands.HealthCheck
                             return false;
                         },
                         x => TransientHttpStatusCodePredicate(x),
-                        () => Send(_client, linkedSource.Token));
+                        () => Send(linkedSource.Token));
 
                 return Healthy(Engines.Slack);
             }
@@ -73,7 +73,7 @@ namespace Rooster.Slack.Commands.HealthCheck
             }
         }
 
-        private async Task<HttpResponseMessage> Send(HttpClient client, CancellationToken cancellation)
+        private async Task<HttpResponseMessage> Send(CancellationToken cancellation)
         {
             var request = new HttpRequestMessage
             {
@@ -84,14 +84,14 @@ namespace Rooster.Slack.Commands.HealthCheck
             if (_options.Authorization != null)
                 request.Headers.Authorization = new AuthenticationHeaderValue(_options.Authorization.Scheme, _options.Authorization.Parameter);
 
-            client.Timeout = TimeSpan.FromMilliseconds(_options.TimeoutInMs);
+            _client.Timeout = TimeSpan.FromMilliseconds(_options.TimeoutInMs);
 
             foreach (var header in _options.Headers)
             {
                 request.Headers.Add(header.Name, header.Value);
             }
 
-            var response = await client.SendAsync(request, cancellation);
+            var response = await _client.SendAsync(request, cancellation);
 
             if (response.StatusCode >= HttpStatusCode.InternalServerError)
                 throw new HttpRequestException(response.ReasonPhrase) { Data = { [nameof(HttpStatusCode)] = response.StatusCode } };

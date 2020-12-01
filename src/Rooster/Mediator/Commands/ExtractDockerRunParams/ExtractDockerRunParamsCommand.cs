@@ -23,18 +23,17 @@ namespace Rooster.Mediator.Commands.ExtractDockerRunParams
 
             var metadata = LogExtractor.Extract(request.LogLine);
 
-            var logEntry = new ExtractDockerRunParamsResponse
-            {
-                ServiceName = metadata.ServiceName.ToString(),
-                ContainerName = metadata.ContainerName.ToString(),
-                ImageName = metadata.ImageName.ToString(),
-                ImageTag = metadata.ImageTag.ToString(),
-                InboundPort = metadata.InboundPort.ToString(),
-                OutboundPort = metadata.OutboundPort.ToString(),
-                EventDate = metadata.Date
-            };
-
-            return Task.FromResult(logEntry);
+            return Task.FromResult(
+                new ExtractDockerRunParamsResponse
+                {
+                    ServiceName = metadata.ServiceName.ToString(),
+                    ContainerName = metadata.ContainerName.ToString(),
+                    ImageName = metadata.ImageName.ToString(),
+                    ImageTag = metadata.ImageTag.ToString(),
+                    InboundPort = metadata.InboundPort.ToString(),
+                    OutboundPort = metadata.OutboundPort.ToString(),
+                    EventDate = metadata.Date
+                });
         }
     }
 }

@@ -28,7 +28,7 @@ namespace Rooster.Adapters.Kudu
         private const string KuduLogPath = "api/logs/docker";
         private const string LogUrlLogMessage = "Log URL: {0}{1}";
 
-        private static Lazy<JsonSerializerOptions> JsonSerializerOptionInstance =
+        private static readonly Lazy<JsonSerializerOptions> _jsonSerializerOptionInstance =
             new Lazy<JsonSerializerOptions>(
                 () => new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
                 true);
@@ -53,11 +53,11 @@ namespace Rooster.Adapters.Kudu
 
             response.EnsureSuccessStatusCode();
 
-            using var stream = await response.Content.ReadAsStreamAsync();
+            using var stream = await response.Content.ReadAsStreamAsync(cancellation);
 
             var logs = await JsonSerializer.DeserializeAsync<KuduLog[]>(
                 stream,
-                JsonSerializerOptionInstance.Value,
+                _jsonSerializerOptionInstance.Value,
                 cancellation);
 
             var values = logs.Where(

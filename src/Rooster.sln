@@ -32,7 +32,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rooster.Mock", "Rooster.Moc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rooster.HealthCheck", "Rooster.HealthCheck\Rooster.HealthCheck.csproj", "{C2009A94-77F3-42F8-9C38-0FE8A0136810}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{9757EA18-9D67-40C7-8FE5-EE6C556F225A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{9757EA18-9D67-40C7-8FE5-EE6C556F225A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

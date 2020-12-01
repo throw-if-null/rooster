@@ -13,10 +13,11 @@ namespace Benchmarks.KuduApiAdapter
 {
     public class KuduApiAdapterOld
     {
-        private static Func<JsonSerializerOptions> GetJsonSerializerOptions = delegate ()
-        {
-            return new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        };
+        private static readonly Lazy<JsonSerializerOptions> GetJsonSerializerOptions =
+            new Lazy<JsonSerializerOptions> (() => new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
 
         private const string InitStringValue = "init";
         private const string Docker = "docker";
@@ -43,11 +44,11 @@ namespace Benchmarks.KuduApiAdapter
 
             response.EnsureSuccessStatusCode();
 
-            using var stream = await response.Content.ReadAsStreamAsync();
+            using var stream = await response.Content.ReadAsStreamAsync(cancellation);
 
             var logs = await JsonSerializer.DeserializeAsync<KuduLog[]>(
                 stream,
-                GetJsonSerializerOptions(),
+                GetJsonSerializerOptions.Value,
                 cancellation);
 
             var values = logs.Where(

@@ -4,9 +4,8 @@ using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Mediator.Commands.ProcessLogEntry
+namespace Rooster.Mediator.Commands.ShouldProcessDockerLog
 {
-    // TODO: This needs to return a response
     public class ShouldProcessDockerLogCommand : AsyncRequestHandler<ShouldProcessDockerLogRequest>
     {
         private readonly IMediator _mediator;

@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
-using Rooster.Mediator.Commands.ProcessLogEntry;
+using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using System;
 using System.Linq;
 using System.Threading;
@@ -45,18 +45,18 @@ namespace Rooster.Mediator.Commands.ProcessAppLogSource
 
                 await foreach (var line in lines)
                 {
-                    var exportedLogEntry = await _mediator.Send(new ExtractDockerRunParamsRequest { LogLine = line }, cancellationToken);
+                    ExtractDockerRunParamsResponse extractedParams = await _mediator.Send(new ExtractDockerRunParamsRequest { LogLine = line }, cancellationToken);
 
-                    if (exportedLogEntry.ContainerName.EndsWith(ContinerProxySufix, StringComparison.InvariantCultureIgnoreCase))
+                    if (extractedParams.ContainerName.EndsWith(ContinerProxySufix, StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
-                    if (request.Containers.ContainsKey(exportedLogEntry.ContainerName) &&
-                        request.Containers[exportedLogEntry.ContainerName] <= exportedLogEntry.EventDate.Ticks)
+                    if (request.Containers.ContainsKey(extractedParams.ContainerName) &&
+                        request.Containers[extractedParams.ContainerName] <= extractedParams.EventDate.Ticks)
                         continue;
 
-                    await _mediator.Send(new ShouldProcessDockerLogRequest { ExportedLogEntry = exportedLogEntry }, cancellationToken);
+                    await _mediator.Send(new ShouldProcessDockerLogRequest { ExportedLogEntry = extractedParams }, cancellationToken);
 
-                    request.Containers[exportedLogEntry.ContainerName] = exportedLogEntry.EventDate.Ticks;
+                    request.Containers[extractedParams.ContainerName] = extractedParams.EventDate.Ticks;
                 }
 
                 _logger.LogDebug(LogExtractionFinished, logUri);

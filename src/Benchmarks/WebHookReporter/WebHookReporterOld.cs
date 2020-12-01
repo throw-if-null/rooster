@@ -57,7 +57,7 @@ namespace Benchmarks.WebHookReporter
             {
                 var serializedContent = JsonSerializer.Serialize(payload);
 
-                await
+                _ = await
                     _retryProvider.RetryOn<HttpRequestException, HttpResponseMessage>(
                         CheckError,
                         TransientHttpStatusCodePredicate,
