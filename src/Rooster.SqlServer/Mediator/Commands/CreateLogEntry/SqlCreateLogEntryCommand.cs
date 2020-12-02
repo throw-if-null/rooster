@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using MediatR;
-using Rooster.Mediator.Commands.ValidateDockerRunParams;
+using Rooster.Mediator.Commands.SendDockerRunParams;
 using Rooster.SqlServer.Connectors;
 using Rooster.SqlServer.Schema;
 using System;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.SqlServer.Mediator.Commands.CreateLogEntry
 {
-    public sealed class SqlCreateLogEntryCommand : ValidateDockerRunParamsCommand
+    public sealed class SqlCreateLogEntryCommand : SendDockerRunParamsCommand
     {
         private static readonly string TableName = "LogEntry";
 
@@ -52,7 +52,7 @@ namespace Rooster.SqlServer.Mediator.Commands.CreateLogEntry
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        protected override async Task<Unit> CreateImplementation(ValidateDockerRunParamsRequest request, CancellationToken cancellation)
+        protected override async Task<Unit> CreateImplementation(SendDockerRunParamsRequest request, CancellationToken cancellation)
         {
             await using var connection = _connectionFactory.CreateConnection();
 

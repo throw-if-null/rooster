@@ -11,8 +11,10 @@ using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
+using Rooster.Mediator.Commands.ProcessLogSource;
+using Rooster.Mediator.Commands.SendDockerRunParams;
 using Rooster.Mediator.Commands.ShouldProcessDockerLog;
-using Rooster.Mediator.Commands.ValidateDockerRunParams;
+using Rooster.Mediator.Commands.ValidateExportedRunParams;
 using Rooster.Mock;
 using Rooster.Mock.Commands.ProcessLogEntry;
 using Rooster.Mock.Reporters;
@@ -40,7 +42,7 @@ namespace Rooster.Test
                     .AddJsonFile(appsettings, optional: false, true)
                     .Build();
 
-            var hosts = new List<IHost> ();
+            var hosts = new List<IHost>();
 
             var engines = configuration.GetSection($"{nameof(AppHostOptions)}:{nameof(Engines)}").Get<Collection<string>>();
 
@@ -88,15 +90,19 @@ namespace Rooster.Test
 
                     services.AddMediatR(new[]
                     {
-                            typeof(ShouldProcessDockerLogRequest),
-                            typeof(ExtractDockerRunParamsRequest),
-                            typeof(ProcessAppLogSourcesRequest),
-                            typeof(ValidateDockerRunParamsRequest)
-                        });
+                        typeof(ShouldProcessDockerLogRequest),
+                        typeof(ExtractDockerRunParamsRequest),
+                        typeof(ProcessAppLogSourcesRequest),
+                        typeof(ProcessLogSourceRequest),
+                        typeof(SendDockerRunParamsRequest),
+                        typeof(ValidateExportedRunParamsRequest)
+                    });
 
                     services.AddTransient<IRequestHandler<ShouldProcessDockerLogRequest, Unit>, MockProcessLogEntryCommand>();
                     services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
                     services.AddTransient<IRequestHandler<ProcessAppLogSourcesRequest, Unit>, ProcessAppLogSourcesCommand>();
+                    services.AddTransient<IRequestHandler<ProcessLogSourceRequest, Unit>, ProcessLogSourceCommand>();
+                    services.AddTransient<IRequestHandler<ValidateExportedRunParamsRequest, ValidateExportedRunParamsResponse>, ValidateExportedRunParamsCommand>();
 
                     services.AddHostedService<MockHost>();
                 })
@@ -120,7 +126,6 @@ namespace Rooster.Test
 
             return builder.Build();
         }
-
 
         private static IServiceCollection AddRooster(this IServiceCollection services, IConfiguration configuration)
         {

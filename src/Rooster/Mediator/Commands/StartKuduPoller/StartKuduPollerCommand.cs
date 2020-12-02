@@ -32,7 +32,7 @@ namespace Rooster.Mediator.Commands.StartKuduPoller
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "{Command} failed.", nameof(ProcessAppLogSourcesCommand));
+                _logger.LogWarning(ex, "{Command} failed.", nameof(StartKuduPollerCommand));
             }
 
             if (!request.UseInternalPoller)

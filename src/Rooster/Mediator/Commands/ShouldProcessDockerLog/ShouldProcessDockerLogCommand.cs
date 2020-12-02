@@ -1,5 +1,6 @@
 ﻿using MediatR;
-using Rooster.Mediator.Commands.ValidateDockerRunParams;
+using Rooster.Mediator.Commands.SendDockerRunParams;
+using Rooster.Mediator.Commands.ValidateExportedRunParams;
 using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,8 +18,12 @@ namespace Rooster.Mediator.Commands.ShouldProcessDockerLog
 
         protected override async Task Handle(ShouldProcessDockerLogRequest request, CancellationToken cancellationToken)
         {
-            ValidateDockerRunParamsRequest validateDockerRunParamsRequest = request.ExportedLogEntry;
-            await _mediator.Send(validateDockerRunParamsRequest, cancellationToken);
+            ValidateExportedRunParamsRequest validateExportedRunParamsRequest = request.ExportedLogEntry;
+            ValidateExportedRunParamsResponse validateExportedRunParamsResponse =
+                await _mediator.Send(validateExportedRunParamsRequest);
+
+            if (!validateExportedRunParamsResponse.IsValid)
+                return;
 
             var latestLogEntry =
                 await
@@ -32,6 +37,9 @@ namespace Rooster.Mediator.Commands.ShouldProcessDockerLog
 
             if (request.ExportedLogEntry.EventDate <= latestLogEntry)
                 return;
+
+            SendDockerRunParamsRequest sendDockerRunParamsRequest = request.ExportedLogEntry;
+            await _mediator.Send(sendDockerRunParamsRequest, cancellationToken);
         }
     }
 }
