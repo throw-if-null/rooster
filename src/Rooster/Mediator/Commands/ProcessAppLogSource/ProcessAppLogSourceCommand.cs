@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.Mediator.Commands.ProcessAppLogSource
 {
-    public class ProcessAppLogSourceCommand : IRequestHandler<ProcessAppLogSourceRequest, ProcessAppLogSourceResponse>
+    public class ProcessAppLogSourceCommand : AsyncRequestHandler<ProcessAppLogSourceRequest>
     {
         private const string ContinerProxySufix = "_msiproxy";
         private const string LogIsOldMessage = "Log: {0} is old. Last updated: {1}. Machine: {2}";
@@ -24,13 +24,19 @@ namespace Rooster.Mediator.Commands.ProcessAppLogSource
             _mediator = mediator;
         }
 
-        public async Task<ProcessAppLogSourceResponse> Handle(ProcessAppLogSourceRequest request, CancellationToken cancellationToken)
+        protected override async Task Handle(ProcessAppLogSourceRequest request, CancellationToken cancellationToken)
         {
             var kuduLogs = await request.Kudu.GetDockerLogs(cancellationToken);
-            var logs = kuduLogs.Where(x => x.LastUpdated.Date != DateTimeOffset.UtcNow.Date).OrderByDescending(x => x.LastUpdated);
+            var logs = kuduLogs.Where(x => x.LastUpdated.Date == DateTimeOffset.UtcNow.Date);
 
-            // TODO: Group logs by MachineName, take first and process them in parallel
-            foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in logs)
+            var logsPerMachine = logs
+                .GroupBy(x => x.MachineName)
+                .Select(x => x.OrderByDescending(x => x.LastUpdated).First())
+                .ToList();
+
+            // TODO: Run in parallel
+
+            foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in logsPerMachine)
             {
                 var lastUpdatedEx = lastUpdated.AddMinutes(request.CurrentDateVarianceInMinutes);
 
@@ -50,19 +56,11 @@ namespace Rooster.Mediator.Commands.ProcessAppLogSource
                     if (extractedParams.ContainerName.EndsWith(ContinerProxySufix, StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
-                    if (request.Containers.ContainsKey(extractedParams.ContainerName) &&
-                        request.Containers[extractedParams.ContainerName] <= extractedParams.EventDate.Ticks)
-                        continue;
-
                     await _mediator.Send(new ShouldProcessDockerLogRequest { ExportedLogEntry = extractedParams }, cancellationToken);
-
-                    request.Containers[extractedParams.ContainerName] = extractedParams.EventDate.Ticks;
                 }
 
                 _logger.LogDebug(LogExtractionFinished, logUri);
             }
-
-            return new ProcessAppLogSourceResponse { Containers = request.Containers };
         }
     }
 }

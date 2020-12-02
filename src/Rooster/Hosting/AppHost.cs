@@ -5,7 +5,6 @@ using Microsoft.Extensions.Options;
 using Rooster.Adapters.Kudu;
 using Rooster.Mediator.Commands.StartKuduPoller;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -48,7 +47,6 @@ namespace Rooster.Hosting
                 tasks[i] = _mediator.Send(new StartKuduPollerRequest
                 {
                     KuduAdapter = kudus[i],
-                    Containers = new ConcurrentDictionary<string, long>(),
                     CurrentDateVarianceInMinutes = _options.CurrentDateVarianceInMinutes,
                     PoolingIntervalInSeconds = _options.PoolingIntervalInSeconds,
                     UseInternalPoller = _options.UseInternalPoller

@@ -4,12 +4,10 @@ using System.Collections.Concurrent;
 
 namespace Rooster.Mediator.Commands.ProcessAppLogSource
 {
-    public record ProcessAppLogSourceRequest : IRequest<ProcessAppLogSourceResponse>
+    public record ProcessAppLogSourceRequest : IRequest
     {
         public IKuduApiAdapter Kudu { get; init; }
 
         public double CurrentDateVarianceInMinutes { get; init; }
-
-        public ConcurrentDictionary<string, long> Containers { get; init; }
     }
 }

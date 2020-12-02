@@ -58,7 +58,7 @@ namespace Rooster.MongoDb.DependencyInjection
                 MongoDbGetLatestByServiceAndContainerNamesQuery>();
 
             services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
-            services.AddTransient<IRequestHandler<ProcessAppLogSourceRequest, ProcessAppLogSourceResponse>, ProcessAppLogSourceCommand>();
+            services.AddTransient<IRequestHandler<ProcessAppLogSourceRequest, Unit>, ProcessAppLogSourceCommand>();
             services.AddTransient<IRequestHandler<ShouldProcessDockerLogRequest, Unit>, ShouldProcessDockerLogCommand>();
             services.AddTransient<IRequestHandler<StartKuduPollerRequest, Unit>, StartKuduPollerCommand>();
 

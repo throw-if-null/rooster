@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using Rooster.Mediator.Commands.ProcessAppLogSource;
 using System;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,15 +9,6 @@ namespace Rooster.Mediator.Commands.StartKuduPoller
 {
     public class StartKuduPollerCommand : AsyncRequestHandler<StartKuduPollerRequest>
     {
-        private static readonly Func<ConcurrentDictionary<string, long>, ProcessAppLogSourceResponse> CreateProcessDockerLogResponse =
-            delegate (ConcurrentDictionary<string, long> containers)
-            {
-                return new ProcessAppLogSourceResponse
-                {
-                    Containers = containers
-                };
-            };
-
         private readonly IMediator _mediator;
         private readonly ILogger _logger;
 
@@ -30,27 +20,19 @@ namespace Rooster.Mediator.Commands.StartKuduPoller
 
         protected override async Task Handle(StartKuduPollerRequest request, CancellationToken cancellationToken)
         {
-            ProcessAppLogSourceResponse response;
-
             try
             {
-                response = await _mediator.Send(
+                await _mediator.Send(
                     new ProcessAppLogSourceRequest
                     {
                         Kudu = request.KuduAdapter,
-                        CurrentDateVarianceInMinutes = request.CurrentDateVarianceInMinutes,
-                        Containers = request.Containers
+                        CurrentDateVarianceInMinutes = request.CurrentDateVarianceInMinutes
                     },
                     cancellationToken);
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "{Command} failed.", nameof(ProcessAppLogSourceCommand));
-
-                response = new ProcessAppLogSourceResponse
-                {
-                    Containers = request.Containers
-                };
             }
 
             if (!request.UseInternalPoller)
@@ -58,9 +40,7 @@ namespace Rooster.Mediator.Commands.StartKuduPoller
 
             await Task.Delay(TimeSpan.FromSeconds(request.PoolingIntervalInSeconds), cancellationToken);
 
-            var newRequest = request with { Containers = response.Containers };
-
-            await _mediator.Send(newRequest, cancellationToken);
+            await _mediator.Send(request, cancellationToken);
         }
     }
 }

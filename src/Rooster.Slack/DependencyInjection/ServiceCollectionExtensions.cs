@@ -41,7 +41,7 @@ namespace Rooster.Slack.DependencyInjection
 
             services.AddTransient<IRequestHandler<ShouldProcessDockerLogRequest, Unit>, SlackProcessLogEntryCommand>();
             services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
-            services.AddTransient<IRequestHandler<ProcessAppLogSourceRequest, ProcessAppLogSourceResponse>, ProcessAppLogSourceCommand>();
+            services.AddTransient<IRequestHandler<ProcessAppLogSourceRequest, Unit>, ProcessAppLogSourceCommand>();
             services.AddTransient<IRequestHandler<StartKuduPollerRequest, Unit>, StartKuduPollerCommand>();
 
             services.AddHostedService<SlackHost>();

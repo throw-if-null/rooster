@@ -96,7 +96,7 @@ namespace Rooster.Test
 
                     services.AddTransient<IRequestHandler<ShouldProcessDockerLogRequest, Unit>, MockProcessLogEntryCommand>();
                     services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
-                    services.AddTransient<IRequestHandler<ProcessAppLogSourceRequest, ProcessAppLogSourceResponse>, ProcessAppLogSourceCommand>();
+                    services.AddTransient<IRequestHandler<ProcessAppLogSourceRequest, Unit>, ProcessAppLogSourceCommand>();
 
                     services.AddHostedService<MockHost>();
                 })

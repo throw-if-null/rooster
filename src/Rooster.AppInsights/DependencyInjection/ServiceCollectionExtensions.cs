@@ -49,7 +49,7 @@ namespace Rooster.AppInsights.DependencyInjection
 
             services.AddTransient<IRequestHandler<ShouldProcessDockerLogRequest, Unit>, AppInsightsProcessLogEntryCommand>();
             services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
-            services.AddTransient<IRequestHandler<ProcessAppLogSourceRequest, ProcessAppLogSourceResponse>, ProcessAppLogSourceCommand>();
+            services.AddTransient<IRequestHandler<ProcessAppLogSourceRequest, Unit>, ProcessAppLogSourceCommand>();
             services.AddTransient<IRequestHandler<StartKuduPollerRequest, Unit>, StartKuduPollerCommand>();
 
             services.AddHostedService<AppInsightsHost>();
