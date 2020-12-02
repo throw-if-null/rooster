@@ -27,7 +27,7 @@ namespace Rooster.Mediator.Commands.ProcessAppLogSource
         public async Task<ProcessAppLogSourceResponse> Handle(ProcessAppLogSourceRequest request, CancellationToken cancellationToken)
         {
             var kuduLogs = await request.Kudu.GetDockerLogs(cancellationToken);
-            var logs = kuduLogs.Where(x => x.LastUpdated.Date == DateTimeOffset.UtcNow.Date).OrderByDescending(x => x.LastUpdated);
+            var logs = kuduLogs.Where(x => x.LastUpdated.Date != DateTimeOffset.UtcNow.Date).OrderByDescending(x => x.LastUpdated);
 
             // TODO: Group logs by MachineName, take first and process them in parallel
             foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in logs)

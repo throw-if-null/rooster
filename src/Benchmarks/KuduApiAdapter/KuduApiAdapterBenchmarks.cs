@@ -32,8 +32,6 @@ namespace Benchmarks.KuduApiAdapter
         static readonly Uri uri1 = new Uri("");
         static readonly Uri uri2 = new Uri("");
 
-        static readonly RecyclableMemoryStreamManager _streamManager = new RecyclableMemoryStreamManager();
-
         [Benchmark]
         public async Task ExtractLogsFromStream()
         {
@@ -59,7 +57,7 @@ namespace Benchmarks.KuduApiAdapter
         {
             _client.DefaultRequestHeaders.Authorization = BuildBasicAuthHeader();
 
-            var adapter = new Rooster.Adapters.Kudu.KuduApiAdapter(_client, _streamManager, NullLogger<Rooster.Adapters.Kudu.KuduApiAdapter>.Instance);
+            var adapter = new Rooster.Adapters.Kudu.KuduApiAdapter(_client, NullLogger<Rooster.Adapters.Kudu.KuduApiAdapter>.Instance);
 
             await foreach (var log in adapter.ExtractLogsFromStream(uri1))
                 _ = log;

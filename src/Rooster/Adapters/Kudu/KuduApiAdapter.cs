@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.IO;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.IO;
 using System.IO.Pipelines;
 using System.Linq;
 using System.Net.Http;
@@ -34,13 +32,11 @@ namespace Rooster.Adapters.Kudu
                 true);
 
         private readonly HttpClient _client;
-        private readonly RecyclableMemoryStreamManager _streamManager;
         private readonly ILogger _logger;
 
-        public KuduApiAdapter(HttpClient client, RecyclableMemoryStreamManager streamManager, ILogger<KuduApiAdapter> logger)
+        public KuduApiAdapter(HttpClient client, ILogger<KuduApiAdapter> logger)
         {
             _client = client;
-            _streamManager = streamManager;
             _logger = logger;
         }
 
@@ -71,18 +67,12 @@ namespace Rooster.Adapters.Kudu
 
         public async IAsyncEnumerable<string> ExtractLogsFromStream(Uri logUri)
         {
-            using MemoryStream managedStream = _streamManager.GetStream();
-
-            using (var stream = await _client.GetStreamAsync(logUri))
-            {
-                await stream.CopyToAsync(managedStream);
-            }
-
-            var logReader = PipeReader.Create(managedStream);
+            await using var stream = await _client.GetStreamAsync(logUri);
+            var pipeReader = PipeReader.Create(stream);
 
             while (true)
             {
-                var read = await logReader.ReadAsync();
+                var read = await pipeReader.ReadAsync();
                 ReadOnlySequence<byte> buffer = read.Buffer;
                 ReadOnlySequence<byte> line = default;
 
@@ -98,7 +88,7 @@ namespace Rooster.Adapters.Kudu
                 }
                 while (line.Length > 0);
 
-                logReader.AdvanceTo(buffer.Start, buffer.End);
+                pipeReader.AdvanceTo(buffer.Start, buffer.End);
 
                 if (read.IsCompleted)
                 {
