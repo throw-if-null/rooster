@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
-using Rooster.Mediator.Commands.ProcessAppLogSource;
+using Rooster.Mediator.Commands.ProcessAppLogSources;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +12,7 @@ namespace Rooster.Mediator.Commands.StartKuduPoller
         private readonly IMediator _mediator;
         private readonly ILogger _logger;
 
-        public StartKuduPollerCommand(IMediator mediator, ILogger<ProcessAppLogSourceCommand> logger)
+        public StartKuduPollerCommand(IMediator mediator, ILogger<StartKuduPollerCommand> logger)
         {
             _mediator = mediator;
             _logger = logger;
@@ -23,7 +23,7 @@ namespace Rooster.Mediator.Commands.StartKuduPoller
             try
             {
                 await _mediator.Send(
-                    new ProcessAppLogSourceRequest
+                    new ProcessAppLogSourcesRequest
                     {
                         Kudu = request.KuduAdapter,
                         CurrentDateVarianceInMinutes = request.CurrentDateVarianceInMinutes
@@ -32,7 +32,7 @@ namespace Rooster.Mediator.Commands.StartKuduPoller
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "{Command} failed.", nameof(ProcessAppLogSourceCommand));
+                _logger.LogWarning(ex, "{Command} failed.", nameof(ProcessAppLogSourcesCommand));
             }
 
             if (!request.UseInternalPoller)

@@ -10,7 +10,7 @@ using Rooster.DependencyInjection;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
-using Rooster.Mediator.Commands.ProcessAppLogSource;
+using Rooster.Mediator.Commands.ProcessAppLogSources;
 using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using Rooster.Mediator.Commands.ValidateDockerRunParams;
 using Rooster.Mock;
@@ -90,13 +90,13 @@ namespace Rooster.Test
                     {
                             typeof(ShouldProcessDockerLogRequest),
                             typeof(ExtractDockerRunParamsRequest),
-                            typeof(ProcessAppLogSourceRequest),
+                            typeof(ProcessAppLogSourcesRequest),
                             typeof(ValidateDockerRunParamsRequest)
                         });
 
                     services.AddTransient<IRequestHandler<ShouldProcessDockerLogRequest, Unit>, MockProcessLogEntryCommand>();
                     services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
-                    services.AddTransient<IRequestHandler<ProcessAppLogSourceRequest, Unit>, ProcessAppLogSourceCommand>();
+                    services.AddTransient<IRequestHandler<ProcessAppLogSourcesRequest, Unit>, ProcessAppLogSourcesCommand>();
 
                     services.AddHostedService<MockHost>();
                 })

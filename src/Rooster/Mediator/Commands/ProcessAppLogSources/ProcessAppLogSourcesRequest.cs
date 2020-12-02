@@ -1,10 +1,9 @@
 ﻿using MediatR;
 using Rooster.Adapters.Kudu;
-using System.Collections.Concurrent;
 
-namespace Rooster.Mediator.Commands.ProcessAppLogSource
+namespace Rooster.Mediator.Commands.ProcessAppLogSources
 {
-    public record ProcessAppLogSourceRequest : IRequest
+    public record ProcessAppLogSourcesRequest : IRequest
     {
         public IKuduApiAdapter Kudu { get; init; }
 

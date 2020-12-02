@@ -5,7 +5,7 @@ using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
-using Rooster.Mediator.Commands.ProcessAppLogSource;
+using Rooster.Mediator.Commands.ProcessAppLogSources;
 using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using Rooster.Mediator.Commands.StartKuduPoller;
 using Rooster.Mediator.Commands.ValidateDockerRunParams;
@@ -34,14 +34,14 @@ namespace Rooster.Slack.DependencyInjection
             {
                 typeof(ShouldProcessDockerLogRequest),
                 typeof(ExtractDockerRunParamsRequest),
-                typeof(ProcessAppLogSourceRequest),
+                typeof(ProcessAppLogSourcesRequest),
                 typeof(ValidateDockerRunParamsRequest),
                 typeof(StartKuduPollerRequest)
             });
 
             services.AddTransient<IRequestHandler<ShouldProcessDockerLogRequest, Unit>, SlackProcessLogEntryCommand>();
             services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
-            services.AddTransient<IRequestHandler<ProcessAppLogSourceRequest, Unit>, ProcessAppLogSourceCommand>();
+            services.AddTransient<IRequestHandler<ProcessAppLogSourcesRequest, Unit>, ProcessAppLogSourcesCommand>();
             services.AddTransient<IRequestHandler<StartKuduPollerRequest, Unit>, StartKuduPollerCommand>();
 
             services.AddHostedService<SlackHost>();
