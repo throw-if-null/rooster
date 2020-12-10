@@ -1,12 +1,13 @@
-﻿using MediatR;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Rooster.CrossCutting.Docker;
+using Rooster.Mediator.Commands.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rooster.Mediator.Commands.ExtractDockerRunParams
 {
-    public class ExtractDockerRunParamsCommand : IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>
+    public class ExtractDockerRunParamsCommand :
+        IOpinionatedRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>
     {
         private const string LogDockerLogLineReceived = "Received docker log line: {DockerLogLine}";
 

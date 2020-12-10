@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using Rooster.Mediator.Commands.Common;
 using Rooster.Mediator.Commands.ProcessLogSource;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,8 @@ using System.Threading.Tasks;
 
 namespace Rooster.Mediator.Commands.ProcessAppLogSources
 {
-    public class ProcessAppLogSourcesCommand : AsyncRequestHandler<ProcessAppLogSourcesRequest>
+    public class ProcessAppLogSourcesCommand :
+        IOpinionatedRequestHandler<ProcessAppLogSourcesRequest, Unit>
     {
         private const string LogIsOldMessage = "Log: {0} is old. Last updated: {1}. Machine: {2}";
 
@@ -22,7 +24,7 @@ namespace Rooster.Mediator.Commands.ProcessAppLogSources
             _mediator = mediator;
         }
 
-        protected override async Task Handle(ProcessAppLogSourcesRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(ProcessAppLogSourcesRequest request, CancellationToken cancellationToken)
         {
             var kuduLogs = await request.Kudu.GetDockerLogs(cancellationToken);
 
@@ -37,9 +39,10 @@ namespace Rooster.Mediator.Commands.ProcessAppLogSources
 
             foreach ((DateTimeOffset lastUpdated, Uri logUri, string machineName) in logsPerMachine)
             {
-                var lastUpdatedEx = lastUpdated.AddMinutes(request.CurrentDateVarianceInMinutes);
+                var lastUpdatedSecondsEx = lastUpdated.ToUniversalTime().AddSeconds(request.CurrentDateVarianceInSeconds).ToUnixTimeSeconds();
+                var currentSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-                if (lastUpdatedEx < DateTimeOffset.UtcNow)
+                if (lastUpdatedSecondsEx < currentSeconds)
                 {
                     _logger.LogDebug(LogIsOldMessage, logUri, lastUpdated, machineName);
 
@@ -52,10 +55,12 @@ namespace Rooster.Mediator.Commands.ProcessAppLogSources
                     LastUpdated = lastUpdated,
                     LogUri = logUri,
                     MachineName = machineName
-                }));
+                }, cancellationToken));
             }
 
             await Task.WhenAll(tasks);
+
+            return Unit.Value;
         }
     }
 }

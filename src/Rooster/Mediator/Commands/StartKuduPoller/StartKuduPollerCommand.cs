@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using Rooster.Mediator.Commands.Common;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
 using System;
 using System.Threading;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.Mediator.Commands.StartKuduPoller
 {
-    public class StartKuduPollerCommand : AsyncRequestHandler<StartKuduPollerRequest>
+    public class StartKuduPollerCommand : IOpinionatedRequestHandler<StartKuduPollerRequest, Unit>
     {
         private readonly IMediator _mediator;
         private readonly ILogger _logger;
@@ -18,29 +19,22 @@ namespace Rooster.Mediator.Commands.StartKuduPoller
             _logger = logger;
         }
 
-        protected override async Task Handle(StartKuduPollerRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(StartKuduPollerRequest request, CancellationToken cancellationToken)
         {
-            try
-            {
-                await _mediator.Send(
-                    new ProcessAppLogSourcesRequest
-                    {
-                        Kudu = request.KuduAdapter,
-                        CurrentDateVarianceInMinutes = request.CurrentDateVarianceInMinutes
-                    },
-                    cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "{Command} failed.", nameof(StartKuduPollerCommand));
-            }
+            await _mediator.Send(
+                new ProcessAppLogSourcesRequest(_logger)
+                {
+                    Kudu = request.KuduAdapter,
+                    CurrentDateVarianceInSeconds = request.CurrentDateVarianceInSeconds
+                },
+                cancellationToken);
 
             if (!request.UseInternalPoller)
-                return;
+                return Unit.Value;
 
             await Task.Delay(TimeSpan.FromSeconds(request.PoolingIntervalInSeconds), cancellationToken);
 
-            await _mediator.Send(request, cancellationToken);
+            return await _mediator.Send(request, cancellationToken);
         }
     }
 }

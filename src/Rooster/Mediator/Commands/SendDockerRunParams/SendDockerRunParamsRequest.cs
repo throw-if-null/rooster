@@ -1,11 +1,22 @@
 ﻿using MediatR;
 using Rooster.Mediator.Commands.Common;
+using Rooster.Mediator.Commands.Common.Behaviors;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Rooster.Mediator.Commands.SendDockerRunParams
 {
-    public sealed record SendDockerRunParamsRequest : DockerRunParams, IRequest
+    public sealed record SendDockerRunParamsRequest :
+        DockerRunParams,
+        IRequest,
+        IRequestProcessingErrorBehavior
     {
+        public void OnError([NotNull] Exception ex)
+        {
+            return;
+        }
+
         public static implicit operator SendDockerRunParamsRequest(ExtractDockerRunParamsResponse response) =>
             new()
             {

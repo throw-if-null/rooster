@@ -1,4 +1,4 @@
-﻿using Rooster.Mediator.Commands.ShouldProcessDockerLog;
+﻿using Rooster.Mediator.Commands.SendDockerRunParams;
 using System;
 using System.Collections.Concurrent;
 
@@ -6,21 +6,24 @@ namespace Rooster.Mock.Reporters
 {
     public interface IMockReporter
     {
-        void RegisterRequest(ShouldProcessDockerLogRequest request);
+        void RegisterRequest(SendDockerRunParamsRequest request);
     }
 
     public class MockReporter : IMockReporter
     {
-        private readonly ConcurrentBag<ShouldProcessDockerLogRequest> _requests;
+        private readonly ConcurrentDictionary<string, int> _requests;
 
-        public MockReporter(ConcurrentBag<ShouldProcessDockerLogRequest> requests)
+        public MockReporter(ConcurrentDictionary<string, int> requests)
         {
             _requests = requests ?? throw new ArgumentNullException(nameof(requests));
         }
 
-        public void RegisterRequest(ShouldProcessDockerLogRequest request)
+        public void RegisterRequest(SendDockerRunParamsRequest request)
         {
-            _requests.Add(request);
+            if (_requests.ContainsKey(request.ContainerName))
+                _requests[request.ContainerName] += 1;
+            else
+                _requests[request.ContainerName] = 1;
         }
     }
 }

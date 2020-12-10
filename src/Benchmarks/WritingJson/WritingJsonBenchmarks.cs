@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Microsoft.IO;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
-using Rooster.Mediator.Commands.ShouldProcessDockerLog;
+using Rooster.Mediator.Commands.ProcessDockerLog;
 using System;
 using System.Text.Json;
 
@@ -18,7 +18,7 @@ namespace Benchmarks.WritingJson
         private const string MarkdownInOption = "text";
         private const string ColorValue = "warning";
 
-        private static readonly ShouldProcessDockerLogRequest Request = new ShouldProcessDockerLogRequest
+        private static readonly ProcessDockerLogRequest Request = new ProcessDockerLogRequest
         {
             ExportedLogEntry = new ExtractDockerRunParamsResponse
             {
@@ -91,7 +91,7 @@ namespace Benchmarks.WritingJson
             return stream.ToArray();
         }
 
-        private static void WriteJson(Utf8JsonWriter writer, ShouldProcessDockerLogRequest request)
+        private static void WriteJson(Utf8JsonWriter writer, ProcessDockerLogRequest request)
         {
             writer.WriteStartObject();
             writer.WriteStartArray(attachmentsKey); // start attachments

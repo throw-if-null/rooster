@@ -8,9 +8,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.SqlServer.Mediator.Commands.CreateLogEntry
+namespace Rooster.SqlServer.Mediator.Commands.SendDockerRunParams
 {
-    public sealed class SqlCreateLogEntryCommand : SendDockerRunParamsCommand
+    public sealed class SqlSendDockerRunParamsCommand : SendDockerRunParamsCommand
     {
         private static readonly string TableName = "LogEntry";
 
@@ -47,12 +47,12 @@ namespace Rooster.SqlServer.Mediator.Commands.CreateLogEntry
 
         private readonly IConnectionFactory _connectionFactory;
 
-        public SqlCreateLogEntryCommand(IConnectionFactory connectionFactory)
+        public SqlSendDockerRunParamsCommand(IConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
 
-        protected override async Task<Unit> CreateImplementation(SendDockerRunParamsRequest request, CancellationToken cancellation)
+        protected override async Task<Unit> SendImplementation(SendDockerRunParamsRequest request, CancellationToken cancellation)
         {
             await using var connection = _connectionFactory.CreateConnection();
 

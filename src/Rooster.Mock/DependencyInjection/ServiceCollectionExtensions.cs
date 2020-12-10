@@ -5,12 +5,13 @@ using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
+using Rooster.Mediator.Commands.ProcessDockerLog;
 using Rooster.Mediator.Commands.ProcessLogSource;
 using Rooster.Mediator.Commands.SendDockerRunParams;
-using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using Rooster.Mediator.Commands.StartKuduPoller;
 using Rooster.Mediator.Commands.ValidateExportedRunParams;
 using Rooster.Mock.Commands.ProcessLogEntry;
+using Rooster.Mock.Commands.SendDockerRunParams;
 using Rooster.Mock.Reporters;
 using System.Collections.Concurrent;
 
@@ -21,7 +22,7 @@ namespace Rooster.Mock.DependencyInjection
         public static IServiceCollection AddMock(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton(new HostNameEnricher(nameof(MockHost)));
-            services.AddSingleton(new ConcurrentBag<ShouldProcessDockerLogRequest>());
+            services.AddSingleton(new ConcurrentBag<ProcessDockerLogRequest>());
 
             services.AddTransient<IMockReporter, MockReporter>();
 
@@ -29,7 +30,7 @@ namespace Rooster.Mock.DependencyInjection
 
             services.AddMediatR(new[]
             {
-                typeof(ShouldProcessDockerLogRequest),
+                typeof(ProcessDockerLogRequest),
                 typeof(ExtractDockerRunParamsRequest),
                 typeof(ProcessAppLogSourcesRequest),
                 typeof(ProcessLogSourceRequest),
@@ -38,12 +39,13 @@ namespace Rooster.Mock.DependencyInjection
                 typeof(ValidateExportedRunParamsRequest)
             });
 
-            services.AddTransient<IRequestHandler<ShouldProcessDockerLogRequest, Unit>, MockProcessLogEntryCommand>();
             services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
             services.AddTransient<IRequestHandler<ProcessAppLogSourcesRequest, Unit>, ProcessAppLogSourcesCommand>();
             services.AddTransient<IRequestHandler<ProcessLogSourceRequest, Unit>, ProcessLogSourceCommand>();
             services.AddTransient<IRequestHandler<StartKuduPollerRequest, Unit>, StartKuduPollerCommand>();
             services.AddTransient<IRequestHandler<ValidateExportedRunParamsRequest, ValidateExportedRunParamsResponse>, ValidateExportedRunParamsCommand>();
+            services.AddTransient<IRequestHandler<ProcessDockerLogRequest, Unit>, MockProcessDockerLogCommand>();
+            services.AddTransient<IRequestHandler<SendDockerRunParamsRequest, Unit>, MockSendDockerRunParamsCommand>();
 
             services.AddHostedService<MockHost>();
 

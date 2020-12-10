@@ -1,12 +1,12 @@
-﻿using MediatR;
+﻿using Rooster.Mediator.Commands.Common;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames
 {
-    public abstract class GetLatestByServiceAndContainerNamesQuery
-        : IRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>
+    public abstract class GetLatestByServiceAndContainerNamesQuery :
+        IOpinionatedRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>
     {
         protected abstract Task<DateTimeOffset> GetLatestByServiceAndContainerNamesImplementation(
             GetLatestByServiceAndContainerNamesRequest request,

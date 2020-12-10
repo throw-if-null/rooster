@@ -6,15 +6,16 @@ using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
+using Rooster.Mediator.Commands.ProcessDockerLog;
 using Rooster.Mediator.Commands.ProcessLogSource;
 using Rooster.Mediator.Commands.SendDockerRunParams;
-using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using Rooster.Mediator.Commands.StartKuduPoller;
 using Rooster.Mediator.Commands.ValidateExportedRunParams;
 using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;
 using Rooster.SqlServer.Connectors;
-using Rooster.SqlServer.Mediator.Commands.CreateLogEntry;
 using Rooster.SqlServer.Mediator.Commands.HealthCheck;
+using Rooster.SqlServer.Mediator.Commands.ProcessDockerLog;
+using Rooster.SqlServer.Mediator.Commands.SendDockerRunParams;
 using Rooster.SqlServer.Mediator.Queries;
 using System;
 
@@ -35,28 +36,24 @@ namespace Rooster.SqlServer.DependencyInjection
 
             services.AddMediatR(new[]
             {
-                typeof(ShouldProcessDockerLogRequest),
                 typeof(ExtractDockerRunParamsRequest),
-                typeof(ProcessAppLogSourcesRequest),
-                typeof(ProcessLogSourceRequest),
                 typeof(GetLatestByServiceAndContainerNamesRequest),
+                typeof(ProcessAppLogSourcesRequest),
+                typeof(ProcessDockerLogRequest),
+                typeof(ProcessLogSourceRequest),
                 typeof(SendDockerRunParamsRequest),
                 typeof(StartKuduPollerRequest),
                 typeof(ValidateExportedRunParamsRequest)
             });
 
-            services.AddTransient<IRequestHandler<SendDockerRunParamsRequest, Unit>, SqlCreateLogEntryCommand>();
-            services.AddTransient<IRequestHandler<
-                GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>,
-                SqlGetLatestByServiceAndContainerNamesQuery>();
-
-            services.AddTransient<IRequestHandler<ShouldProcessDockerLogRequest, Unit>, ShouldProcessDockerLogCommand>();
             services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
+            services.AddTransient<IRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>, SqlGetLatestByServiceAndContainerNamesQuery>();
             services.AddTransient<IRequestHandler<ProcessAppLogSourcesRequest, Unit>, ProcessAppLogSourcesCommand>();
+            services.AddTransient<IRequestHandler<ProcessDockerLogRequest, Unit>, SqlProcessDockerLogCommand>();
             services.AddTransient<IRequestHandler<ProcessLogSourceRequest, Unit>, ProcessLogSourceCommand>();
             services.AddTransient<IRequestHandler<StartKuduPollerRequest, Unit>, StartKuduPollerCommand>();
+            services.AddTransient<IRequestHandler<SendDockerRunParamsRequest, Unit>, SqlSendDockerRunParamsCommand>();
             services.AddTransient<IRequestHandler<ValidateExportedRunParamsRequest, ValidateExportedRunParamsResponse>, ValidateExportedRunParamsCommand>();
-
 
             services.AddHostedService<SqlServerHost>();
 

@@ -6,17 +6,18 @@ using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
+using Rooster.Mediator.Commands.ProcessDockerLog;
 using Rooster.Mediator.Commands.ProcessLogSource;
 using Rooster.Mediator.Commands.SendDockerRunParams;
-using Rooster.Mediator.Commands.ShouldProcessDockerLog;
 using Rooster.Mediator.Commands.StartKuduPoller;
 using Rooster.Mediator.Commands.ValidateExportedRunParams;
 using Rooster.Mediator.Queries.GetLatestByServiceAndContainerNames;
 using Rooster.MongoDb.Connectors.Clients;
 using Rooster.MongoDb.Connectors.Colections;
 using Rooster.MongoDb.Connectors.Databases;
-using Rooster.MongoDb.Mediator.Commands.CreateLogEntry;
 using Rooster.MongoDb.Mediator.Commands.HealthCheck;
+using Rooster.MongoDb.Mediator.Commands.ProcessDockerLog;
+using Rooster.MongoDb.Mediator.Commands.SendDockerRunParams;
 using Rooster.MongoDb.Mediator.Queries;
 using System;
 
@@ -46,7 +47,7 @@ namespace Rooster.MongoDb.DependencyInjection
 
             services.AddMediatR(new[]
             {
-                typeof(ShouldProcessDockerLogRequest),
+                typeof(ProcessDockerLogRequest),
                 typeof(ExtractDockerRunParamsRequest),
                 typeof(ProcessAppLogSourcesRequest),
                 typeof(ProcessLogSourceRequest),
@@ -56,15 +57,12 @@ namespace Rooster.MongoDb.DependencyInjection
                 typeof(ValidateExportedRunParamsRequest)
             });
 
-            services.AddTransient<IRequestHandler<SendDockerRunParamsRequest, Unit>, MongoDbCreateLogEntryCommand>();
-            services.AddTransient<
-                IRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>,
-                MongoDbGetLatestByServiceAndContainerNamesQuery>();
-
+            services.AddTransient<IRequestHandler<SendDockerRunParamsRequest, Unit>, MongoDbSendDockerRunParamsCommand>();
+            services.AddTransient<IRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>, MongoDbGetLatestByServiceAndContainerNamesQuery>();
             services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
             services.AddTransient<IRequestHandler<ProcessAppLogSourcesRequest, Unit>, ProcessAppLogSourcesCommand>();
             services.AddTransient<IRequestHandler<ProcessLogSourceRequest, Unit>, ProcessLogSourceCommand>();
-            services.AddTransient<IRequestHandler<ShouldProcessDockerLogRequest, Unit>, ShouldProcessDockerLogCommand>();
+            services.AddTransient<IRequestHandler<ProcessDockerLogRequest, Unit>, MongoDbProcessDockerLogCommand >();
             services.AddTransient<IRequestHandler<StartKuduPollerRequest, Unit>, StartKuduPollerCommand>();
             services.AddTransient<IRequestHandler<ValidateExportedRunParamsRequest, ValidateExportedRunParamsResponse>, ValidateExportedRunParamsCommand>();
 

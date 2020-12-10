@@ -1,4 +1,4 @@
-﻿using MediatR;
+﻿using Rooster.Mediator.Commands.Common;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Rooster.Mediator.Commands.ValidateExportedRunParams
 {
     public class ValidateExportedRunParamsCommand
-        : IRequestHandler<ValidateExportedRunParamsRequest, ValidateExportedRunParamsResponse>
+        : IOpinionatedRequestHandler<ValidateExportedRunParamsRequest, ValidateExportedRunParamsResponse>
     {
         public Task<ValidateExportedRunParamsResponse> Handle(ValidateExportedRunParamsRequest request, CancellationToken _)
         {

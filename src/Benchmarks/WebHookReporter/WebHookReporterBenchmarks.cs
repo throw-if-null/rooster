@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.IO;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
-using Rooster.Mediator.Commands.ShouldProcessDockerLog;
+using Rooster.Mediator.Commands.ProcessDockerLog;
 using Rooster.QoS.Resilency;
 using Rooster.Slack.Reporting;
 using System;
@@ -28,7 +28,7 @@ namespace Benchmarks.WebHookReporter
         private const string MarkdownInOption = "text";
         private const string ColorValue = "warning";
 
-        private static readonly ShouldProcessDockerLogRequest Request = new ShouldProcessDockerLogRequest
+        private static readonly ProcessDockerLogRequest Request = new ProcessDockerLogRequest
         {
             ExportedLogEntry = new ExtractDockerRunParamsResponse
             {

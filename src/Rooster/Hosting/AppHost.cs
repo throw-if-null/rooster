@@ -44,10 +44,10 @@ namespace Rooster.Hosting
 
             for (var i = 0; i < kudus.Length; i++)
             {
-                tasks[i] = _mediator.Send(new StartKuduPollerRequest
+                tasks[i] = _mediator.Send(new StartKuduPollerRequest(_logger)
                 {
                     KuduAdapter = kudus[i],
-                    CurrentDateVarianceInMinutes = _options.CurrentDateVarianceInMinutes,
+                    CurrentDateVarianceInSeconds = _options.CurrentDateVarianceInSeconds,
                     PoolingIntervalInSeconds = _options.PoolingIntervalInSeconds,
                     UseInternalPoller = _options.UseInternalPoller
                 },

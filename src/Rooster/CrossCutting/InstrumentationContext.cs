@@ -10,7 +10,7 @@ namespace Rooster.CrossCutting
         /// Note: Value can be null.
         /// </summary>
         /// <returns>Correlation id or null.</returns>
-        string CorrelationValue { get; }
+        string CorrelationId { get; }
     }
 
     public sealed class InstrumentationContext : IInstrumentationContext
@@ -19,7 +19,7 @@ namespace Rooster.CrossCutting
 
         private readonly AsyncLocal<string> _correlationId = new AsyncLocal<string>();
 
-        public string CorrelationValue
+        public string CorrelationId
         {
             get
             {

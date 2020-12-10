@@ -1,14 +1,14 @@
 ﻿using MediatR;
 using Microsoft.IO;
-using Rooster.Mediator.Commands.ShouldProcessDockerLog;
+using Rooster.Mediator.Commands.SendDockerRunParams;
 using Rooster.Slack.Reporting;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.Slack.Commands.LogEntryCommand
+namespace Rooster.Slack.Commands.SendDockerRunParams
 {
-    public class SlackProcessLogEntryCommand : AsyncRequestHandler<ShouldProcessDockerLogRequest>
+    public sealed class SlackSendDockerRunParamsCommand : SendDockerRunParamsCommand
     {
         private const string Message = "New container deployment.";
         private const string DateTitle = "Date";
@@ -21,20 +21,20 @@ namespace Rooster.Slack.Commands.LogEntryCommand
         private readonly IReporter _reporter;
         private readonly RecyclableMemoryStreamManager _streamManager;
 
-        public SlackProcessLogEntryCommand(IReporter reporter, RecyclableMemoryStreamManager streamManager)
+        public SlackSendDockerRunParamsCommand(IReporter reporter, RecyclableMemoryStreamManager streamManager)
         {
             _reporter = reporter;
             _streamManager = streamManager;
         }
 
-        protected override async Task Handle(ShouldProcessDockerLogRequest request, CancellationToken cancellationToken)
+        protected override async Task<Unit> SendImplementation(SendDockerRunParamsRequest request, CancellationToken cancellation)
         {
             var attachmentFields = new object[4]
             {
-                new { title = DateTitle, value = $"`{request.ExportedLogEntry.EventDate}`" },
-                new { title = ContainerNameTitle, value = $"`{request.ExportedLogEntry.ContainerName}`"},
-                new { title = PortsTitle, value = $"`{request.ExportedLogEntry.InboundPort}` : `{request.ExportedLogEntry.OutboundPort}`"},
-                new { title = ImageTitle, value = $"`{request.ExportedLogEntry.ImageName}`: `{request.ExportedLogEntry.ImageTag}`" }
+                new { title = DateTitle, value = $"`{request.EventDate}`" },
+                new { title = ContainerNameTitle, value = $"`{request.ContainerName}`"},
+                new { title = PortsTitle, value = $"`{request.InboundPort}` : `{request.OutboundPort}`"},
+                new { title = ImageTitle, value = $"`{request.ImageName}`: `{request.ImageTag}`" }
             };
 
             var content =
@@ -46,7 +46,7 @@ namespace Rooster.Slack.Commands.LogEntryCommand
                         {
                             mrkdwn_in = new object[1] { MarkdownInOption },
                             color = ColorValue,
-                            pretext = $"*Service:* {request.ExportedLogEntry.ServiceName}",
+                            pretext = $"*Service:* {request.ServiceName}",
                             text = $"_{Message}_",
                             fields = attachmentFields
                         },
@@ -55,9 +55,11 @@ namespace Rooster.Slack.Commands.LogEntryCommand
 
             using var stream = _streamManager.GetStream();
 
-            await JsonSerializer.SerializeAsync(stream, content, typeof(object), null, cancellationToken);
+            await JsonSerializer.SerializeAsync(stream, content, typeof(object), null, cancellation);
 
-            await _reporter.Send(stream, cancellationToken);
+            await _reporter.Send(stream, cancellation);
+
+            return Unit.Value;
         }
     }
 }

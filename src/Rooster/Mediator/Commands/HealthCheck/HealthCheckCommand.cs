@@ -1,10 +1,11 @@
-﻿using MediatR;
+﻿using Rooster.Mediator.Commands.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rooster.Mediator.Commands.HealthCheck
 {
-    public abstract class HealthCheckCommand : IRequestHandler<HealthCheckRequest, HealthCheckResponse>
+    public abstract class HealthCheckCommand :
+        IOpinionatedRequestHandler<HealthCheckRequest, HealthCheckResponse>
     {
         public abstract Task<HealthCheckResponse> Handle(HealthCheckRequest request, CancellationToken cancellationToken);
 

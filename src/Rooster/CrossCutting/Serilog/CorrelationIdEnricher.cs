@@ -17,7 +17,7 @@ namespace Rooster.CrossCutting.Serilog
 
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
-            logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(CorrelationId, _context.CorrelationValue));
+            logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(CorrelationId, _context.CorrelationId));
         }
     }
 }

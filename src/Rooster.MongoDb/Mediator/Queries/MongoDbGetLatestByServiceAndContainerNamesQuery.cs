@@ -19,7 +19,6 @@ namespace Rooster.MongoDb.Mediator.Queries
                     Projection = Builders<LogEntry>.Projection.Include(x => x.EventDate)
                 });
 
-
         private readonly ILogEntryCollectionFactory _collectionFactory;
 
     public MongoDbGetLatestByServiceAndContainerNamesQuery(ILogEntryCollectionFactory collectionFactory)

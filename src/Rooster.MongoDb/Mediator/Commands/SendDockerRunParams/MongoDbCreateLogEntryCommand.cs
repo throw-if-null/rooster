@@ -6,20 +6,20 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rooster.MongoDb.Mediator.Commands.CreateLogEntry
+namespace Rooster.MongoDb.Mediator.Commands.SendDockerRunParams
 {
-    public sealed class MongoDbCreateLogEntryCommand : SendDockerRunParamsCommand
+    public sealed class MongoDbSendDockerRunParamsCommand : SendDockerRunParamsCommand
     {
         private static readonly Lazy<InsertOneOptions> GetInsertOneOptions = new Lazy<InsertOneOptions>(() => new InsertOneOptions(), true);
 
         private readonly ILogEntryCollectionFactory _collectionFactory;
 
-        public MongoDbCreateLogEntryCommand(ILogEntryCollectionFactory collectionFactory)
+        public MongoDbSendDockerRunParamsCommand(ILogEntryCollectionFactory collectionFactory)
         {
             _collectionFactory = collectionFactory ?? throw new ArgumentNullException(nameof(collectionFactory));
         }
 
-        protected override async Task<Unit> CreateImplementation(SendDockerRunParamsRequest request, CancellationToken cancellation)
+        protected override async Task<Unit> SendImplementation(SendDockerRunParamsRequest request, CancellationToken cancellation)
         {
             var collection = await _collectionFactory.Get<SendDockerRunParamsRequest>(cancellation);
 
