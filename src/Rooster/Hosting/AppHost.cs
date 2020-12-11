@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Rooster.Adapters.Kudu;
+using Rooster.CrossCutting.Exceptions;
 using Rooster.Mediator.Commands.StartKuduPoller;
 using System;
 using System.Collections.Generic;
@@ -44,14 +45,15 @@ namespace Rooster.Hosting
 
             for (var i = 0; i < kudus.Length; i++)
             {
-                tasks[i] = _mediator.Send(new StartKuduPollerRequest(_logger)
+                var request = new StartKuduPollerRequest(_logger)
                 {
                     KuduAdapter = kudus[i],
                     CurrentDateVarianceInSeconds = _options.CurrentDateVarianceInSeconds,
                     PoolingIntervalInSeconds = _options.PoolingIntervalInSeconds,
                     UseInternalPoller = _options.UseInternalPoller
-                },
-                cancellationToken);
+                };
+
+                tasks[i] = CreatePollerTask(request, cancellationToken);
             }
 
             await Task.WhenAll(tasks);
@@ -62,6 +64,28 @@ namespace Rooster.Hosting
             _logger.LogInformation(StopLogMessage, Array.Empty<object>());
 
             return Task.CompletedTask;
+        }
+
+        private Task<Unit> CreatePollerTask(StartKuduPollerRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return _mediator.Send(request, cancellationToken);
+            }
+            catch(PollingCanceledException pce)
+            {
+                _logger.LogWarning(
+                    pce.InnerException,
+                    $"Polling for {request.KuduAdapter.BaseUrl} has been canceled.");
+
+                return Unit.Task;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Unhandled error occurred.");
+
+                throw;
+            }
         }
     }
 }

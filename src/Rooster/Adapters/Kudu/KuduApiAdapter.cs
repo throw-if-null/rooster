@@ -14,6 +14,8 @@ namespace Rooster.Adapters.Kudu
 {
     public interface IKuduApiAdapter
     {
+        Uri BaseUrl { get; }
+
         Task<IEnumerable<(DateTimeOffset LastUpdated, Uri LogUri, string MachineName)>> GetDockerLogs(CancellationToken cancellation);
 
         IAsyncEnumerable<string> ExtractLogsFromStream(Uri logUri);
@@ -39,6 +41,8 @@ namespace Rooster.Adapters.Kudu
             _client = client;
             _logger = logger;
         }
+
+        public Uri BaseUrl => _client.BaseAddress;
 
         public async Task<IEnumerable<(DateTimeOffset LastUpdated, Uri LogUri, string MachineName)>>
             GetDockerLogs(CancellationToken cancellation)

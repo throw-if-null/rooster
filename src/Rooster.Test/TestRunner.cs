@@ -10,6 +10,7 @@ using Rooster.DependencyInjection;
 using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
 using Rooster.Mediator.Commands.Common;
+using Rooster.Mediator.Commands.Common.Behaviors;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
 using Rooster.Mediator.Commands.ProcessDockerLog;
@@ -101,6 +102,8 @@ namespace Rooster.Test
                     services.AddTransient<IRequestHandler<SendDockerRunParamsRequest, Unit>, MockSendDockerRunParamsCommand>();
                     services.AddTransient<IRequestHandler<StartKuduPollerRequest, Unit>, StartKuduPollerCommand>();
                     services.AddTransient<IRequestHandler<ValidateExportedRunParamsRequest, ValidateExportedRunParamsResponse>, ValidateExportedRunParamsCommand>();
+
+                    services.AddScoped(typeof(IPipelineBehavior<,>), typeof(InstrumentingPipelineBehavior<,>));
 
                     services.AddHostedService<MockHost>();
                 })

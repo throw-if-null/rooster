@@ -120,9 +120,7 @@ namespace Rooster.Test
                     services.AddTransient<IKuduApiAdapter>(x => kuduMock.Object);
                 });
 
-            var canceledTask = Assert.ThrowsAsync<TaskCanceledException>(() => host.StartAsync(source.Token));
-
-            await canceledTask;
+            await host.StartAsync(source.Token);
 
             Assert.Single(requests);
 
@@ -167,9 +165,7 @@ namespace Rooster.Test
                         services.AddTransient<IKuduApiAdapter>(x => kuduMock.Object);
                     });
 
-            var canceledTask = Assert.ThrowsAsync<TaskCanceledException>(() => host.StartAsync(source.Token));
-
-            await canceledTask;
+            await host.StartAsync(source.Token);
 
             Assert.Single(requests);
 
