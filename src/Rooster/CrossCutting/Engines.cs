@@ -1,4 +1,4 @@
-﻿namespace Rooster
+﻿namespace Rooster.CrossCutting
 {
     public static class Engines
     {

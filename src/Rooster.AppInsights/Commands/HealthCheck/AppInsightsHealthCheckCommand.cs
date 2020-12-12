@@ -1,4 +1,5 @@
-﻿using Rooster.Mediator.Commands.HealthCheck;
+﻿using Rooster.CrossCutting;
+using Rooster.Mediator.Commands.HealthCheck;
 using System.Threading;
 using System.Threading.Tasks;
 

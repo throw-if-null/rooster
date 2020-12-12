@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Rooster.AppInsights.Commands.HealthCheck;
+using Rooster.CrossCutting;
 using Rooster.Hosting;
 using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.MongoDb.Mediator.Commands.HealthCheck;

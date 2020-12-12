@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Rooster.Adapters.Kudu;
-using Rooster.DependencyInjection.Exceptions;
-using Rooster.Mediator.Commands.ProcessDockerLog;
-using Rooster.Mediator.Commands.SendDockerRunParams;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

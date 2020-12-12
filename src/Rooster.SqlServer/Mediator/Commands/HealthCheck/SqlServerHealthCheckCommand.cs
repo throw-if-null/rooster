@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Rooster.CrossCutting;
 using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.QoS.Resilency;
 using Rooster.SqlServer.Connectors;

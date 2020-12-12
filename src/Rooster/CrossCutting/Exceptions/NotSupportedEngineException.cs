@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Rooster.DependencyInjection.Exceptions
+namespace Rooster.CrossCutting.Exceptions
 {
     public class NotSupportedEngineException : Exception
     {
@@ -10,7 +10,8 @@ namespace Rooster.DependencyInjection.Exceptions
                 return $"Engine: {engine} is not supported. Supported values are: {Engines.Values}.";
             };
 
-        public NotSupportedEngineException(string databaseEngine) : base(BuildErrorMessage(databaseEngine))
+        public NotSupportedEngineException(string databaseEngine) :
+            base(BuildErrorMessage(databaseEngine))
         {
         }
 

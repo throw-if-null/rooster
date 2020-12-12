@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using Rooster.CrossCutting;
 using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.MongoDb.Connectors.Colections;
 using Rooster.MongoDb.Schema;

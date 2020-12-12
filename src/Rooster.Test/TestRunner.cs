@@ -5,11 +5,10 @@ using Microsoft.Extensions.Hosting;
 using Rooster.Adapters.Kudu;
 using Rooster.AppInsights.DependencyInjection;
 using Rooster.CrossCutting;
+using Rooster.CrossCutting.Exceptions;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
-using Rooster.DependencyInjection.Exceptions;
 using Rooster.Hosting;
-using Rooster.Mediator.Commands.Common;
 using Rooster.Mediator.Commands.Common.Behaviors;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
@@ -31,8 +30,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Rooster.Test
 {
