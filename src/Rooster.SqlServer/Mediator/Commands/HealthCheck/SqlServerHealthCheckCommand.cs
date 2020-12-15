@@ -1,14 +1,11 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Rooster.CrossCutting;
 using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.QoS.Resilency;
 using Rooster.SqlServer.Connectors;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,13 +40,13 @@ namespace Rooster.SqlServer.Mediator.Commands.HealthCheck
                         _ => false,
                         () => Execute(_factory, HealthQuery, cancellationToken));
 
-                return Healthy(Engines.SqlServer);
+                return Healthy(Engine.SqlServer.Name);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "HealthCheck failed.", Array.Empty<object>());
 
-                return Unhealthy(Engines.SqlServer, ex.ToString());
+                return Unhealthy(Engine.SqlServer.Name, ex.ToString());
             }
         }
 

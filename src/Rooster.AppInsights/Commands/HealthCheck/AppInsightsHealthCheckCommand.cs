@@ -12,7 +12,7 @@ namespace Rooster.AppInsights.Handlers.HealthCheck
     {
         public override Task<HealthCheckResponse> Handle(HealthCheckRequest request, CancellationToken cancellationToken)
         {
-            return Task.FromResult(Healthy(Engines.AppInsights));
+            return Task.FromResult(Healthy(Engine.AppInsights.Name));
         }
     }
 }

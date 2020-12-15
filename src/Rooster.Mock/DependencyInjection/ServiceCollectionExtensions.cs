@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
@@ -19,7 +20,14 @@ namespace Rooster.Mock.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddMock(this IServiceCollection services, IConfiguration configuration)
+        public static IHost AddMockHost(this IHostBuilder builder)
+        {
+            builder.AddHost((ctx, services) => AddMock(ctx.Configuration, services));
+
+            return builder.Build();
+        }
+
+        private static IServiceCollection AddMock(IConfiguration configuration, IServiceCollection services)
         {
             services.AddSingleton(new HostNameEnricher(nameof(MockHost)));
             services.AddSingleton(new ConcurrentBag<ProcessDockerLogRequest>());

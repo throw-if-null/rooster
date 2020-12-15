@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
@@ -25,7 +26,14 @@ namespace Rooster.SqlServer.DependencyInjection
     {
         private const string SqlConfigPath = "DataStores:Sql";
 
-        public static IServiceCollection AddSqlServer(this IServiceCollection services, IConfiguration configuration)
+        public static IHost AddSqlServerHost(this IHostBuilder builder)
+        {
+            builder.AddHost((ctx, services) => AddSqlServer(ctx.Configuration, services));
+
+            return builder.Build();
+        }
+
+        private static IServiceCollection AddSqlServer(IConfiguration configuration, IServiceCollection services)
         {
             services.Configure<ConnectionFactoryOptions>(configuration.GetSection($"{SqlConfigPath}:{nameof(ConnectionFactoryOptions)}"));
 

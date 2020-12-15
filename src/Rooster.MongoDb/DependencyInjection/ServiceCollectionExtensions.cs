@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
@@ -32,7 +33,14 @@ namespace Rooster.MongoDb.DependencyInjection
             return $"{MongoDbPath}:{nameof(CollectionFactoryOptions)}:{typeof(T).Name}";
         }
 
-        public static IServiceCollection AddMongoDb(this IServiceCollection services, IConfiguration configuration)
+        public static IHost AddMongoDbHost(this IHostBuilder builder)
+        {
+            builder.AddHost((ctx, services) => AddMongoDb(ctx.Configuration, services));
+
+            return builder.Build();
+        }
+
+        private static IServiceCollection AddMongoDb(IConfiguration configuration, IServiceCollection services)
         {
             services.ConfigureClientFactoryOptions(configuration);
             services.ConfigureDatabaseFactoryOptions(configuration);

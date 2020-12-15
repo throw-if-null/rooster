@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.Common.Behaviors;
@@ -24,7 +25,14 @@ namespace Rooster.Slack.DependencyInjection
     {
         private const string SlackBaseUrl = "https://hooks.slack.com";
 
-        public static IServiceCollection AddSlack(this IServiceCollection services, IConfiguration configuration)
+        public static IHost AddSlackHost(this IHostBuilder builder)
+        {
+            builder.AddHost((ctx, services) => AddSlack(ctx.Configuration, services));
+
+            return builder.Build();
+        }
+
+        private static IServiceCollection AddSlack(IConfiguration configuration, IServiceCollection services)
         {
             services.Configure<WebHookReporterOptions>(configuration.GetSection($"Reporters:Slack:{nameof(WebHookReporterOptions)}"));
 

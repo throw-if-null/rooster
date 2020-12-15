@@ -24,9 +24,9 @@ namespace Rooster.DependencyInjection
 {
     public static class Extensions
     {
-        private static readonly Action<IServiceCollection> Empty = _ => { };
+        private static readonly Action<HostBuilderContext, IServiceCollection> Empty = (_, _) => {};
 
-        public static IHost AddHost(this IHostBuilder builder, Action<IServiceCollection> hostConfigurator = null)
+        public static IHost AddHost(this IHostBuilder builder, Action<HostBuilderContext, IServiceCollection> hostConfigurator = null)
         {
             hostConfigurator ??= Empty;
 

@@ -8,6 +8,7 @@ using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.MongoDb.Mediator.Commands.HealthCheck;
 using Rooster.Slack.Commands.HealthCheck;
 using Rooster.SqlServer.Mediator.Commands.HealthCheck;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
@@ -22,7 +23,7 @@ namespace Rooster.HealthCheck
 
         public RoosterHealthCheck(IConfiguration configuration, IMediator mediator)
         {
-            _engines = configuration.GetSection($"{nameof(AppHostOptions)}:{nameof(Engines)}").Get<Collection<string>>();
+            _engines = configuration.GetSection($"{nameof(AppHostOptions)}:{nameof(Engine)}").Get<Collection<string>>();
             _mediator = mediator;
         }
 
@@ -31,17 +32,30 @@ namespace Rooster.HealthCheck
             var data = new Dictionary<string, object>();
             var isHealthy = true;
 
-            foreach (var engine in _engines)
+            foreach (Engine engine in Engine.ToList(_engines))
             {
-                var response = engine.Trim().ToUpperInvariant() switch
+                var response = new HealthCheckResponse { Name = "NONE", IsHaelthy = false };
+
+                if (engine.Equals(Engine.MongoDb))
                 {
-                    Engines.MongoDb => await _mediator.Send(new MongoDbHealthCheckRequest(), cancellationToken),
-                    Engines.SqlServer => await _mediator.Send(new SqlServerHealthCheckRequest(), cancellationToken),
-                    Engines.Slack => await _mediator.Send(new SlackHealthCheckRequest(), cancellationToken),
-                    Engines.AppInsights => await _mediator.Send(new AppInsightsHealthCheckRequest(), cancellationToken),
-                    Engines.Mock => new HealthCheckResponse { Name = Engines.Mock, IsHaelthy = true },
-                    _ => new HealthCheckResponse { Name = "NONE", IsHaelthy = false }
-                };
+                    response = await _mediator.Send(new MongoDbHealthCheckRequest(), cancellationToken);
+                }
+                else if (engine.Equals(Engine.SqlServer))
+                {
+                    response = await _mediator.Send(new SqlServerHealthCheckRequest(), cancellationToken);
+                }
+                else if (engine.Equals(Engine.Slack))
+                {
+                    response = await _mediator.Send(new SlackHealthCheckRequest(), cancellationToken);
+                }
+                else if (engine.Equals(Engine.AppInsights))
+                {
+                    response = await _mediator.Send(new AppInsightsHealthCheckRequest(), cancellationToken);
+                }
+                else if (engine.Equals(Engine.Mock))
+                {
+                    response = new HealthCheckResponse { Name = Engine.Mock.Name, IsHaelthy = true };
+                }
 
                 isHealthy = isHealthy && response.IsHaelthy;
 

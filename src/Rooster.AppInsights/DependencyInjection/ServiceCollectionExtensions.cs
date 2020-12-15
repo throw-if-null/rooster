@@ -3,6 +3,7 @@ using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Rooster.AppInsights.Commands.HealthCheck;
 using Rooster.AppInsights.Commands.SendDockerRunParams;
 using Rooster.AppInsights.Handlers.HealthCheck;
@@ -10,7 +11,6 @@ using Rooster.AppInsights.Handlers.ProcessDockerLog;
 using Rooster.AppInsights.Reporters;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
-using Rooster.Mediator.Commands.Common;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
@@ -26,7 +26,15 @@ namespace Rooster.AppInsights.DependencyInjection
     {
         private static readonly string TelemetryOptionsPath = $"Reporters:AppInsights:{nameof(TelemetryReporterOptions)}";
 
-        public static IServiceCollection AddAppInsights(this IServiceCollection services, IConfiguration configuration)
+        public static IHost AddAppInsightsHost(this IHostBuilder builder)
+        {
+            builder.AddHost((ctx, services) => AddAppInsights(ctx.Configuration, services));
+
+            return builder.Build();
+
+        }
+
+        private static IServiceCollection AddAppInsights(IConfiguration configuration, IServiceCollection services)
         {
             services.Configure<TelemetryReporterOptions>(configuration.GetSection(TelemetryOptionsPath));
 

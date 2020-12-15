@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 using Rooster.AppInsights.DependencyInjection;
 using Rooster.CrossCutting;
 using Rooster.CrossCutting.Exceptions;
-using Rooster.DependencyInjection;
 using Rooster.HealthCheck;
 using Rooster.Hosting;
 using Rooster.Mock.DependencyInjection;
@@ -39,20 +38,35 @@ internal class Program
 
     public async static Task Run(CancellationToken cancellation)
     {
-        var engines = Configuration.Value.GetSection($"{nameof(AppHostOptions)}:{nameof(Engines)}").Get<Collection<string>>();
+        var engines = Configuration.Value.GetSection($"{nameof(AppHostOptions)}:{nameof(Engine)}").Get<Collection<string>>();
         var hosts = new List<IHost>(engines.Count + 1) { Host.CreateDefaultBuilder().ConfigureHealthCheck() };
 
-        foreach (var engine in engines)
+        foreach (var engine in Engine.ToList(engines))
         {
-            var host = engine.Trim().ToUpperInvariant() switch
+            IHost host = null;
+
+            if (engine.Equals(Engine.MongoDb))
             {
-                Engines.MongoDb => Host.CreateDefaultBuilder().AddHost(services => services.AddMongoDb(Configuration.Value)),
-                Engines.SqlServer => Host.CreateDefaultBuilder().AddHost(services => services.AddSqlServer(Configuration.Value)),
-                Engines.Slack => Host.CreateDefaultBuilder().AddHost(services => services.AddSlack(Configuration.Value)),
-                Engines.AppInsights => Host.CreateDefaultBuilder().AddHost(services => services.AddAppInsights(Configuration.Value)),
-                Engines.Mock => Host.CreateDefaultBuilder().AddHost(services => services.AddMock(Configuration.Value)),
-                _ => throw new NotSupportedEngineException(engine),
-            };
+                host = Host.CreateDefaultBuilder().AddMongoDbHost();
+            }
+            else if (engine.Equals(Engine.SqlServer))
+            {
+                host = Host.CreateDefaultBuilder().AddSqlServerHost();
+            }
+            else if (engine.Equals(Engine.Slack))
+            {
+                Host.CreateDefaultBuilder().AddSlackHost();
+            }
+            else if (engine.Equals(Engine.AppInsights))
+            {
+                host = Host.CreateDefaultBuilder().AddAppInsightsHost();
+            }
+            else if (engine.Equals(Engine.Mock))
+            {
+                host = Host.CreateDefaultBuilder().AddMockHost();
+            }
+            else
+                throw new NotSupportedEngineException(engine.Name);
 
             hosts.Add(host);
         }

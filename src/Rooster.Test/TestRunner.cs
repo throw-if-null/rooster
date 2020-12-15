@@ -35,7 +35,7 @@ namespace Rooster.Test
 {
     public static class TestRunner
     {
-        internal static IHost Run(string appsettings, Action<HostBuilderContext, IServiceCollection> configure)
+        internal static IHost Run(string appsettings, Action<HostBuilderContext, IServiceCollection> configureHost)
         {
             IConfiguration configuration =
                 new ConfigurationBuilder()
@@ -43,29 +43,8 @@ namespace Rooster.Test
                     .AddJsonFile(appsettings, optional: false, true)
                     .Build();
 
-            var hosts = new List<IHost>();
-
-            var engines = configuration.GetSection($"{nameof(AppHostOptions)}:{nameof(Engines)}").Get<Collection<string>>();
-
-            var x = configuration.GetSection($"{nameof(AppHostOptions)}");
-            foreach (var engine in engines)
-            {
-                var host = engine.Trim().ToUpperInvariant() switch
-                {
-                    Engines.MongoDb => BuildHost((ctx, services) => services.AddMongoDb(ctx.Configuration)),
-                    Engines.SqlServer => BuildHost((ctx, services) => services.AddSqlServer(ctx.Configuration)),
-                    Engines.Slack => BuildHost((ctx, services) => services.AddSlack(ctx.Configuration)),
-                    Engines.AppInsights => BuildHost((ctx, services) => services.AddAppInsights(ctx.Configuration)),
-                    Engines.Mock => BuildMockHost(configuration, configure),
-                    _ => throw new NotSupportedEngineException(engine),
-                };
-
-                return host;
-            }
-
-            throw new NotImplementedException();
+            return BuildMockHost(configuration, configureHost);
         }
-
 
         public static IHost BuildMockHost(IConfiguration configuration, Action<HostBuilderContext, IServiceCollection> configureHost)
         {
@@ -104,21 +83,6 @@ namespace Rooster.Test
 
                     services.AddHostedService<MockHost>();
                 })
-                .ConfigureServices(configureHost)
-                .UseConsoleLifetime();
-
-            return builder.Build();
-        }
-
-        public static IHost BuildHost(Action<HostBuilderContext, IServiceCollection> configureHost)
-        {
-            var builder =
-                Host.CreateDefaultBuilder()
-                .ConfigureHostConfiguration(configurator =>
-                    configurator
-                        .SetBasePath(Directory.GetCurrentDirectory())
-                        .AddJsonFile("appsettings.json", optional: false))
-                .ConfigureServices((context, services) => services.AddRooster(context.Configuration))
                 .ConfigureServices(configureHost)
                 .UseConsoleLifetime();
 

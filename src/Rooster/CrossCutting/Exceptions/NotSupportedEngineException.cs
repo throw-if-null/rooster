@@ -7,7 +7,7 @@ namespace Rooster.CrossCutting.Exceptions
         private static readonly Func<string, string> BuildErrorMessage =
             delegate (string engine)
             {
-                return $"Engine: {engine} is not supported. Supported values are: {Engines.Values}.";
+                return $"Engine: {engine} is not supported. Supported values are: {Engine.Values}.";
             };
 
         public NotSupportedEngineException(string databaseEngine) :

@@ -64,13 +64,13 @@ namespace Rooster.Slack.Commands.HealthCheck
                         x => TransientHttpStatusCodePredicate(x),
                         () => Send(linkedSource.Token));
 
-                return Healthy(Engines.Slack);
+                return Healthy(Engine.Slack.Name);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "HealthCheck failed.", Array.Empty<object>());
 
-                return Unhealthy(Engines.Slack, ex.ToString());
+                return Unhealthy(Engine.Slack.Name, ex.ToString());
             }
         }
 

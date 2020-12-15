@@ -34,11 +34,11 @@ namespace Rooster.MongoDb.Mediator.Commands.HealthCheck
                             x => false,
                             () => logEntries.CountDocumentsAsync(new FilterDefinitionBuilder<LogEntry>().Empty));
 
-                return Healthy(Engines.MongoDb);
+                return Healthy(Engine.MongoDb.Name);
             }
             catch (Exception ex)
             {
-                return Unhealthy(Engines.MongoDb, ex.ToString());
+                return Unhealthy(Engine.MongoDb.Name, ex.ToString());
             }
         }
     }
