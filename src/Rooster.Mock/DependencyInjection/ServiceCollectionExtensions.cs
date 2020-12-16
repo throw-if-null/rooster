@@ -22,9 +22,7 @@ namespace Rooster.Mock.DependencyInjection
     {
         public static IHost AddMockHost(this IHostBuilder builder)
         {
-            builder.AddHost((ctx, services) => AddMock(ctx.Configuration, services));
-
-            return builder.Build();
+            return builder.AddHost((ctx, services) => AddMock(ctx.Configuration, services));
         }
 
         private static IServiceCollection AddMock(IConfiguration configuration, IServiceCollection services)

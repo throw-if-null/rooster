@@ -28,9 +28,7 @@ namespace Rooster.SqlServer.DependencyInjection
 
         public static IHost AddSqlServerHost(this IHostBuilder builder)
         {
-            builder.AddHost((ctx, services) => AddSqlServer(ctx.Configuration, services));
-
-            return builder.Build();
+            return builder.AddHost((ctx, services) => AddSqlServer(ctx.Configuration, services));
         }
 
         private static IServiceCollection AddSqlServer(IConfiguration configuration, IServiceCollection services)

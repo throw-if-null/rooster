@@ -35,9 +35,7 @@ namespace Rooster.MongoDb.DependencyInjection
 
         public static IHost AddMongoDbHost(this IHostBuilder builder)
         {
-            builder.AddHost((ctx, services) => AddMongoDb(ctx.Configuration, services));
-
-            return builder.Build();
+            return builder.AddHost((ctx, services) => AddMongoDb(ctx.Configuration, services));
         }
 
         private static IServiceCollection AddMongoDb(IConfiguration configuration, IServiceCollection services)

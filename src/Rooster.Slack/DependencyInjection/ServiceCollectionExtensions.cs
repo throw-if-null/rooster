@@ -27,9 +27,7 @@ namespace Rooster.Slack.DependencyInjection
 
         public static IHost AddSlackHost(this IHostBuilder builder)
         {
-            builder.AddHost((ctx, services) => AddSlack(ctx.Configuration, services));
-
-            return builder.Build();
+            return builder.AddHost((ctx, services) => AddSlack(ctx.Configuration, services));
         }
 
         private static IServiceCollection AddSlack(IConfiguration configuration, IServiceCollection services)

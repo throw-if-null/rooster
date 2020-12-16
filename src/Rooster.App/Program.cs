@@ -1,14 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Rooster.AppInsights.DependencyInjection;
+using Rooster.App;
 using Rooster.CrossCutting;
-using Rooster.CrossCutting.Exceptions;
 using Rooster.HealthCheck;
 using Rooster.Hosting;
-using Rooster.Mock.DependencyInjection;
-using Rooster.MongoDb.DependencyInjection;
-using Rooster.Slack.DependencyInjection;
-using Rooster.SqlServer.DependencyInjection;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -43,30 +38,7 @@ internal class Program
 
         foreach (var engine in Engine.ToList(engines))
         {
-            IHost host = null;
-
-            if (engine.Equals(Engine.MongoDb))
-            {
-                host = Host.CreateDefaultBuilder().AddMongoDbHost();
-            }
-            else if (engine.Equals(Engine.SqlServer))
-            {
-                host = Host.CreateDefaultBuilder().AddSqlServerHost();
-            }
-            else if (engine.Equals(Engine.Slack))
-            {
-                Host.CreateDefaultBuilder().AddSlackHost();
-            }
-            else if (engine.Equals(Engine.AppInsights))
-            {
-                host = Host.CreateDefaultBuilder().AddAppInsightsHost();
-            }
-            else if (engine.Equals(Engine.Mock))
-            {
-                host = Host.CreateDefaultBuilder().AddMockHost();
-            }
-            else
-                throw new NotSupportedEngineException(engine.Name);
+            var host = EngineHostBuilder.ResolveAndBuild(engine);
 
             hosts.Add(host);
         }

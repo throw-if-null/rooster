@@ -28,10 +28,7 @@ namespace Rooster.AppInsights.DependencyInjection
 
         public static IHost AddAppInsightsHost(this IHostBuilder builder)
         {
-            builder.AddHost((ctx, services) => AddAppInsights(ctx.Configuration, services));
-
-            return builder.Build();
-
+            return builder.AddHost((ctx, services) => AddAppInsights(ctx.Configuration, services));
         }
 
         private static IServiceCollection AddAppInsights(IConfiguration configuration, IServiceCollection services)

@@ -29,13 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rooster.AppInsights\Rooster.AppInsights.csproj" />
-    <ProjectReference Include="..\Rooster.HealthCheck\Rooster.HealthCheck.csproj" />
-    <ProjectReference Include="..\Rooster.Mock\Rooster.Mock.csproj" />
-    <ProjectReference Include="..\Rooster.MongoDb\Rooster.MongoDb.csproj" />
-    <ProjectReference Include="..\Rooster.Slack\Rooster.Slack.csproj" />
-    <ProjectReference Include="..\Rooster.SqlServer\Rooster.SqlServer.csproj" />
-    <ProjectReference Include="..\Rooster\Rooster.csproj" />
+    <ProjectReference Include="..\Rooster.App\Rooster.App.csproj" />
   </ItemGroup>
 
   <ItemGroup>
