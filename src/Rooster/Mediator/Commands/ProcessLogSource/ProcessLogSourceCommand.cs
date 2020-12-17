@@ -37,7 +37,7 @@ namespace Rooster.Mediator.Commands.ProcessLogSource
 
                 await
                     _mediator.Send(
-                        new ProcessDockerLogRequest { ExportedLogEntry = extractedParams },
+                        new ProcessDockerLogRequest { ExtractedParams = extractedParams },
                         cancellationToken);
             }
 

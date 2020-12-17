@@ -6,6 +6,7 @@ using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
+using Rooster.Mediator.Commands.InitKuduPollers;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
 using Rooster.Mediator.Commands.ProcessDockerLog;
 using Rooster.Mediator.Commands.ProcessLogSource;
@@ -53,22 +54,24 @@ namespace Rooster.MongoDb.DependencyInjection
 
             services.AddMediatR(new[]
             {
-                typeof(ProcessDockerLogRequest),
                 typeof(ExtractDockerRunParamsRequest),
-                typeof(ProcessAppLogSourcesRequest),
-                typeof(ProcessLogSourceRequest),
                 typeof(GetLatestByServiceAndContainerNamesRequest),
+                typeof(InitKuduPollersRequest),
+                typeof(ProcessAppLogSourcesRequest),
+                typeof(ProcessDockerLogRequest),
+                typeof(ProcessLogSourceRequest),
                 typeof(SendDockerRunParamsRequest),
                 typeof(StartKuduPollerRequest),
                 typeof(ValidateExportedRunParamsRequest)
             });
 
-            services.AddTransient<IRequestHandler<SendDockerRunParamsRequest, Unit>, MongoDbSendDockerRunParamsCommand>();
-            services.AddTransient<IRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>, MongoDbGetLatestByServiceAndContainerNamesQuery>();
             services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
+            services.AddTransient<IRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>, MongoDbGetLatestByServiceAndContainerNamesQuery>();
+            services.AddTransient<IRequestHandler<InitKuduPollersRequest, Unit>, InitKuduPollersCommand>();
             services.AddTransient<IRequestHandler<ProcessAppLogSourcesRequest, Unit>, ProcessAppLogSourcesCommand>();
-            services.AddTransient<IRequestHandler<ProcessLogSourceRequest, Unit>, ProcessLogSourceCommand>();
             services.AddTransient<IRequestHandler<ProcessDockerLogRequest, Unit>, MongoDbProcessDockerLogCommand >();
+            services.AddTransient<IRequestHandler<ProcessLogSourceRequest, Unit>, ProcessLogSourceCommand>();
+            services.AddTransient<IRequestHandler<SendDockerRunParamsRequest, Unit>, MongoDbSendDockerRunParamsCommand>();
             services.AddTransient<IRequestHandler<StartKuduPollerRequest, Unit>, StartKuduPollerCommand>();
             services.AddTransient<IRequestHandler<ValidateExportedRunParamsRequest, ValidateExportedRunParamsResponse>, ValidateExportedRunParamsCommand>();
 

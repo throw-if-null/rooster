@@ -24,7 +24,11 @@ namespace Rooster.Mediator.Commands.ProcessAppLogSources
 
         public void OnError([NotNull] Exception ex)
         {
-            _logger.LogWarning(ex, "{Command} failed.", nameof(ProcessAppLogSourcesCommand));
+            _logger.LogWarning(
+                ex,
+                "{Command} failed. Data: {KuduUrl}",
+                nameof(ProcessAppLogSourcesCommand),
+                Kudu.BaseUrl);
         }
     }
 }

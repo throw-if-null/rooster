@@ -10,8 +10,7 @@ using System.Threading.Tasks;
 
 namespace Rooster.Mediator.Commands.ProcessAppLogSources
 {
-    public class ProcessAppLogSourcesCommand :
-        IOpinionatedRequestHandler<ProcessAppLogSourcesRequest, Unit>
+    public class ProcessAppLogSourcesCommand : IOpinionatedRequestHandler<ProcessAppLogSourcesRequest, Unit>
     {
         private const string LogIsOldMessage = "Log: {0} is old. Last updated: {1}. Machine: {2}";
 

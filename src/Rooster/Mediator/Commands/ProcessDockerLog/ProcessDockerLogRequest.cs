@@ -1,6 +1,6 @@
 ﻿using MediatR;
+using Rooster.Mediator.Commands.Common;
 using Rooster.Mediator.Commands.Common.Behaviors;
-using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
@@ -10,7 +10,7 @@ namespace Rooster.Mediator.Commands.ProcessDockerLog
         IRequest,
         IRequestProcessingErrorBehavior
     {
-        public ExtractDockerRunParamsResponse ExportedLogEntry { get; set; }
+        public DockerRunParams ExtractedParams { get; set; }
 
         public void OnError([NotNull] Exception ex)
         {

@@ -20,7 +20,7 @@ namespace Benchmarks.WritingJson
 
         private static readonly ProcessDockerLogRequest Request = new ProcessDockerLogRequest
         {
-            ExportedLogEntry = new ExtractDockerRunParamsResponse
+            ExtractedParams = new ExtractDockerRunParamsResponse
             {
                 ContainerName = "test",
                 Created = DateTimeOffset.UtcNow,
@@ -38,10 +38,10 @@ namespace Benchmarks.WritingJson
         {
             var attachmentFields = new object[4]
             {
-                new { title = DateTitle, value = $"`{Request.ExportedLogEntry.EventDate}`" },
-                new { title = ContainerNameTitle, value = $"`{Request.ExportedLogEntry.ContainerName}`"},
-                new { title = PortsTitle, value = $"`{Request.ExportedLogEntry.InboundPort}` : `{Request.ExportedLogEntry.OutboundPort}`"},
-                new { title = ImageTitle, value = $"`{Request.ExportedLogEntry.ImageName}`: `{Request.ExportedLogEntry.ImageTag}`" }
+                new { title = DateTitle, value = $"`{Request.ExtractedParams.EventDate}`" },
+                new { title = ContainerNameTitle, value = $"`{Request.ExtractedParams.ContainerName}`"},
+                new { title = PortsTitle, value = $"`{Request.ExtractedParams.InboundPort}` : `{Request.ExtractedParams.OutboundPort}`"},
+                new { title = ImageTitle, value = $"`{Request.ExtractedParams.ImageName}`: `{Request.ExtractedParams.ImageTag}`" }
             };
 
             var content =
@@ -53,7 +53,7 @@ namespace Benchmarks.WritingJson
                         {
                             mrkdwn_in = new object[1] { MarkdownInOption },
                             color = ColorValue,
-                            pretext = $"*Service:* {Request.ExportedLogEntry.ServiceName}",
+                            pretext = $"*Service:* {Request.ExtractedParams.ServiceName}",
                             text = $"_{Message}_",
                             fields = attachmentFields
                         },
@@ -102,29 +102,29 @@ namespace Benchmarks.WritingJson
             writer.WriteEndArray();
 
             writer.WriteString(colorKey, colorValue);
-            writer.WriteString(pretextKey, $"*Service:* {request.ExportedLogEntry.ServiceName}");
+            writer.WriteString(pretextKey, $"*Service:* {request.ExtractedParams.ServiceName}");
             writer.WriteString(textKey, $"_{Message}_");
 
             writer.WriteStartArray(fieldsKey); // start fields
 
             writer.WriteStartObject();
             writer.WriteString(titleKey, dateTitleValue);
-            writer.WriteString(valueKey, $"`{request.ExportedLogEntry.EventDate}`");
+            writer.WriteString(valueKey, $"`{request.ExtractedParams.EventDate}`");
             writer.WriteEndObject();
 
             writer.WriteStartObject();
             writer.WriteString(titleKey, containerNameTitleValue);
-            writer.WriteString(valueKey, $"`{request.ExportedLogEntry.ContainerName}`");
+            writer.WriteString(valueKey, $"`{request.ExtractedParams.ContainerName}`");
             writer.WriteEndObject();
 
             writer.WriteStartObject();
             writer.WriteString(titleKey, portsTitleValue);
-            writer.WriteString(valueKey, $"`{request.ExportedLogEntry.InboundPort}` : `{request.ExportedLogEntry.OutboundPort}`");
+            writer.WriteString(valueKey, $"`{request.ExtractedParams.InboundPort}` : `{request.ExtractedParams.OutboundPort}`");
             writer.WriteEndObject();
 
             writer.WriteStartObject();
             writer.WriteString(titleKey, imageTitleValue);
-            writer.WriteString(valueKey, $"`{request.ExportedLogEntry.ImageName}`: `{request.ExportedLogEntry.ImageTag}`");
+            writer.WriteString(valueKey, $"`{request.ExtractedParams.ImageName}`: `{request.ExtractedParams.ImageTag}`");
             writer.WriteEndObject();
 
             writer.WriteEndArray(); // end fields

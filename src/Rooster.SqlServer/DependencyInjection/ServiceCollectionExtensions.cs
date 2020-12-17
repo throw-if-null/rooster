@@ -6,6 +6,7 @@ using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
+using Rooster.Mediator.Commands.InitKuduPollers;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
 using Rooster.Mediator.Commands.ProcessDockerLog;
 using Rooster.Mediator.Commands.ProcessLogSource;
@@ -44,6 +45,7 @@ namespace Rooster.SqlServer.DependencyInjection
             {
                 typeof(ExtractDockerRunParamsRequest),
                 typeof(GetLatestByServiceAndContainerNamesRequest),
+                typeof(InitKuduPollersRequest),
                 typeof(ProcessAppLogSourcesRequest),
                 typeof(ProcessDockerLogRequest),
                 typeof(ProcessLogSourceRequest),
@@ -54,6 +56,7 @@ namespace Rooster.SqlServer.DependencyInjection
 
             services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
             services.AddTransient<IRequestHandler<GetLatestByServiceAndContainerNamesRequest, DateTimeOffset>, SqlGetLatestByServiceAndContainerNamesQuery>();
+            services.AddTransient<IRequestHandler<InitKuduPollersRequest, Unit>, InitKuduPollersCommand>();
             services.AddTransient<IRequestHandler<ProcessAppLogSourcesRequest, Unit>, ProcessAppLogSourcesCommand>();
             services.AddTransient<IRequestHandler<ProcessDockerLogRequest, Unit>, SqlProcessDockerLogCommand>();
             services.AddTransient<IRequestHandler<ProcessLogSourceRequest, Unit>, ProcessLogSourceCommand>();

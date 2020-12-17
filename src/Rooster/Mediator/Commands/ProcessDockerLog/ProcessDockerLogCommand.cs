@@ -2,7 +2,6 @@
 using Rooster.Mediator.Commands.Common;
 using Rooster.Mediator.Commands.SendDockerRunParams;
 using Rooster.Mediator.Commands.ValidateExportedRunParams;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,7 +20,7 @@ namespace Rooster.Mediator.Commands.ProcessDockerLog
 
         public async Task<Unit> Handle(ProcessDockerLogRequest request, CancellationToken cancellationToken)
         {
-            ValidateExportedRunParamsRequest validateExportedRunParamsRequest = request.ExportedLogEntry;
+            var validateExportedRunParamsRequest = ValidateExportedRunParamsRequest.FromBase(request.ExtractedParams);
             ValidateExportedRunParamsResponse validateExportedRunParamsResponse =
                 await Mediator.Send(validateExportedRunParamsRequest, cancellationToken);
 
@@ -31,7 +30,7 @@ namespace Rooster.Mediator.Commands.ProcessDockerLog
             if (!await ShouldProcessDockerLog(validateExportedRunParamsRequest, cancellationToken))
                 return Unit.Value;
 
-            SendDockerRunParamsRequest sendDockerRunParamsRequest = request.ExportedLogEntry;
+            var sendDockerRunParamsRequest = SendDockerRunParamsRequest.FromBase(request.ExtractedParams);
 
             return await Mediator.Send(sendDockerRunParamsRequest, cancellationToken);
         }

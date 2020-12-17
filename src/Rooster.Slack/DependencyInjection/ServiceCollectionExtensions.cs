@@ -7,6 +7,7 @@ using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.Common.Behaviors;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
+using Rooster.Mediator.Commands.InitKuduPollers;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
 using Rooster.Mediator.Commands.ProcessDockerLog;
 using Rooster.Mediator.Commands.ProcessLogSource;
@@ -43,6 +44,7 @@ namespace Rooster.Slack.DependencyInjection
             services.AddMediatR(new[]
             {
                 typeof(ExtractDockerRunParamsRequest),
+                typeof(InitKuduPollersRequest),
                 typeof(ProcessAppLogSourcesRequest),
                 typeof(ProcessDockerLogRequest),
                 typeof(ProcessLogSourceRequest),
@@ -52,6 +54,7 @@ namespace Rooster.Slack.DependencyInjection
             });
 
             services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
+            services.AddTransient<IRequestHandler<InitKuduPollersRequest, Unit>, InitKuduPollersCommand>();
             services.AddTransient<IRequestHandler<ProcessAppLogSourcesRequest, Unit>, ProcessAppLogSourcesCommand>();
             services.AddTransient<IRequestHandler<ProcessDockerLogRequest, Unit>, SlackProcessDockerLogCommand>();
             services.AddTransient<IRequestHandler<ProcessLogSourceRequest, Unit>, ProcessLogSourceCommand>();

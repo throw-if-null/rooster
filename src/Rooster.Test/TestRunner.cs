@@ -3,14 +3,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Rooster.Adapters.Kudu;
-using Rooster.AppInsights.DependencyInjection;
 using Rooster.CrossCutting;
-using Rooster.CrossCutting.Exceptions;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.Hosting;
 using Rooster.Mediator.Commands.Common.Behaviors;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
+using Rooster.Mediator.Commands.InitKuduPollers;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
 using Rooster.Mediator.Commands.ProcessDockerLog;
 using Rooster.Mediator.Commands.ProcessLogSource;
@@ -21,13 +20,9 @@ using Rooster.Mock;
 using Rooster.Mock.Commands.ProcessLogEntry;
 using Rooster.Mock.Commands.SendDockerRunParams;
 using Rooster.Mock.Reporters;
-using Rooster.MongoDb.DependencyInjection;
 using Rooster.QoS.Resilency;
-using Rooster.Slack.DependencyInjection;
-using Rooster.SqlServer.DependencyInjection;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 
@@ -48,8 +43,7 @@ namespace Rooster.Test
 
         public static IHost BuildMockHost(IConfiguration configuration, Action<HostBuilderContext, IServiceCollection> configureHost)
         {
-            var builder =
-                Host.CreateDefaultBuilder()
+            var builder = Host.CreateDefaultBuilder()
                 .ConfigureServices((_, services) => services.AddRooster(configuration))
                 .ConfigureServices((context, services) =>
                 {
@@ -63,6 +57,7 @@ namespace Rooster.Test
                     services.AddMediatR(new[]
                     {
                         typeof(ExtractDockerRunParamsRequest),
+                        typeof(InitKuduPollersRequest),
                         typeof(ProcessAppLogSourcesRequest),
                         typeof(ProcessDockerLogRequest),
                         typeof(ProcessLogSourceRequest),
@@ -72,6 +67,7 @@ namespace Rooster.Test
                     });
 
                     services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
+                    services.AddTransient<IRequestHandler<InitKuduPollersRequest, Unit>, InitKuduPollersCommand>();
                     services.AddTransient<IRequestHandler<ProcessAppLogSourcesRequest, Unit>, ProcessAppLogSourcesCommand>();
                     services.AddTransient<IRequestHandler<ProcessDockerLogRequest, Unit>, MockProcessDockerLogCommand>();
                     services.AddTransient<IRequestHandler<ProcessLogSourceRequest, Unit>, ProcessLogSourceCommand>();

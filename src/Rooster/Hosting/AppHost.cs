@@ -1,13 +1,8 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Rooster.Adapters.Kudu;
-using Rooster.CrossCutting.Exceptions;
-using Rooster.Mediator.Commands.StartKuduPoller;
+using Rooster.Mediator.Commands.InitKuduPollers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,19 +10,13 @@ namespace Rooster.Hosting
 {
     public abstract class AppHost : IHostedService
     {
-        private readonly AppHostOptions _options;
-        private readonly IEnumerable<IKuduApiAdapter> _kudus;
         private readonly IMediator _mediator;
         private readonly ILogger _logger;
 
         public AppHost(
-            IOptionsMonitor<AppHostOptions> options,
-            IEnumerable<IKuduApiAdapter> kudus,
             IMediator mediator,
             ILogger<AppHost> logger)
         {
-            _options = options.CurrentValue ?? throw new ArgumentNullException(nameof(options));
-            _kudus = kudus;
             _mediator = mediator;
             _logger = logger;
         }
@@ -40,23 +29,7 @@ namespace Rooster.Hosting
         {
             _logger.LogInformation(StartLogMessage, Array.Empty<object>());
 
-            var kudus = _kudus.ToArray();
-            var tasks = new Task[kudus.Length];
-
-            for (var i = 0; i < kudus.Length; i++)
-            {
-                var request = new StartKuduPollerRequest(_logger)
-                {
-                    KuduAdapter = kudus[i],
-                    CurrentDateVarianceInSeconds = _options.CurrentDateVarianceInSeconds,
-                    PoolingIntervalInSeconds = _options.PoolingIntervalInSeconds,
-                    UseInternalPoller = _options.UseInternalPoller
-                };
-
-                tasks[i] = CreatePollerTask(request, cancellationToken);
-            }
-
-            await Task.WhenAll(tasks);
+            await _mediator.Send(new InitKuduPollersRequest(), cancellationToken);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -64,28 +37,6 @@ namespace Rooster.Hosting
             _logger.LogInformation(StopLogMessage, Array.Empty<object>());
 
             return Task.CompletedTask;
-        }
-
-        private Task<Unit> CreatePollerTask(StartKuduPollerRequest request, CancellationToken cancellationToken)
-        {
-            try
-            {
-                return _mediator.Send(request, cancellationToken);
-            }
-            catch(PollingCanceledException pce)
-            {
-                _logger.LogWarning(
-                    pce.InnerException,
-                    $"Polling for {request.KuduAdapter.BaseUrl} has been canceled.");
-
-                return Unit.Task;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogCritical(ex, "Unhandled error occurred.");
-
-                throw;
-            }
         }
     }
 }

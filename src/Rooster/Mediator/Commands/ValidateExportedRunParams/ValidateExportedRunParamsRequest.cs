@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Rooster.Mediator.Commands.Common;
 using Rooster.Mediator.Commands.Common.Behaviors;
-using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
@@ -17,17 +16,17 @@ namespace Rooster.Mediator.Commands.ValidateExportedRunParams
             return;
         }
 
-        public static implicit operator ValidateExportedRunParamsRequest(ExtractDockerRunParamsResponse response) =>
+        internal static ValidateExportedRunParamsRequest FromBase(DockerRunParams parameters) =>
             new()
             {
-                Created = response.Created,
-                ServiceName = response.ServiceName,
-                ContainerName = response.ContainerName,
-                ImageName = response.ImageName,
-                ImageTag = response.ImageTag,
-                InboundPort = response.InboundPort,
-                OutboundPort = response.OutboundPort,
-                EventDate = response.EventDate
+                Created = parameters.Created,
+                ServiceName = parameters.ServiceName,
+                ContainerName = parameters.ContainerName,
+                ImageName = parameters.ImageName,
+                ImageTag = parameters.ImageTag,
+                InboundPort = parameters.InboundPort,
+                OutboundPort = parameters.OutboundPort,
+                EventDate = parameters.EventDate
             };
     }
 }

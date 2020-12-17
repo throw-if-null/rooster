@@ -30,7 +30,7 @@ namespace Benchmarks.WebHookReporter
 
         private static readonly ProcessDockerLogRequest Request = new ProcessDockerLogRequest
         {
-            ExportedLogEntry = new ExtractDockerRunParamsResponse
+            ExtractedParams = new ExtractDockerRunParamsResponse
             {
                 ContainerName = "test",
                 Created = DateTimeOffset.UtcNow,
@@ -73,10 +73,10 @@ namespace Benchmarks.WebHookReporter
 
             var attachmentFields = new object[4]
             {
-                new { title = DateTitle, value = $"`{Request.ExportedLogEntry.EventDate}`" },
-                new { title = ContainerNameTitle, value = $"`{Request.ExportedLogEntry.ContainerName}`"},
-                new { title = PortsTitle, value = $"`{Request.ExportedLogEntry.InboundPort}` : `{Request.ExportedLogEntry.OutboundPort}`"},
-                new { title = ImageTitle, value = $"`{Request.ExportedLogEntry.ImageName}`: `{Request.ExportedLogEntry.ImageTag}`" }
+                new { title = DateTitle, value = $"`{Request.ExtractedParams.EventDate}`" },
+                new { title = ContainerNameTitle, value = $"`{Request.ExtractedParams.ContainerName}`"},
+                new { title = PortsTitle, value = $"`{Request.ExtractedParams.InboundPort}` : `{Request.ExtractedParams.OutboundPort}`"},
+                new { title = ImageTitle, value = $"`{Request.ExtractedParams.ImageName}`: `{Request.ExtractedParams.ImageTag}`" }
             };
 
             var content =
@@ -88,7 +88,7 @@ namespace Benchmarks.WebHookReporter
                         {
                             mrkdwn_in = new object[1] { MarkdownInOption },
                             color = ColorValue,
-                            pretext = $"*Service:* {Request.ExportedLogEntry.ServiceName}",
+                            pretext = $"*Service:* {Request.ExtractedParams.ServiceName}",
                             text = $"_{Message}_",
                             fields = attachmentFields
                         },

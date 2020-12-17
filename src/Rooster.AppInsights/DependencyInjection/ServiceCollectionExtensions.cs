@@ -13,6 +13,7 @@ using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
+using Rooster.Mediator.Commands.InitKuduPollers;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
 using Rooster.Mediator.Commands.ProcessDockerLog;
 using Rooster.Mediator.Commands.ProcessLogSource;
@@ -49,9 +50,10 @@ namespace Rooster.AppInsights.DependencyInjection
 
             services.AddMediatR(new[]
             {
-                typeof(ProcessDockerLogRequest),
                 typeof(ExtractDockerRunParamsRequest),
+                typeof(InitKuduPollersRequest),
                 typeof(ProcessAppLogSourcesRequest),
+                typeof(ProcessDockerLogRequest),
                 typeof(ProcessLogSourceRequest),
                 typeof(SendDockerRunParamsRequest),
                 typeof(StartKuduPollerRequest),
@@ -59,6 +61,7 @@ namespace Rooster.AppInsights.DependencyInjection
             });
 
             services.AddTransient<IRequestHandler<ExtractDockerRunParamsRequest, ExtractDockerRunParamsResponse>, ExtractDockerRunParamsCommand>();
+            services.AddTransient<IRequestHandler<InitKuduPollersRequest, Unit>, InitKuduPollersCommand>();
             services.AddTransient<IRequestHandler<ProcessAppLogSourcesRequest, Unit>, ProcessAppLogSourcesCommand>();
             services.AddTransient<IRequestHandler<ProcessLogSourceRequest, Unit>, ProcessLogSourceCommand>();
             services.AddTransient<IRequestHandler<StartKuduPollerRequest, Unit>, StartKuduPollerCommand>();
