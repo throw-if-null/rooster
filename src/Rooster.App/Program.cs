@@ -33,10 +33,10 @@ internal class Program
 
     public async static Task Run(CancellationToken cancellation)
     {
-        var engines = Configuration.Value.GetSection($"{nameof(AppHostOptions)}:{nameof(Engine)}").Get<Collection<string>>();
+        var engines = Configuration.Value.GetSection($"{nameof(PollerOptions)}").Get<Collection<PollerOptions>>();
         var hosts = new List<IHost>(engines.Count + 1) { Host.CreateDefaultBuilder().ConfigureHealthCheck() };
 
-        foreach (var engine in Engine.ToList(engines))
+        foreach (var engine in Engine.ToList(engines.Select(e => e.Engine)))
         {
             var host = EngineHostBuilder.ResolveAndBuild(engine);
 

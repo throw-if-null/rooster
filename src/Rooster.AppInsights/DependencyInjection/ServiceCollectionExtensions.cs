@@ -25,7 +25,7 @@ namespace Rooster.AppInsights.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        private static readonly string TelemetryOptionsPath = $"Reporters:AppInsights:{nameof(TelemetryReporterOptions)}";
+        private static readonly string TelemetryOptionsPath = $"Engines:AppInsights:{nameof(TelemetryReporterOptions)}";
 
         public static IHost AddAppInsightsHost(this IHostBuilder builder)
         {
@@ -46,7 +46,7 @@ namespace Rooster.AppInsights.DependencyInjection
             services.AddSingleton(new HostNameEnricher(nameof(AppInsightsHost)));
             services.AddSingleton(new TelemetryClient(new TelemetryConfiguration(instrumentationKey)));
 
-            services.AddKuduClient(configuration, "APPINSIGHTS");
+            services.AddKuduApiAdapterCache(configuration);
 
             services.AddMediatR(new[]
             {

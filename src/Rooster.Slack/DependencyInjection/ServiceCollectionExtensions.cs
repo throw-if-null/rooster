@@ -33,13 +33,13 @@ namespace Rooster.Slack.DependencyInjection
 
         private static IServiceCollection AddSlack(IConfiguration configuration, IServiceCollection services)
         {
-            services.Configure<WebHookReporterOptions>(configuration.GetSection($"Reporters:Slack:{nameof(WebHookReporterOptions)}"));
+            services.Configure<WebHookReporterOptions>(configuration.GetSection($"Engines:Slack:{nameof(WebHookReporterOptions)}"));
 
             services.AddSingleton(new HostNameEnricher(nameof(SlackHost)));
 
             services.AddHttpClient<IReporter, WebHookReporter>(x => x.BaseAddress = new Uri(SlackBaseUrl));
 
-            services.AddKuduClient(configuration, "SLACK");
+            services.AddKuduApiAdapterCache(configuration);
 
             services.AddMediatR(new[]
             {

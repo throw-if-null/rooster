@@ -27,7 +27,7 @@ namespace Rooster.MongoDb.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        private const string MongoDbPath = "DataStores:MongoDb";
+        private const string MongoDbPath = "Engines:MongoDb";
 
         private static string BuildMongoCollectionFactoryPath<T>()
         {
@@ -50,7 +50,7 @@ namespace Rooster.MongoDb.DependencyInjection
             services.AddSingleton<IDatabaseFactory, DatabaseFactory>();
             services.AddSingleton<ILogEntryCollectionFactory, LogEntryCollectionFactory>();
 
-            services.AddKuduClient(configuration, "MONGODB");
+            services.AddKuduApiAdapterCache(configuration);
 
             services.AddMediatR(new[]
             {

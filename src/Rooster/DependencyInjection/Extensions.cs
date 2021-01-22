@@ -13,6 +13,7 @@ using Serilog.Core;
 using Serilog.Exceptions;
 using Serilog.Extensions.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -38,7 +39,7 @@ namespace Rooster.DependencyInjection
                 .ConfigureServices((context, services) =>
                 {
                     services.Configure<Collection<KuduAdapterOptions>>(context.Configuration.GetSection($"Adapters:{nameof(KuduAdapterOptions)}"));
-                    services.Configure<AppHostOptions>(context.Configuration.GetSection($"{nameof(AppHostOptions)}"));
+                    services.Configure<Collection<PollerOptions>>(context.Configuration.GetSection($"{nameof(PollerOptions)}"));
                     services.Configure<RetryProviderOptions>(context.Configuration.GetSection($"{nameof(RetryProviderOptions)}"));
 
                     services.AddMemoryCache();
@@ -79,26 +80,36 @@ namespace Rooster.DependencyInjection
             return builder.Build();
         }
 
-        public static IServiceCollection AddKuduClient(
+        public static IServiceCollection AddKuduApiAdapterCache(
             this IServiceCollection services,
-            IConfiguration configuration,
-            [NotNull] string engine)
+            IConfiguration configuration)
         {
+            var cache = new ConcurrentDictionary<string, IKuduApiAdapter>();
+
             var options = configuration.GetSection($"Adapters:{nameof(KuduAdapterOptions)}").Get<Collection<KuduAdapterOptions>>();
 
             foreach (var option in options ?? Enumerable.Empty<KuduAdapterOptions>())
             {
-                if (!option.Tags.Any() ||
-                    option.Tags.Any(tag => tag.Equals(engine, StringComparison.InvariantCultureIgnoreCase)))
+                services
+                    .AddHttpClient<IKuduApiAdapter, KuduApiAdapter>($"Kudu-{Guid.NewGuid():N}", x =>
+                    {
+                        x.DefaultRequestHeaders.Add("adapter-name", option.Name.Trim().ToLowerInvariant());
+                        x.DefaultRequestHeaders.Authorization = BuildBasicAuthHeader(option.User, option.Password);
+                        x.BaseAddress = option.BaseUri;
+                    });
+            }
+
+            using (var provider = services.BuildServiceProvider())
+            {
+                var adapters = provider.GetServices<IKuduApiAdapter>();
+
+                foreach (var adapter in adapters)
                 {
-                    services
-                        .AddHttpClient<IKuduApiAdapter, KuduApiAdapter>($"Kudu-{Guid.NewGuid():N}", x =>
-                        {
-                            x.DefaultRequestHeaders.Authorization = BuildBasicAuthHeader(option.User, option.Password);
-                            x.BaseAddress = option.BaseUri;
-                        });
+                    cache[adapter.Name.Trim().ToLowerInvariant()] = adapter;
                 }
             }
+
+            services.AddSingleton(new KuduApiAdapterCache(cache));
 
             return services;
         }

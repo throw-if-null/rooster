@@ -33,7 +33,7 @@ namespace Rooster.Mock.DependencyInjection
 
             services.AddTransient<IMockReporter, MockReporter>();
 
-            services.AddKuduClient(configuration, "MOCK");
+            services.AddKuduApiAdapterCache(configuration);
 
             services.AddMediatR(new[]
             {

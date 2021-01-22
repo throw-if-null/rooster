@@ -1,7 +1,17 @@
-﻿namespace Rooster.Hosting
+﻿using System.Collections.ObjectModel;
+
+namespace Rooster.Hosting
 {
-    public class AppHostOptions
+    public class PollerOptions
     {
+        /// <summary>
+        /// Gets or sets the engine name.
+        /// </summary>
+        /// <remarks>
+        /// Supported values: AppInsights, MongoDb, Slack and SqlServer
+        /// </remarks>
+        public string Engine { get; set; }
+
         /// <summary>
         /// Gets or sets polling interval.
         /// The amount of time that will pass between tow consecutive calls toward Kudu API.
@@ -31,13 +41,8 @@
         public int CurrentDateVarianceInSeconds { get; set; } = 300;
 
         /// <summary>
-        /// Gets or sets the flag that determines whether logs are going to be persisted to one of supported stores.
+        /// Gets or sets the list of Kudu adapter names that this poller should use.
         /// </summary>
-        public bool UsePersistance { get; set; }
-
-        /// <summary>
-        /// Gets or sets the flag that determines whether notification are going to be sent when log gets extracted.
-        /// </summary>
-        public bool UseReporting { get; set; }
+        public Collection<string> KuduAdapters { get; set; } = new Collection<string>();
     }
 }

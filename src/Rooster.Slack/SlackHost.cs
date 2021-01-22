@@ -4,7 +4,7 @@ using Rooster.Hosting;
 
 namespace Rooster.Slack
 {
-    public class SlackHost : AppHost
+    public class SlackHost : PollerHost
     {
         public SlackHost(
             IMediator mediator,

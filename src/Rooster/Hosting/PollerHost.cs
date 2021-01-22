@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace Rooster.Hosting
 {
-    public abstract class AppHost : IHostedService
+    public abstract class PollerHost : IHostedService
     {
         private readonly IMediator _mediator;
         private readonly ILogger _logger;
 
-        public AppHost(
+        public PollerHost(
             IMediator mediator,
-            ILogger<AppHost> logger)
+            ILogger<PollerHost> logger)
         {
             _mediator = mediator;
             _logger = logger;

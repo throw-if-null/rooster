@@ -4,7 +4,7 @@ using Rooster.Hosting;
 
 namespace Rooster.AppInsights
 {
-    public class AppInsightsHost : AppHost
+    public class AppInsightsHost : PollerHost
     {
         public AppInsightsHost(
             IMediator mediator,

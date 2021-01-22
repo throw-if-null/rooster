@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
-using Rooster.Adapters.Kudu;
 using Rooster.CrossCutting.Exceptions;
 using Rooster.Mediator.Commands.Common.Behaviors;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
@@ -20,7 +20,7 @@ namespace Rooster.Mediator.Commands.StartKuduPoller
             _logger = logger;
         }
 
-        public IKuduApiAdapter KuduAdapter { get; init; }
+        public IEnumerable<string> KuduAdapters { get; init; }
 
         public int CurrentDateVarianceInSeconds { get; init; }
 

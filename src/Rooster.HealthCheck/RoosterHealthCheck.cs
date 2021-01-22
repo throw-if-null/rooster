@@ -23,7 +23,7 @@ namespace Rooster.HealthCheck
 
         public RoosterHealthCheck(IConfiguration configuration, IMediator mediator)
         {
-            _engines = configuration.GetSection($"{nameof(AppHostOptions)}:{nameof(Engine)}").Get<Collection<string>>();
+            _engines = configuration.GetSection($"{nameof(PollerOptions)}:{nameof(Engine)}").Get<Collection<string>>();
             _mediator = mediator;
         }
 

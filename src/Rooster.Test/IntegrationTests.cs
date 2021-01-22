@@ -10,10 +10,10 @@ using Xunit;
 
 namespace Rooster.Test
 {
-    public class MsiProxyDockerLogs
+    public class IntegrationOne
     {
         [Fact]
-        public async Task ShouldNotRead()
+        public async Task Should_not_read_msi_docker_logs()
         {
             var kuduMock = new Mock<IKuduApiAdapter>();
             kuduMock
@@ -32,7 +32,10 @@ namespace Rooster.Test
                 {
                     services.AddSingleton<ConcurrentDictionary<string, int>>(requests);
 
-                    services.AddTransient<IKuduApiAdapter>(x => kuduMock.Object);
+                    var cache = new ConcurrentDictionary<string, IKuduApiAdapter> { };
+                    cache.TryAdd("test-adapter", kuduMock.Object);
+
+                    services.AddSingleton<KuduApiAdapterCache>(new KuduApiAdapterCache(cache));
                 });
 
             await host.StartAsync();
@@ -57,10 +60,10 @@ namespace Rooster.Test
         }
     }
 
-    public class StaleMessages
+    public class IntegrationTwo
     {
         [Fact]
-        public async Task ShoudNotRead()
+        public async Task Shoud_not_read_stale_message()
         {
             var kuduMock = new Mock<IKuduApiAdapter>();
             kuduMock
@@ -79,7 +82,10 @@ namespace Rooster.Test
                     {
                         services.AddSingleton<ConcurrentDictionary<string, int>>(requests);
 
-                        services.AddTransient<IKuduApiAdapter>(x => kuduMock.Object);
+                        var cache = new ConcurrentDictionary<string, IKuduApiAdapter> { };
+                        cache.TryAdd("test-adapter", kuduMock.Object);
+
+                        services.AddSingleton<KuduApiAdapterCache>(new KuduApiAdapterCache(cache));
                     });
 
             await host.StopAsync();
@@ -90,10 +96,10 @@ namespace Rooster.Test
         }
     }
 
-    public class PollingIntervalSmallerThenCurrentDateTimeTollerance
+    public class IntegrationThree
     {
         [Fact]
-        public async Task ShouldReadSameLogMultipleTimes()
+        public async Task Should_read_same_log_multiple_times_if_poll_interval_is_smaller_then_time_tollerance()
         {
             long currentTicks = DateTimeOffset.UtcNow.Ticks;
             var kuduMock = new Mock<IKuduApiAdapter>();
@@ -114,7 +120,10 @@ namespace Rooster.Test
                 {
                     services.AddSingleton<ConcurrentDictionary<string, int>>(requests);
 
-                    services.AddTransient<IKuduApiAdapter>(x => kuduMock.Object);
+                    var cache = new ConcurrentDictionary<string, IKuduApiAdapter> { };
+                    cache.TryAdd("test-adapter", kuduMock.Object);
+
+                    services.AddSingleton<KuduApiAdapterCache>(new KuduApiAdapterCache(cache));
                 });
 
             await host.StartAsync(source.Token);
@@ -134,10 +143,10 @@ namespace Rooster.Test
         }
     }
 
-    public class PollingIntervalLargerThenCurrentDateTimeTollerance
+    public class IntegrationFour
     {
         [Fact]
-        public async Task ShouldReadOnlyOnce()
+        public async Task Should_read_once_when_poll_interval_larger_then_time_tollerance()
         {
             long currentTicks = DateTimeOffset.UtcNow.Ticks;
 
@@ -159,7 +168,10 @@ namespace Rooster.Test
                     {
                         services.AddSingleton<ConcurrentDictionary<string, int>>(requests);
 
-                        services.AddTransient<IKuduApiAdapter>(x => kuduMock.Object);
+                        var cache = new ConcurrentDictionary<string, IKuduApiAdapter> { };
+                        cache.TryAdd("test-adapter", kuduMock.Object);
+
+                        services.AddSingleton<KuduApiAdapterCache>(new KuduApiAdapterCache(cache));
                     });
 
             await host.StartAsync(source.Token);

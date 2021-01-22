@@ -4,7 +4,7 @@ using Rooster.Hosting;
 
 namespace Rooster.MongoDb
 {
-    public class MongoDbHost : AppHost
+    public class MongoDbHost : PollerHost
     {
         public MongoDbHost(
             IMediator mediator,

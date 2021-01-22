@@ -25,7 +25,7 @@ namespace Rooster.SqlServer.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        private const string SqlConfigPath = "DataStores:Sql";
+        private const string SqlConfigPath = "Engines:Sql";
 
         public static IHost AddSqlServerHost(this IHostBuilder builder)
         {
@@ -39,7 +39,7 @@ namespace Rooster.SqlServer.DependencyInjection
             services.AddSingleton(new HostNameEnricher(nameof(SqlServerHost)));
             services.AddSingleton<IConnectionFactory, ConnectionFactory>();
 
-            services.AddKuduClient(configuration, "SQLSERVER");
+            services.AddKuduApiAdapterCache(configuration);
 
             services.AddMediatR(new[]
             {

@@ -4,7 +4,7 @@ using Rooster.Hosting;
 
 namespace Rooster.Mock
 {
-    public class MockHost : AppHost
+    public class MockHost : PollerHost
     {
         public MockHost(
             IMediator mediator,

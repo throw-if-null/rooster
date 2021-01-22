@@ -52,8 +52,6 @@ namespace Rooster.Test
 
                     services.AddTransient<IMockReporter, MockReporter>();
 
-                    services.AddKuduClient(configuration, "MOCK");
-
                     services.AddMediatR(new[]
                     {
                         typeof(ExtractDockerRunParamsRequest),
@@ -88,7 +86,7 @@ namespace Rooster.Test
         private static IServiceCollection AddRooster(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<Collection<KuduAdapterOptions>>(configuration.GetSection($"Adapters:{nameof(KuduAdapterOptions)}"));
-            services.Configure<AppHostOptions>(configuration.GetSection($"{nameof(AppHostOptions)}"));
+            services.Configure<Collection<PollerOptions>>(configuration.GetSection($"{nameof(PollerOptions)}"));
             services.Configure<RetryProviderOptions>(configuration.GetSection($"{nameof(RetryProviderOptions)}"));
 
             services.AddMemoryCache();
@@ -96,8 +94,6 @@ namespace Rooster.Test
             services.AddSingleton<IInstrumentationContext, InstrumentationContext>();
             services.AddSingleton<IRetryProvider, RetryProvider>();
             services.AddSingleton<CorrelationIdEnricher>();
-
-            services.AddKuduClient(configuration, string.Empty);
 
             return services;
         }

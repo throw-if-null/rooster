@@ -4,7 +4,7 @@ using Rooster.Hosting;
 
 namespace Rooster.SqlServer
 {
-    public class SqlServerHost : AppHost
+    public class SqlServerHost : PollerHost
     {
         public SqlServerHost(
             IMediator mediator,
