@@ -127,6 +127,23 @@ PollerOptions__0__Engine=AppInsights
 Engines__AppInsights__TelemetryReporterOptions__InstrumentationKey=xxx
 ```
 
+## Health Checking
+Rooster will always start a kestrel server instance that exposes a health endpoint: `/health` that can be used to check the application health. Since :rooster: is higly configurable and you can have it sending logs to one of 4 supported location implemented health check is smart to read the configuration and run health checks only for configured destinations.
+That means if you configure :rooster: to send logs to SQL database when you hit `/health` endpoint underlaying code will check if database connectivity is good.
+
+### AppInsights Health Check
+Unimplemented, so it always returns healthy status.
+
+### MongoDb Health Check
+Tries to get the count of document inside `LogEntry` MongoDb collection. The `LogEntry` name is the default name, but collection name can be changed when configuring MongoDb destination.
+
+### Slack Health Check
+Sends a get request to configured Slack Webhook URL and returns healthy as long as the result less then 500
+
+### SQL Server Health Check
+Executed simple SQL query: `SELECT 1` and returns healthy if command is successful.
+
+If multiple destinations are configured health check will return healthy if all checks are successful. Meaning if you have SQL and MongoDb configured both health checks need to be successful in order to have final health status as `healthy`.
 ### Logging
 Rooster uses [Serilog](https://serilog.net/) as a logging provider of choice the only installed sink is for logging to console, if you want ot override the minimum logging level you can use the environment variable below:
 ```
