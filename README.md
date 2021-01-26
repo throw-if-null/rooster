@@ -167,3 +167,6 @@ RetryProviderOptions__Delays__0=10
 RetryProviderOptions__Delays__1=30
 RetryProviderOptions__Delays__2=100
 ```
+
+## Feedback
+Would be very much appreciated in any form :-) 
