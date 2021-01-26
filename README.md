@@ -41,6 +41,13 @@ PollerOptions__0__UseInternalPoller=false
 Note:  
 It is import to be aware that `PoolingIntervalInSeconds` and `CurrentDateVarianceInMinutes` are connected and you should make sure that `PoolingIntervalInSeconds` is alway greater or equal to `CurrentDateVarianceInMinutes` so you don't loose any logs. Rooster will decrease current date time by `CurrentDateVarianceInMinutes` when looking for the latest logs, so if you poll every 10 minutes and your variance is 5 you may loose the logs that occured in the first 5 minutes of polling wait time interval. 
 
+To tell which Kudu sources should poller use you need to provide like below:
+```
+PollerOptions__0__KuduAdapters__0=adapter-1
+PollerOptions__0__KuduAdapters__1=adapter-2
+```
+The value `adapter-1` is the name that you will specify whne configuring Kudu instances, check Log Sources section for more information.
+
 ### Log Sources
 Rooster communicates with Kudu API to get the list of log files. Those log files are then processed and any log line that contain: `docker run` will be extracted.  
 You can specify as many Kudu sources as you want and to do so you will need to add the configuration bellow:
