@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Rooster.AppInsights.Commands.HealthCheck;
 using Rooster.AppInsights.DependencyInjection;
-using Rooster.Hosting;
 using Rooster.MongoDb.DependencyInjection;
 using Rooster.MongoDb.Mediator.Commands.HealthCheck;
 using Rooster.QoS.Resilency;
@@ -16,14 +16,13 @@ using Rooster.Slack.DependencyInjection;
 using Rooster.SqlServer.DependencyInjection;
 using Rooster.SqlServer.Mediator.Commands.HealthCheck;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace Rooster.HealthCheck
 {
     public static class HostBuilderExtensions
     {
-        public static IHost ConfigureHealthCheck(this IHostBuilder builder)
+        public static IHost ConfigureHealthCheck(this IHostBuilder builder, IConfiguration configuration)
         {
             var host =
                 builder
@@ -33,7 +32,12 @@ namespace Rooster.HealthCheck
 
                         builder.ConfigureKestrel(x =>
                         {
-                            x.ListenAnyIP(4242);
+                            var port = configuration.GetSection("HealthServer:Port").Get<int>();
+
+                            if (port == 0)
+                                port = 80;
+
+                            x.ListenAnyIP(port);
                         });
 
                         builder.Configure(app =>
@@ -42,6 +46,7 @@ namespace Rooster.HealthCheck
 
                             app.UseEndpoints(e =>
                             {
+                                e.Map("", requestDelegate);
                                 e.MapHealthChecks("/health", new HealthCheckOptions
                                 {
                                     AllowCachingResponses = false
@@ -71,6 +76,12 @@ namespace Rooster.HealthCheck
                     .Build();
 
             return host;
+        }
+
+        private async static Task requestDelegate(HttpContext context)
+        {
+            context.Response.StatusCode = 200;
+            await context.Response.WriteAsync("Pong", context.RequestAborted);
         }
     }
 }
