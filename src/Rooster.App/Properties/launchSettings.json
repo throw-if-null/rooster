@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Rooster.App": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

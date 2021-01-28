@@ -1,11 +1,9 @@
-FROM mcr.microsoft.com/dotnet/runtime:5.0-alpine AS base
-ADD ./Rooster.App/VERSION .
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS base
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
 WORKDIR /src
 COPY ["Rooster.App/Rooster.App.csproj", "Rooster.App/"]
-COPY ["Rooster.DependencyInjection/Rooster.DependencyInjection.csproj", "Rooster.DependencyInjection/"]
 COPY ["Rooster.SqlServer/Rooster.SqlServer.csproj", "Rooster.SqlServer/"]
 COPY ["Rooster/Rooster.csproj", "Rooster/"]
 COPY ["Rooster.MongoDb/Rooster.MongoDb.csproj", "Rooster.MongoDb/"]
