@@ -1,4 +1,5 @@
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS base
+ADD ./Rooster.App/VERSION .
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
