@@ -110,10 +110,10 @@ services:
       - Engines__Slack__WebHookReporterOptions__TimeoutInMs=3000
       - Engines__Slack__WebHookReporterOptions__Headers__0__Name=User-Agent
       - Engines__Slack__WebHookReporterOptions__Headers__0__Value=Rooster
-      - PollerOptions__0__CurrentDateVarianceInMinutes=5
       - PollerOptions__0__Engine=Slack
       - PollerOptions__0__KuduAdapters__0=xxx
-      - PollerOptions__0__PoolingIntervalInSeconds=60
+      - PollerOptions__0__PoolingIntervalInSeconds=120
+      - PollerOptions__0__CurrentDateVarianceInSeconds=90
       - PollerOptions__0__UseInternalPoller=true
       - Serilog__MinimumLevel=Debug
 
