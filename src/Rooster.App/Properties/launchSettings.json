@@ -1,10 +1,10 @@
 {
   "profiles": {
     "Rooster.App": {
-      "commandName": "Project"
-    },
-    "Docker": {
-      "commandName": "Docker"
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
     }
   }
 }

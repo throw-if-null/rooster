@@ -98,27 +98,24 @@ services:
     build:
       context: .
       dockerfile: Rooster.App/Dockerfile
+    ports:
+      - "4242:80"
     environment:
-      - Adapters__KuduAdapterOptions__0__BaseUri=https://bf-studioapi-sandbox.scm.azurewebsites.net/
-      - Adapters__KuduAdapterOptions__0__Name=studioapi-sandbox
-      - Adapters__KuduAdapterOptions__0__User=$$bf-studioapi-sandbox
-      - Adapters__KuduAdapterOptions__0__Password=vuicJaYWb9lzK1snu0mD1my8SJ6mkAofemR4LwtCcwmMqYqTG6Cplwkd28qH
-      - Engines__Slack__WebHookReporterOptions__Url=services/TQCU0B4F4/B016UTQ3TPT/VvX207y6qL6IiqY5arnVJezE
+      - ASPNETCORE_URLS=http://*:80
+      - Adapters__KuduAdapterOptions__0__BaseUri=https://xxx.scm.azurewebsites.net/
+      - Adapters__KuduAdapterOptions__0__Name=xxx
+      - Adapters__KuduAdapterOptions__0__User=$$user
+      - Adapters__KuduAdapterOptions__0__Password=password
+      - Engines__Slack__WebHookReporterOptions__Url=services/xxx
       - Engines__Slack__WebHookReporterOptions__TimeoutInMs=3000
       - Engines__Slack__WebHookReporterOptions__Headers__0__Name=User-Agent
       - Engines__Slack__WebHookReporterOptions__Headers__0__Value=Rooster
-      - HealthServer_Port=80
       - PollerOptions__0__CurrentDateVarianceInMinutes=5
       - PollerOptions__0__Engine=Slack
-      - PollerOptions__0__KuduAdapters__0=studioapi-sandbox
+      - PollerOptions__0__KuduAdapters__0=xxx
       - PollerOptions__0__PoolingIntervalInSeconds=60
       - PollerOptions__0__UseInternalPoller=true
       - Serilog__MinimumLevel=Debug
-
-      - Hosts__AppHostOptions__Engines__0=Mock
-      - Hosts__AppHostOptions__UseInternalPoller=true
-      - Hosts__AppHostOptions__PoolingIntervalInSeconds=60
-      - Hosts__AppHostOptions__CurrentDateVarianceInMinutes=5
 
 networks:
   local:

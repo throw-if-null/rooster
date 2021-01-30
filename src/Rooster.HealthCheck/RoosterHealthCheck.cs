@@ -8,7 +8,6 @@ using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.MongoDb.Mediator.Commands.HealthCheck;
 using Rooster.Slack.Commands.HealthCheck;
 using Rooster.SqlServer.Mediator.Commands.HealthCheck;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;

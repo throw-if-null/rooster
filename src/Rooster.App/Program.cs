@@ -34,7 +34,7 @@ internal class Program
     public async static Task Run(CancellationToken cancellation)
     {
         var engines = Configuration.Value.GetSection($"{nameof(PollerOptions)}").Get<Collection<PollerOptions>>();
-        var hosts = new List<IHost>() { Host.CreateDefaultBuilder().ConfigureHealthCheck(Configuration.Value) };
+        var hosts = new List<IHost>() { Host.CreateDefaultBuilder().ConfigureHealthCheck() };
 
         foreach (var engine in Engine.ToList(engines?.Select(e => e.Engine)))
         {

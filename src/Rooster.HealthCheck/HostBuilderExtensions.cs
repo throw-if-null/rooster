@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Rooster.AppInsights.Commands.HealthCheck;
@@ -22,7 +21,7 @@ namespace Rooster.HealthCheck
 {
     public static class HostBuilderExtensions
     {
-        public static IHost ConfigureHealthCheck(this IHostBuilder builder, IConfiguration configuration)
+        public static IHost ConfigureHealthCheck(this IHostBuilder builder)
         {
             var host =
                 builder
@@ -30,15 +29,12 @@ namespace Rooster.HealthCheck
                     {
                         builder.UseSetting(WebHostDefaults.DetailedErrorsKey, "true");
 
+#if DEBUG
                         builder.ConfigureKestrel(x =>
                         {
-                            var port = configuration.GetSection("HealthServer:Port").Get<int>();
-
-                            if (port == 0)
-                                port = 80;
-
-                            x.ListenAnyIP(port);
+                            x.ListenAnyIP(424);
                         });
+#endif
 
                         builder.Configure(app =>
                         {
