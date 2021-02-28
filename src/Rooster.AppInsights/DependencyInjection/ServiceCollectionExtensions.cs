@@ -11,6 +11,7 @@ using Rooster.AppInsights.Handlers.ProcessDockerLog;
 using Rooster.AppInsights.Reporters;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
+using Rooster.Mediator.Commands.Common.Behaviors;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.Mediator.Commands.InitKuduPollers;
@@ -68,6 +69,8 @@ namespace Rooster.AppInsights.DependencyInjection
             services.AddTransient<IRequestHandler<ValidateExportedRunParamsRequest, ValidateExportedRunParamsResponse>, ValidateExportedRunParamsCommand>();
             services.AddTransient<IRequestHandler<ProcessDockerLogRequest, Unit>, AppInsightsProcessDockerLogCommand>();
             services.AddTransient<IRequestHandler<SendDockerRunParamsRequest, Unit>, AppInsightsSendDockerRunParamsCommand>();
+
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(InstrumentingPipelineBehavior<,>));
 
             services.AddHostedService<AppInsightsHost>();
 

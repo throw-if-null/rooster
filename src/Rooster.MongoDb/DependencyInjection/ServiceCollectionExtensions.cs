@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
+using Rooster.Mediator.Commands.Common.Behaviors;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.HealthCheck;
 using Rooster.Mediator.Commands.InitKuduPollers;
@@ -74,6 +75,8 @@ namespace Rooster.MongoDb.DependencyInjection
             services.AddTransient<IRequestHandler<SendDockerRunParamsRequest, Unit>, MongoDbSendDockerRunParamsCommand>();
             services.AddTransient<IRequestHandler<StartKuduPollerRequest, Unit>, StartKuduPollerCommand>();
             services.AddTransient<IRequestHandler<ValidateExportedRunParamsRequest, ValidateExportedRunParamsResponse>, ValidateExportedRunParamsCommand>();
+
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(InstrumentingPipelineBehavior<,>));
 
             services.AddHostedService<MongoDbHost>();
 

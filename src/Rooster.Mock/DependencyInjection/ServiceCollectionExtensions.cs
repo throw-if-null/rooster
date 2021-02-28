@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Rooster.CrossCutting.Serilog;
 using Rooster.DependencyInjection;
+using Rooster.Mediator.Commands.Common.Behaviors;
 using Rooster.Mediator.Commands.ExtractDockerRunParams;
 using Rooster.Mediator.Commands.InitKuduPollers;
 using Rooster.Mediator.Commands.ProcessAppLogSources;
@@ -55,6 +56,8 @@ namespace Rooster.Mock.DependencyInjection
             services.AddTransient<IRequestHandler<ValidateExportedRunParamsRequest, ValidateExportedRunParamsResponse>, ValidateExportedRunParamsCommand>();
             services.AddTransient<IRequestHandler<ProcessDockerLogRequest, Unit>, MockProcessDockerLogCommand>();
             services.AddTransient<IRequestHandler<SendDockerRunParamsRequest, Unit>, MockSendDockerRunParamsCommand>();
+
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(InstrumentingPipelineBehavior<,>));
 
             services.AddHostedService<MockHost>();
 
